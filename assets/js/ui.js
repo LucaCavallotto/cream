@@ -249,6 +249,11 @@ export function setupUIEvents() {
     btnBulkApplyCategory.addEventListener('click', handleBulkApplyCategory);
   }
 
+  const btnBulkApplySubcategory = document.getElementById('btnBulkApplySubcategory');
+  if (btnBulkApplySubcategory) {
+    btnBulkApplySubcategory.addEventListener('click', handleBulkApplySubcategory);
+  }
+
   const btnBulkApplyTags = document.getElementById('btnBulkApplyTags');
   if (btnBulkApplyTags) {
     btnBulkApplyTags.addEventListener('click', handleBulkApplyTags);
@@ -339,9 +344,11 @@ export function renderApp() {
 function populateCategoriesDropdown() {
   const select = document.getElementById('inputCategory');
   const bulkSelect = document.getElementById('bulkCategorySelect');
+  const bulkSubSelect = document.getElementById('bulkSubcategorySelect');
 
   const options = '<option value="" disabled selected>Select Category</option>';
   const bulkOptions = '<option value="" disabled selected>Choose...</option>';
+  const bulkSubOptions = '<option value="" disabled selected>Choose...</option>';
 
   let optionsHtml = '';
   Object.keys(state.categories).forEach(cat => {
@@ -350,6 +357,21 @@ function populateCategoriesDropdown() {
 
   if (select) select.innerHTML = options + optionsHtml;
   if (bulkSelect) bulkSelect.innerHTML = bulkOptions + optionsHtml;
+
+  if (bulkSubSelect) {
+    let bulkSubHtml = bulkSubOptions;
+    Object.keys(state.categories).forEach(cat => {
+      const subs = state.categories[cat];
+      if (subs && subs.length > 0) {
+        bulkSubHtml += `<optgroup label="${cat}">`;
+        subs.forEach(sub => {
+          bulkSubHtml += `<option value="${cat}|${sub}">${sub}</option>`;
+        });
+        bulkSubHtml += `</optgroup>`;
+      }
+    });
+    bulkSubSelect.innerHTML = bulkSubHtml;
+  }
 }
 
 /**
@@ -632,6 +654,13 @@ function toggleSelectionMode(enabled) {
   selectionCols.forEach(col => col.classList.toggle('d-none', !enabled));
   if (selectAllCheck) selectAllCheck.checked = false;
 
+  if (!enabled) {
+    const bulkCatSelect = document.getElementById('bulkCategorySelect');
+    if (bulkCatSelect) bulkCatSelect.selectedIndex = 0;
+    const bulkSubSelect = document.getElementById('bulkSubcategorySelect');
+    if (bulkSubSelect) bulkSubSelect.selectedIndex = 0;
+  }
+
   updateSelectedCount();
   renderTransactions();
 }
@@ -643,11 +672,13 @@ function updateSelectedCount() {
   }
 
   const bulkApplyBtn = document.getElementById('btnBulkApplyCategory');
+  const bulkSubApplyBtn = document.getElementById('btnBulkApplySubcategory');
   const bulkTagsBtn = document.getElementById('btnBulkApplyTags');
   const bulkDeleteBtn = document.getElementById('btnBulkDelete');
   const hasSelection = state.selectedIds.length > 0;
 
   if (bulkApplyBtn) bulkApplyBtn.disabled = !hasSelection;
+  if (bulkSubApplyBtn) bulkSubApplyBtn.disabled = !hasSelection;
   if (bulkTagsBtn) bulkTagsBtn.disabled = !hasSelection;
   if (bulkDeleteBtn) bulkDeleteBtn.disabled = !hasSelection;
 }
@@ -680,6 +711,28 @@ function handleBulkApplyCategory() {
     markUnsavedChanges();
     toggleSelectionMode(false);
     showStatusMessage(`Updated category for ${idsToUpdate.size} transactions`);
+  }
+}
+
+function handleBulkApplySubcategory() {
+  const selectVal = document.getElementById('bulkSubcategorySelect').value;
+  if (!selectVal || state.selectedIds.length === 0) return;
+
+  const [category, subcategory] = selectVal.split('|');
+  if (!category || !subcategory) return;
+
+  if (confirm(`Apply subcategory "${subcategory}" and category "${category}" to ${state.selectedIds.length} transactions?`)) {
+    const idsToUpdate = new Set(state.selectedIds);
+    state.transactions.forEach(t => {
+      if (idsToUpdate.has(t.id)) {
+        t.Category = category;
+        t.Subcategory = subcategory;
+      }
+    });
+
+    markUnsavedChanges();
+    toggleSelectionMode(false);
+    showStatusMessage(`Updated subcategory for ${idsToUpdate.size} transactions`);
   }
 }
 
