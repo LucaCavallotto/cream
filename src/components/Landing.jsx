@@ -27,12 +27,12 @@ export default function Landing({
             <br className="desktop-break" /> the bigger picture.
           </p>
           <button
-            id="btnOpenFile"
+            id="btnCreateNewFile"
             className="btn btn-primary landing-create"
             disabled={!ready}
-            onClick={onOpen}
+            onClick={onCreate}
           >
-            Browse Files{' '}
+            Create New File{' '}
             <i className="bi bi-arrow-up-right" aria-hidden="true" />
           </button>
           <button
@@ -81,12 +81,12 @@ export default function Landing({
               </p>
             </div>
             <button
-              id="btnCreateNewFile"
+              id="btnOpenFile"
               className="btn btn-outline-secondary"
               disabled={!ready}
-              onClick={onCreate}
+              onClick={onOpen}
             >
-              Create New File{' '}
+              Browse Files{' '}
               <i className="bi bi-arrow-right" aria-hidden="true" />
             </button>
             <span className="drop-zone-note">

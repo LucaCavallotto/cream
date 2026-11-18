@@ -12,7 +12,7 @@ test('cream opens the bundled demo in Overview and the shortcuts reach real data
   page,
 }) => {
   await launch(page);
-  await expect(page).toHaveTitle('cream — A clearer view of your money.');
+  await expect(page).toHaveTitle('cream');
   await page.getByRole('button', { name: /Take a look around/ }).click();
   await expect(page.locator('#appView')).toBeVisible();
   await expect(page.locator('#overview-tab-pane')).toBeVisible();

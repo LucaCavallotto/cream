@@ -43,6 +43,6 @@ test('cream branding and manifest reference the shipped local icon', async () =>
   );
   assert.match(
     await readFile('dist/index.html', 'utf8'),
-    /<title>cream — A clearer view of your money\.<\/title>/,
+    /<title>cream<\/title>/,
   );
 });
