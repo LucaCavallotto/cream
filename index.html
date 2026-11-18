@@ -250,6 +250,40 @@
               </div>
             </div>
           </div>
+          <details class="card mb-3" id="analyticsExclusionsPanel">
+            <summary class="card-header fw-semibold">Analytics exclusions</summary>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                  <button id="analyticsExcludeAll" type="button" class="btn btn-outline-primary btn-sm">Exclude all</button>
+                  <button id="analyticsIncludeAll" type="button" class="btn btn-outline-secondary btn-sm">Include all</button>
+                </div>
+              <p class="small text-muted">Session-only filters. Reset on file open, close or page reload.
+                Monthly comparison always uses the current and previous calendar months.</p>
+              <div>
+                <p class="small text-muted mb-0">Add exclusions below, or Exclude all and remove the rules for categories you want to see.</p>
+                <div class="row g-2 align-items-end mt-2 mb-3">
+                  <div class="col-md-5"><label for="analyticsExcludeCategory" class="form-label">Category to exclude</label>
+                    <select id="analyticsExcludeCategory" class="form-select"><option value="">Choose category…</option></select></div>
+                  <div class="col-md-5"><label for="analyticsExcludeSubcategory" class="form-label">Subcategory to exclude</label>
+                    <select id="analyticsExcludeSubcategory" class="form-select"><option value="">Entire category</option></select></div>
+                  <div class="col-md-2"><button id="analyticsAddExclusion" type="button" class="btn btn-outline-primary w-100">Exclude</button></div>
+                </div>
+                <div id="analyticsExclusionRules" class="small mb-3"></div>
+                <details>
+                  <summary class="fw-semibold">Exclude individual transactions</summary>
+                  <p class="small text-muted mt-2">Checked records are excluded. This list covers the entire dataset, independently of the selected period.
+                    Records excluded by a category rule are locked here until that rule is removed.</p>
+                  <label for="analyticsExclusionSearch" class="form-label">Find transactions to exclude or include again</label>
+                  <input id="analyticsExclusionSearch" type="search" class="form-control mb-2" placeholder="Description, category, date or amount">
+                  <div id="analyticsExclusionTransactions" class="list-group mb-2"></div>
+                  <p id="analyticsExclusionCount" class="small text-muted"></p>
+                  <button id="analyticsExclusionMore" type="button" class="btn btn-outline-secondary btn-sm d-none">Show 50 more</button>
+                </details>
+              </div>
+            </div>
+          </details>
+          <div id="analyticsExclusionSummary" class="alert alert-info small mb-3" role="status" aria-live="polite"></div>
+          <div id="analyticsNoData" class="alert alert-secondary d-none" role="status">No transactions remain for the selected period and exclusions.</div>
           <div class="row mb-4">
             <div class="col-md-3 col-sm-6">
               <div class="card text-center shadow-sm h-100 border-success">

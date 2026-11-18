@@ -1,5 +1,7 @@
 import { state } from './app.js';
 import { isValidTransactionDate } from './datasetHealth.js';
+import { selectAnalyticsTransactions, filterAnalyticsPeriod, buildMonthlyCashFlow } from './analyticsScope.js';
+import { renderAnalyticsFilters } from './analyticsFilters.js';
 
 let pieChartInstance = null;
 let lineChartInstance = null;
@@ -87,43 +89,22 @@ export function renderAnalytics() {
   const period = periodSelect ? periodSelect.value : 'overall';
   const monthSelect = document.getElementById('analyticsSpecificMonth');
   
-  const validTransactions = state.transactions.filter(t => Number.isFinite(t.Amount) && isValidTransactionDate(t.DateTime));
-  let transactions = validTransactions;
+  if (period === 'specific_month') populateAvailableMonths();
+  const selection = selectAnalyticsTransactions(state.transactions, state.analyticsExclusions);
+  const specificMonth = monthSelect.value;
+  const transactions = filterAnalyticsPeriod(selection.included, period, specificMonth);
+  const selectedExcluded = filterAnalyticsPeriod(selection.excluded, period, specificMonth);
   let periodLabel = 'Overall';
-
-  // Filter based on period
-  if (period !== 'overall') {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-
-    transactions = validTransactions.filter(t => {
-      const tDate = new Date(t.DateTime);
-      if (isNaN(tDate)) return false;
-
-      if (period === 'current_month') {
-        periodLabel = now.toLocaleString('default', { month: 'long', year: 'numeric' });
-        return tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear;
-      } else if (period === 'specific_month') {
-        const selectedVal = monthSelect.value; // format "YYYY-MM"
-        if (!selectedVal) return true;
-        const [y, m] = selectedVal.split('-').map(Number);
-        periodLabel = new Date(y, m - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-        return tDate.getFullYear() === y && (tDate.getMonth() + 1) === m;
-      } else {
-        let monthsBack = 0;
-        if (period === 'last_3_months') monthsBack = 3;
-        else if (period === 'last_6_months') monthsBack = 6;
-        else if (period === 'last_12_months') monthsBack = 12;
-        
-        periodLabel = `Last ${monthsBack} Months`;
-        const cutoffDate = new Date();
-        cutoffDate.setMonth(now.getMonth() - monthsBack);
-        return tDate >= cutoffDate;
-      }
-    });
+  if (period === 'current_month') {
+    periodLabel = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+  } else if (period === 'specific_month') {
+    periodLabel = specificMonth ? new Date(`${specificMonth}-01T12:00:00`).toLocaleString('default', { month: 'long', year: 'numeric' }) : 'Specific Month';
+  } else if (period !== 'overall') {
+    periodLabel = `Last ${{ last_3_months: 3, last_6_months: 6, last_12_months: 12 }[period]} Months`;
   }
-  
+  renderAnalyticsFilters(state, selection, selectedExcluded, renderAnalytics);
+  document.getElementById('analyticsNoData').classList.toggle('d-none', transactions.length !== 0);
+
   let totalIncome = 0;
   let totalExpenses = 0;
   const categoryExpenses = {};
@@ -170,8 +151,8 @@ export function renderAnalytics() {
   }
 
   updatePieChart(categoryExpenses);
-  updateLineChart(validTransactions, periodLabel);
-  updateComparisonMetrics(validTransactions);
+  updateLineChart(transactions, periodLabel);
+  updateComparisonMetrics(selection.included);
   renderDetailedCategoryBreakdown(transactions, periodLabel);
   renderDetailedIncomeBreakdown(transactions, periodLabel);
   renderDetailedTagsBreakdown(transactions, periodLabel);
@@ -245,31 +226,11 @@ function updateLineChart(transactions, periodLabel) {
     lineChartInstance.destroy();
   }
 
-  // Group data by month
-  const months = {};
-  const now = new Date();
-  
-  // Initialize last 12 months
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    months[key] = { income: 0, expenses: 0, label: d.toLocaleString('default', { month: 'short' }).toUpperCase() };
-  }
-
-  transactions.forEach(t => {
-    const d = new Date(t.DateTime);
-    if (isNaN(d)) return;
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    if (months[key]) {
-      if (t.Amount >= 0) months[key].income += t.Amount;
-      else months[key].expenses += Math.abs(t.Amount);
-    }
-  });
-
-  const sortedKeys = Object.keys(months).sort();
-  const labels = sortedKeys.map(k => months[k].label);
-  const incomeData = sortedKeys.map(k => months[k].income);
-  const expenseData = sortedKeys.map(k => months[k].expenses);
+  const months = buildMonthlyCashFlow(transactions);
+  const labels = months.map(month => month.label);
+  const incomeData = months.map(month => month.income);
+  const expenseData = months.map(month => month.expenses);
+  document.querySelector('#cashFlowLineChart').closest('.card').querySelector('.card-title').textContent = `Monthly Cash Flow Trend (${periodLabel})`;
 
   lineChartInstance = new Chart(ctx, {
     type: 'line',
@@ -384,7 +345,7 @@ function populateAvailableMonths() {
   // Find unique months
   const months = new Set();
   state.transactions.forEach(t => {
-    if (t.DateTime) {
+    if (Number.isFinite(t.Amount) && isValidTransactionDate(t.DateTime)) {
       const date = new Date(t.DateTime);
       if (!isNaN(date)) {
         const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;

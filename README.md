@@ -9,6 +9,7 @@ A modular, browser-based personal finance manager that works directly with your 
 - **Bulk Entry:** Smart "Quick Inline Entry" supports pasting multiple transactions at once (e.g., from bank statements).
 - **Responsive Dashboard:** View your current net delta and monthly spend comparisons at a glance.
 - **Comprehensive Analytics:** Detailed hierarchical breakdowns for Spending, Income, and Tags with interactive "Show More" functionality.
+- **Reversible Analytics Exclusions:** Exclude investments, categories, subcategories or individual transactions from statistics without modifying the dataset.
 - **Advanced Search & Sorting:** Quickly find transactions by description or sort by any column.
 - **Dark Mode Support:** Automatically syncs with your system's light/dark preference.
 - **Dataset Health:** Find missing or invalid values and classification problems, then review each affected transaction in the standard edit modal.
@@ -106,7 +107,23 @@ For a single line, the form is prefilled so you can review or adjust it before a
 - **Undo:** If you made a mistake before saving, use the **"Undo Changes"** button to revert to the last saved state.
 - **Searching:** Use the search bar in the Transactions tab to filter by description.
 
-### 4. Dataset Health
+### 4. Analytics exclusions
+
+In **Analytics**, expand **Analytics exclusions** to configure filters, then collapse it when finished. A compact summary stays visible with counts of excluded category rules, subcategory rules, individual selections and affected transactions. Nothing is deleted, recategorized or changed in the CSV. All valid transactions are included initially; no automatic outlier detection or popup changes your selection.
+
+Add and manage exclusions directly:
+
+- Choose a **Category to exclude**, optionally choose a specific **Subcategory to exclude**, and click **Exclude**. Repeat to exclude multiple categories or subcategories at once. For example, exclude only `Investments / ETFs` to retain dividends and commissions, or choose `Investments / Entire category` to omit every investment transaction. The choices come from the actual open dataset, including imported classifications absent from the static catalog.
+- Already excluded categories and subcategories disappear from the dropdowns and return when their rule is removed. A whole-category rule replaces any existing subcategory rules for that category.
+- Click **Exclude all** to replace the current selections with one exclusion rule for every category present in the dataset, including records without a category. Then remove the rules for the few categories you want to analyze. Subcategory and individual selections are cleared so they cannot keep those categories hidden after you remove their category rule.
+- Open **Exclude individual transactions**, search by description, category, date or amount, and check specific records. Checked records are excluded. Uncheck them to include them again. Records covered by a category or subcategory rule are locked until that rule is removed. The list covers the whole dataset and loads 50 matching records at a time.
+- Use **Remove rule** to remove a category/subcategory exclusion, or **Include all** to clear every manual exclusion. Rules combine: a record remains excluded while any rule or individual selection covers it.
+
+The summary counts explicit category and subcategory rules separately (it does not count every subcategory covered by an entire-category rule) and shows excluded transactions across the dataset and in the selected period. Invalid-record counts appear only when nonzero. Exclusions consistently affect income, expenses, net delta, pie and cash-flow charts, category/subcategory breakdowns, tags and monthly comparisons. Net delta is the result of the filtered view, not the complete dataset balance. The cash-flow chart follows the selected period; monthly comparison always compares the current and previous calendar months with the same exclusions.
+
+These are **session-only view settings**: switching tabs, changing the time period, saving the CSV or undoing transaction edits does not clear them. Opening or creating a file, closing it or reloading the page resets them. They are not written to the CSV and do not mark it as modified. Transactions and Dataset Health always retain the full dataset. Records with invalid dates or amounts remain excluded from analytics for data-quality reasons even after **Include all**.
+
+### 5. Dataset Health
 
 Open the **Dataset Health** tab after loading a CSV to see the total transaction count, records with no detected issues, records to review, and the number of individual issues. A transaction may have several issues, so issue counts can exceed the number of affected records. The checks always cover the whole dataset, regardless of transaction search or analytics filters.
 
@@ -116,7 +133,7 @@ Use **Filter by issue** to focus on a problem, then **Review / Edit** to open th
 
 Missing and invalid imported amounts are preserved rather than silently replaced with zero. Rows with missing or invalid dates or amounts are excluded from analytics until repaired; classification issues alone do not exclude a transaction. No records are automatically changed or deleted by the health check. Click **Save Changes** to write corrections to the CSV, or **Undo Changes** to restore the last saved state and its health report.
 
-### 5. Categorization
+### 6. Categorization
 Categories and subcategories are loaded from `data/categories.json`. You can customize this file to match your personal spending habits.
 
 - **Treats:** Expenses you pay for someone else, such as a friend's coffee (`Coffee`), drinks (`Drinks`), a meal (`Meals`), snacks, or an experience. Use `Bar` / `Food & Dining` for your own consumption and `Shopping / Gifts to Buy` for purchased gifts. If a payment covers both your share and a treat, split it into two transactions when you want to track the shares separately.

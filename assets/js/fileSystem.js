@@ -1,6 +1,7 @@
 import { state, clearUnsavedChanges, normalizeTags } from './app.js';
 import { renderApp, showStatusMessage } from './ui.js';
 import { parseImportedAmount } from './datasetHealth.js';
+import { createAnalyticsExclusions } from './analyticsScope.js';
 
 const REQUIRED_HEADERS = ["DateTime", "Amount", "Description", "Category", "Subcategory", "Tags", "Notes"];
 
@@ -125,6 +126,7 @@ async function handleCreateNewFile() {
       state.fileName = fileName.endsWith('.csv') ? fileName : fileName + '.csv';
     }
     state.transactions = []; // Empty since it's new
+    state.analyticsExclusions = createAnalyticsExclusions();
     state.originalTransactions = [];
     clearUnsavedChanges();
     renderApp();
@@ -240,6 +242,7 @@ function parseCSV(csvText) {
   }).filter(t => t !== null);
 
   console.log(`Successfully parsed ${state.transactions.length} transactions.`);
+  state.analyticsExclusions = createAnalyticsExclusions();
   return true;
 }
 
@@ -332,6 +335,7 @@ function closeFile() {
   state.fileHandle = null;
   state.fileName = '';
   state.transactions = [];
+  state.analyticsExclusions = createAnalyticsExclusions();
   state.originalTransactions = [];
   state.searchQuery = '';
   clearUnsavedChanges();

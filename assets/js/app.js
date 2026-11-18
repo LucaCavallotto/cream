@@ -1,3 +1,5 @@
+import { createAnalyticsExclusions } from './analyticsScope.js';
+
 export function isIOS() {
   return [
     'iPad Simulator',
@@ -19,6 +21,7 @@ export const state = {
   sort: { column: 'Date', direction: 'desc' },
   searchQuery: '',
   allTags: [],
+  analyticsExclusions: createAnalyticsExclusions(),
   isSelectionMode: false,
   selectedIds: [],
   viewOnlyMode: isIOS()

@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import test from 'node:test';
 import { analyzeDataset, getTransactionIssues, isValidTransactionDate, parseImportedAmount } from '../assets/js/datasetHealth.js';
+import { createAnalyticsExclusions } from '../assets/js/analyticsScope.js';
 
 const categories = JSON.parse(readFileSync(new URL('../data/categories.json', import.meta.url)));
 const transaction = {
@@ -79,7 +80,7 @@ test('CSV load, save and undo preserve unresolved values and report health consi
   const state = { categories, transactions: [], fileName: 'test.csv', fileHandle: {
     async createWritable() { return { async write(value) { written = value; }, async close() {} }; }
   } };
-  const context = vm.createContext({ state, parseImportedAmount, normalizeTags: s => s,
+  const context = vm.createContext({ state, parseImportedAmount, createAnalyticsExclusions, normalizeTags: s => s,
     crypto: { randomUUID: () => 'imported' }, console: { log() {}, error() {} },
     window: { showSaveFilePicker: true }, confirm: () => true, alert: message => assert.fail(message),
     clearUnsavedChanges() {}, renderApp() {}, showStatusMessage() {},
@@ -94,10 +95,13 @@ test('CSV load, save and undo preserve unresolved values and report health consi
   assert(context.parseCSV('fixture'));
   assert.equal(state.transactions[0].Amount, '12oops');
   assert.equal(analyzeDataset(state.transactions, categories).counts.invalid_amount, 1);
+  state.analyticsExclusions.categories.add('Investments');
   await context.saveFile();
   assert.equal(exported[0].Amount, '12oops');
   assert.equal(exported[0].Category, 'Legacy');
   assert(!Object.hasOwn(exported[0], 'id'));
+  assert(!Object.hasOwn(exported[0], 'analyticsExclusions'));
+  assert(state.analyticsExclusions.categories.has('Investments'));
   assert(written.includes('12oops'));
   state.transactions[0].Amount = -12;
   state.transactions[0].Category = 'Bar';
@@ -106,4 +110,7 @@ test('CSV load, save and undo preserve unresolved values and report health consi
   context.undoChanges();
   assert.equal(analyzeDataset(state.transactions, categories).dirty.length, 1);
   assert.equal(state.transactions[0].Amount, '12oops');
+  assert(state.analyticsExclusions.categories.has('Investments'));
+  assert(context.parseCSV('fixture'));
+  assert.equal(state.analyticsExclusions.categories.size, 0);
 });
