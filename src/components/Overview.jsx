@@ -1,3 +1,4 @@
+import Star from './Star.jsx';
 import { compareTransactions } from '../../assets/js/transactions.js';
 import { formatDate } from '../../assets/js/dateTime.js';
 import { formatMoney } from '../../assets/js/presentation.js';
@@ -132,7 +133,7 @@ export default function Overview({
           <div className="net-hero-top">
             <span className="eyebrow">ALL-TIME NET FLOW</span>
             <span className="hero-mark" aria-hidden="true">
-              ✳
+              <Star />
             </span>
           </div>
           <p className="net-amount" id="overviewNet">

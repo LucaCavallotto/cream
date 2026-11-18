@@ -1,3 +1,4 @@
+import { createTransactionId } from '../../assets/js/transactionId.js';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Papa from 'papaparse';
 import { parseInlineCSV, parseInlineRow } from '../../assets/js/inlineInput.js';
@@ -185,7 +186,7 @@ export default function ExpenseModal({
       ];
     }
     onCommit(
-      rows.map((t) => ({ ...t, id: transaction?.id || crypto.randomUUID() })),
+      rows.map((t) => ({ ...t, id: transaction?.id || createTransactionId() })),
       transaction?.id,
       parsed?.warnings || [],
     );

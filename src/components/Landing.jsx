@@ -1,3 +1,4 @@
+import Star from './Star.jsx';
 export default function Landing({
   ready,
   onCreate,
@@ -26,12 +27,12 @@ export default function Landing({
             <br className="desktop-break" /> the bigger picture.
           </p>
           <button
-            id="btnCreateNewFile"
+            id="btnOpenFile"
             className="btn btn-primary landing-create"
             disabled={!ready}
-            onClick={onCreate}
+            onClick={onOpen}
           >
-            Create New File{' '}
+            Browse Files{' '}
             <i className="bi bi-arrow-up-right" aria-hidden="true" />
           </button>
           <button
@@ -47,7 +48,7 @@ export default function Landing({
         <div className="landing-file-area">
           <div id="dropZone" className="drop-zone">
             <div className="drop-zone-top">
-              <span className="eyebrow">A FRESH START</span>
+              <span className="eyebrow">YOUR FILE, YOUR PERSPECTIVE</span>
               <span className="file-corner" aria-hidden="true">
                 ↗
               </span>
@@ -60,7 +61,9 @@ export default function Landing({
                 <span className="sheet-line" />
                 <span className="sheet-line short" />
                 <span className="sheet-extension">.csv</span>
-                <span className="sheet-star">✳</span>
+                <span className="sheet-star">
+                  <Star />
+                </span>
               </div>
               <span className="file-ready">
                 <span className="status-dot" /> Yours to open.
@@ -72,15 +75,18 @@ export default function Landing({
                 <br />
                 The whole picture.
               </h2>
-              <p>Drop your CSV here, or pick it from your device.</p>
+              <p>
+                Drop your CSV here to open it. Starting fresh? Create a new file
+                below.
+              </p>
             </div>
             <button
-              id="btnOpenFile"
-              className="btn btn-primary"
+              id="btnCreateNewFile"
+              className="btn btn-outline-secondary"
               disabled={!ready}
-              onClick={onOpen}
+              onClick={onCreate}
             >
-              Browse Files{' '}
+              Create New File{' '}
               <i className="bi bi-arrow-right" aria-hidden="true" />
             </button>
             <span className="drop-zone-note">

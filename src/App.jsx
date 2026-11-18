@@ -1,3 +1,4 @@
+import Star from './components/Star.jsx';
 import {
   lazy,
   Suspense,
@@ -68,7 +69,8 @@ export default function App() {
   const picker = useRef(null),
     dragDepth = useRef(0),
     saveTimer = useRef(null),
-    pendingScroll = useRef(null);
+    pendingScroll = useRef(null),
+    readOnlyInfo = useRef(null);
   const closeModal = useCallback(() => setModal(null), []);
   const tags = useMemo(
     () =>
@@ -301,11 +303,16 @@ export default function App() {
         </div>
       </div>
       <div className="app-chrome">
-        <header className={`cream-header ${loaded ? 'has-file' : ''}`}>
+        <header
+          className={`cream-header ${loaded ? 'has-file' : ''} ${state.viewOnlyMode ? 'is-read-only' : ''}`}
+        >
           <div className="brand-lockup">
-            <span className="cream-wordmark" aria-label="cream">
-              cream<span aria-hidden="true">✳</span>
-            </span>
+            <button type="button" className="cream-wordmark" aria-label="cream home" disabled={saving} onClick={() => { if (loaded) closeFile(); else window.scrollTo(0, 0); }}>
+              cream
+              <span aria-hidden="true">
+                <Star />
+              </span>
+            </button>
             {!loaded && (
               <span className="brand-descriptor">
                 A clearer view of your money.
@@ -348,12 +355,18 @@ export default function App() {
                 aria-hidden="true"
               />
             </button>
-            <span
+            <button
+              type="button"
+              onClick={(event) => {
+                event.currentTarget.focus();
+                readOnlyInfo.current.showModal();
+              }}
+              aria-haspopup="dialog"
               id="textViewOnly"
               className={`read-only-badge ${state.viewOnlyMode ? '' : 'd-none'}`}
             >
               Read only
-            </span>
+            </button>
             <button
               id="btnUndoChanges"
               className={`icon-button ${state.viewOnlyMode ? 'd-none' : ''}`}
@@ -575,6 +588,21 @@ export default function App() {
           onDelete={(id) => remove([id])}
         />
       )}
+      <dialog
+        ref={readOnlyInfo}
+        className="read-only-dialog"
+        aria-labelledby="readOnlyTitle"
+      >
+        <h2 id="readOnlyTitle">Your money, on the go.</h2>
+        <p>
+          On iPhone and iPad, cream is read only. You can explore transactions,
+          analytics and dataset health. To add, edit or save transactions, open
+          your CSV in cream on a computer.
+        </p>
+        <form method="dialog">
+          <button className="btn btn-primary">Got it</button>
+        </form>
+      </dialog>
       <footer className="cream-footer">
         <span className="footer-brand">cream.</span>
         <span>Cash Rules Everything Around Me.</span>

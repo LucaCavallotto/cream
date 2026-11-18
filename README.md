@@ -47,6 +47,8 @@ npm ci
 npm run dev
 ```
 
+To test from another device on your local network, run `npm run dev -- --host` and open the Network URL printed by Vite. HTTP network access uses file-input/download fallbacks and supports transaction IDs even when `crypto.randomUUID` is unavailable.
+
 Open the localhost URL printed by Vite. The source `index.html` requires Vite; opening it directly from disk does not run the app.
 
 - **New Users:** Click **"Create New File"** to generate a fresh expense CSV on your computer.
@@ -57,11 +59,11 @@ The synthetic `demo.csv` uses the current category catalog and includes income, 
 
 ### Your workspace
 
-Opening or creating a file takes you to **Overview**. Use the sidebar (or bottom navigation on mobile) to switch between **Overview**, **Transactions**, **Analytics** and **Dataset Health**. Arrow keys, Home and End work when the navigation has keyboard focus.
+Opening or creating a file takes you to **Overview**. Click **cream** in the header to close the file and return to the landing page; pending changes require confirmation. Use the sidebar (or bottom navigation on mobile) to switch between **Overview**, **Transactions**, **Analytics** and **Dataset Health**. Arrow keys, Home and End work when the navigation has keyboard focus.
 
 Overview shows **all-time included cash flow**, not a bank-account balance. Recent activity and Dataset Health always cover all records. The always-visible ticker uses the same analytics exclusions as Overview and identifies invalid records that stay outside calculations. Analytics retains its own selected period. Filtering a period does not change the ticker’s all-time scope.
 
-The **Add transaction** button is available in the header from every section. In the editor, **Now** fills the current local date and time without changing the other fields or submitting. Use **Save Changes**, the undo arrow, or the close icon for the file session. Downloads do not navigate away from the app; browser unload warnings apply only to unsaved changes. On mobile, the ledger includes a sort selector. Read-only sessions keep editing and saving disabled as before.
+The **Add transaction** button is available in the header from every section. In the editor, **Now** fills the current local date and time without changing the other fields or submitting. Use **Save Changes**, the undo arrow, or the close icon for the file session. Downloads do not navigate away from the app; browser unload warnings apply only to unsaved changes. On read-only mobile sessions, the compact header shows cream, the filename, a **Read only** explanation button and the close control. Editing requires a computer. On mobile, the ledger includes a sort selector. Read-only sessions keep editing and saving disabled as before.
 
 Pause or resume the ticker with its control; hovering or focusing its text pauses it temporarily. When your system requests reduced motion, the ticker stops moving and can be scrolled horizontally. Charts also disable animation. Appearance follows system changes automatically without resetting your work, filters or current section.
 

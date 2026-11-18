@@ -90,3 +90,23 @@ test('mobile bottom navigation, dataset ticker and ledger sorting remain usable 
     page.getByRole('button', { name: 'Pause ticker', exact: true }),
   ).toBeVisible();
 });
+
+test('read-only mobile header stays on one row and explains how to edit on a computer', async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    Object.defineProperty(navigator, 'platform', { get: () => 'iPhone' }),
+  );
+  await launch(page);
+  await openRows(page, [row()]);
+  const header = await page.locator('.cream-header').boundingBox();
+  expect(header.height).toBe(72);
+  await expect(page.locator('.cream-wordmark .cream-star')).toBeVisible();
+  await expect(page.locator('.file-status')).toBeHidden();
+  await page.getByRole('button', { name: 'Read only', exact: true }).tap();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByRole('dialog')).toContainText('on a computer');
+  await page.getByRole('button', { name: 'Got it', exact: true }).tap();
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect(page.locator('#textViewOnly')).toBeFocused();
+});

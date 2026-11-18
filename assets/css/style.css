@@ -3204,3 +3204,77 @@ button:disabled {
 .ticker-value {
   font-size: 11px;
 }
+
+.cream-star {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.08em;
+}
+.read-only-badge {
+  border: 0;
+  cursor: pointer;
+}
+.read-only-badge:hover {
+  text-decoration: underline;
+}
+.read-only-dialog {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 28px;
+  width: min(440px, calc(100% - 36px));
+}
+.read-only-dialog::backdrop {
+  background: #0008;
+}
+.read-only-dialog h2 {
+  font-size: 25px;
+  letter-spacing: -0.6px;
+}
+.read-only-dialog p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+  margin-block: 18px 24px;
+}
+@media (max-width: 767.98px) {
+  :root:has(.cream-header.has-file.is-read-only) {
+    --chrome-height: 110px;
+  }
+  .cream-header.has-file.is-read-only {
+    height: 72px;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-rows: 44px;
+    gap: 6px;
+    padding: 14px 16px;
+  }
+  .is-read-only .file-context {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+  .is-read-only #currentFileName {
+    font-size: 11px;
+    max-width: 100%;
+  }
+  .is-read-only .file-context > i,
+  .is-read-only .file-status {
+    display: none;
+  }
+  .is-read-only .read-only-badge {
+    grid-column: 3;
+    grid-row: 1;
+    font-size: 10px;
+    padding: 6px;
+  }
+  .is-read-only #btnCloseFile {
+    grid-column: 4;
+    grid-row: 1;
+  }
+}
+
+button.cream-wordmark { padding: 0; border: 0; background: transparent; color: var(--ink); text-align: left; }
+button.cream-wordmark:hover { color: var(--green); }

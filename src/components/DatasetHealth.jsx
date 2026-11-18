@@ -40,10 +40,10 @@ export default function DatasetHealth({
             report.dirty.length,
             'text-warning',
           ],
-          ['cleanupIssueCount', 'Issues found', report.issueCount, ''],
+          ['cleanupIssueCount', 'Issues found', report.issueCount, report.issueCount ? 'text-danger' : ''],
         ].map(([id, label, value, color]) => (
           <div key={id}>
-            <h6 className="text-muted">{label}</h6>
+            <h6 className={id === 'cleanupIssueCount' && value > 0 ? 'text-danger' : 'text-muted'}>{label}</h6>
             <p id={id} className={`h3 mb-0 ${color}`}>
               {value}
             </p>

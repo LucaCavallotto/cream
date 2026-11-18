@@ -1,3 +1,4 @@
+import Star from './Star.jsx';
 import { useRef, useState } from 'react';
 import { datasetTicker } from '../../assets/js/presentation.js';
 
@@ -61,7 +62,7 @@ export default function Ticker({ model, loaded }) {
                     {item.value}
                   </span>
                   <span className="ticker-separator" aria-hidden="true">
-                    ✳
+                    <Star />
                   </span>
                 </li>
               ))}

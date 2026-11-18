@@ -247,3 +247,42 @@ test('unload warnings protect pending edits, but clean sessions and CSV download
   expect(dialogs).toEqual([]);
   expect(await wouldWarn()).toBe(false);
 });
+
+test('LAN-compatible IDs support CSV import, manual and multiline entry, and download without randomUUID', async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(crypto, 'randomUUID', { value: undefined, configurable: true }));
+  await launch(page);
+  await openRows(page, [row('Imported')]);
+  await addModal(page);
+  await page.locator('#inputDate').fill('2026-11-18');
+  await page.locator('#inputAmount').fill('-2');
+  await page.locator('#inputDescription').fill('Manual');
+  await page.getByRole('button', { name: 'Save Transaction', exact: true }).click();
+  await addModal(page);
+  await page.locator('#inlineInput').fill('2026-11-18, -3, Inline one\n2026-11-18, -4, Inline two');
+  await page.getByRole('button', { name: 'Save Transaction', exact: true }).click();
+  const ids = await page.locator('#transactionsTbody .mobile-row-click').evaluateAll(rows => rows.map(row => row.dataset.id));
+  expect(ids).toHaveLength(4);
+  expect(new Set(ids).size).toBe(4);
+  const download = page.waitForEvent('download');
+  await page.locator('#btnSaveChanges').click();
+  await download;
+  await expect(page.locator('#btnSaveChanges')).toBeDisabled();
+});
+
+test('issue counts highlight problems and the cream logo returns home without discarding edits silently', async ({ page }) => {
+  await launch(page);
+  await openRows(page, [row('Needs review', -1, 'Unknown', '')]);
+  await tab(page, 'Dataset Health');
+  await expect(page.locator('#cleanupIssueCount')).toHaveClass(/text-danger/);
+  await expect(page.getByRole('heading', { name: 'Issues found', exact: true })).toHaveClass(/text-danger/);
+  await addModal(page);
+  await page.locator('#inlineInput').fill('2026-11-18, -1, Pending');
+  await page.getByRole('button', { name: 'Save Transaction', exact: true }).click();
+  page.once('dialog', dialog => dialog.dismiss());
+  await page.getByRole('button', { name: 'cream home', exact: true }).click();
+  await expect(page.locator('#appView')).toBeVisible();
+  await expect(page.locator('#unsavedWarning')).toBeVisible();
+  page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'cream home', exact: true }).click();
+  await expect(page.locator('#landingView')).toBeVisible();
+});

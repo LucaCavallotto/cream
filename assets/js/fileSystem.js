@@ -1,3 +1,4 @@
+import { createTransactionId } from './transactionId.js';
 import Papa from 'papaparse';
 import { parseTransactionsCSV, serializeTransactionsCSV } from './csv.js';
 
@@ -11,7 +12,7 @@ export async function readCSVSession(source) {
     fileName: file.name || source.name,
     fileHandle: handle,
     transactions: result.transactions.map((row) => ({
-      id: crypto.randomUUID(),
+      id: createTransactionId(),
       ...row,
     })),
   };
