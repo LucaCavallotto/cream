@@ -127,6 +127,7 @@ async function handleCreateNewFile() {
     }
     state.transactions = []; // Empty since it's new
     state.analyticsExclusions = createAnalyticsExclusions();
+    state.analyticsReturnContext = null;
     state.originalTransactions = [];
     clearUnsavedChanges();
     renderApp();
@@ -243,6 +244,7 @@ function parseCSV(csvText) {
 
   console.log(`Successfully parsed ${state.transactions.length} transactions.`);
   state.analyticsExclusions = createAnalyticsExclusions();
+  state.analyticsReturnContext = null;
   return true;
 }
 
@@ -336,6 +338,7 @@ function closeFile() {
   state.fileName = '';
   state.transactions = [];
   state.analyticsExclusions = createAnalyticsExclusions();
+  state.analyticsReturnContext = null;
   state.originalTransactions = [];
   state.searchQuery = '';
   clearUnsavedChanges();

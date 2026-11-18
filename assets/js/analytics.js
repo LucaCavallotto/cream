@@ -15,6 +15,10 @@ let periodListenerAttached = false;
  * Reads application transactions, computes analytics, and updates charts and text summaries.
  */
 export function renderAnalytics() {
+  const expandedRows = new Set(Array.from(
+    document.querySelectorAll('#analytics-tab-pane .category-item.expanded'),
+    row => JSON.stringify([row.parentElement.id, row.dataset.breakdownKey])
+  ));
   if (!periodListenerAttached) {
     const periodSelect = document.getElementById('analyticsTimePeriod');
     const monthSelect = document.getElementById('analyticsSpecificMonth');
@@ -156,6 +160,12 @@ export function renderAnalytics() {
   renderDetailedCategoryBreakdown(transactions, periodLabel);
   renderDetailedIncomeBreakdown(transactions, periodLabel);
   renderDetailedTagsBreakdown(transactions, periodLabel);
+  document.querySelectorAll('#analytics-tab-pane .category-item').forEach(row => {
+    if (expandedRows.has(JSON.stringify([row.parentElement.id, row.dataset.breakdownKey]))) {
+      row.classList.add('expanded');
+      row.querySelector('.subcategory-list')?.classList.add('show');
+    }
+  });
 }
 
 /**
@@ -460,7 +470,7 @@ function renderDetailedCategoryBreakdown(transactions, periodLabel) {
     `).join('');
 
     return `
-      <div class="category-item list-group-item p-0 border-bottom">
+      <div class="category-item list-group-item p-0 border-bottom" data-breakdown-key="${encodeURIComponent(catName)}">
         <div class="category-header d-flex align-items-center">
           <div class="flex-grow-1">
             <div class="d-flex justify-content-between align-items-start mb-1">
@@ -562,7 +572,7 @@ function renderDetailedIncomeBreakdown(transactions, periodLabel) {
     `).join('');
 
     return `
-      <div class="category-item list-group-item p-0 border-bottom">
+      <div class="category-item list-group-item p-0 border-bottom" data-breakdown-key="${encodeURIComponent(catName)}">
         <div class="category-header d-flex align-items-center">
           <div class="flex-grow-1">
             <div class="d-flex justify-content-between align-items-start mb-1">
@@ -666,7 +676,7 @@ function renderDetailedTagsBreakdown(transactions, periodLabel) {
     const netPrefix = tagData.net > 0 ? '+' : '';
 
     return `
-      <div class="category-item list-group-item p-0 border-bottom">
+      <div class="category-item list-group-item p-0 border-bottom" data-breakdown-key="${encodeURIComponent(tagName)}">
         <div class="category-header d-flex align-items-center">
           <div class="flex-grow-1">
             <div class="d-flex justify-content-between align-items-start mb-1">
@@ -702,13 +712,5 @@ function renderDetailedTagsBreakdown(transactions, periodLabel) {
  * Triggers a global search filter and switches to the transactions tab.
  */
 function applyFilterAndSwitchTab(filterStr) {
-  state.searchQuery = filterStr.toLowerCase();
-  
-  const searchInput = document.getElementById('inputSearchTransaction');
-  if (searchInput) searchInput.value = filterStr;
-  
-  const clearBtn = document.getElementById('btnClearSearch');
-  if (clearBtn) clearBtn.classList.remove('d-none');
-  
-  document.dispatchEvent(new CustomEvent('filter-transactions-requested'));
+  document.dispatchEvent(new CustomEvent('filter-transactions-requested', { detail: { filter: filterStr } }));
 }

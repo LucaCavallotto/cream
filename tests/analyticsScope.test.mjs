@@ -146,7 +146,7 @@ test('analytics renderer consistently excludes investments from every metric and
   class TestDate extends Date { constructor(...args) { super(...(args.length ? args : [now])); } }
   const context = vm.createContext({ state, Date: TestDate, isValidTransactionDate, selectAnalyticsTransactions,
     filterAnalyticsPeriod, buildMonthlyCashFlow, captures, renderAnalyticsFilters() {},
-    document: { getElementById: element, querySelector: element },
+    document: { getElementById: element, querySelector: element, querySelectorAll: () => [] },
     Chart: class { constructor(_, config) { chartData.set(config.type, config.data); } destroy() {} }
   });
   const source = readFileSync(new URL('../assets/js/analytics.js', import.meta.url), 'utf8')

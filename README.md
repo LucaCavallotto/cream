@@ -121,6 +121,8 @@ Add and manage exclusions directly:
 
 The summary counts explicit category and subcategory rules separately (it does not count every subcategory covered by an entire-category rule) and shows excluded transactions across the dataset and in the selected period. Invalid-record counts appear only when nonzero. Exclusions consistently affect income, expenses, net delta, pie and cash-flow charts, category/subcategory breakdowns, tags and monthly comparisons. Net delta is the result of the filtered view, not the complete dataset balance. The cash-flow chart follows the selected period; monthly comparison always compares the current and previous calendar months with the same exclusions.
 
+Use **View Transactions** in a breakdown to inspect matching records, then **Back to Analytics** to return. The selected period, exclusions, Show More settings, expanded breakdowns and analytics scroll position are preserved. Returning also restores the transaction list's previous search and sort; clicking the Analytics tab directly performs the same return. Transaction edits made during the drilldown remain in the dataset. Opening, creating or closing a file clears the return context.
+
 These are **session-only view settings**: switching tabs, changing the time period, saving the CSV or undoing transaction edits does not clear them. Opening or creating a file, closing it or reloading the page resets them. They are not written to the CSV and do not mark it as modified. Transactions and Dataset Health always retain the full dataset. Records with invalid dates or amounts remain excluded from analytics for data-quality reasons even after **Include all**.
 
 ### 5. Dataset Health

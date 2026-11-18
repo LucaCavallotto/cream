@@ -3,6 +3,7 @@ import { renderAnalytics } from './analytics.js';
 import { parseInlineRow } from './inlineInput.js';
 import { renderDatasetHealth } from './cleanup.js';
 import { getTransactionIssues, isValidTransactionDate } from './datasetHealth.js';
+import { beginAnalyticsDrilldown, finishAnalyticsDrilldown } from './analyticsNavigation.js';
 
 const categoryMap = {
   'food': { icon: 'bi-cup-hot-fill', color: 'bg-danger' },
@@ -170,12 +171,38 @@ export function setupUIEvents() {
     });
   });
 
-  document.addEventListener('filter-transactions-requested', () => {
+  document.addEventListener('filter-transactions-requested', (event) => {
+    const filter = event.detail.filter;
+    const searchInput = document.getElementById('inputSearchTransaction');
+    beginAnalyticsDrilldown(state, filter, searchInput.value, window.scrollY);
+    searchInput.value = filter;
+    document.getElementById('btnClearSearch').classList.toggle('d-none', !filter);
     renderTransactions();
     const listTab = document.getElementById('list-tab');
     if (listTab) {
       listTab.click();
     }
+  });
+
+  let analyticsReturnScroll = null;
+  const analyticsTab = document.getElementById('analytics-tab');
+  document.getElementById('btnBackToAnalytics').addEventListener('click', () => analyticsTab.click());
+  analyticsTab.addEventListener('show.bs.tab', () => {
+    const context = finishAnalyticsDrilldown(state);
+    if (!context) return;
+    analyticsReturnScroll = context.scrollY;
+    document.getElementById('inputSearchTransaction').value = context.searchText;
+    document.getElementById('btnClearSearch').classList.toggle('d-none', !context.searchText);
+    renderTransactions();
+  });
+  analyticsTab.addEventListener('shown.bs.tab', () => {
+    if (analyticsReturnScroll === null) return;
+    const top = analyticsReturnScroll;
+    analyticsReturnScroll = null;
+    window.requestAnimationFrame(() => window.scrollTo({ top, behavior: 'instant' }));
+  });
+  document.getElementById('list-tab').addEventListener('shown.bs.tab', () => {
+    if (state.analyticsReturnContext) window.scrollTo({ top: 0, behavior: 'instant' });
   });
 
   const inputSearchTransaction = document.getElementById('inputSearchTransaction');
@@ -483,6 +510,7 @@ function formatDate(isoString) {
  * Renders the transactions table in sorted order.
  */
 export function renderTransactions() {
+  document.getElementById('btnBackToAnalytics').classList.toggle('d-none', !state.analyticsReturnContext);
   renderDatasetHealth(state, editTransaction);
   const tbody = document.getElementById('transactionsTbody');
   const emptyState = document.getElementById('emptyState');

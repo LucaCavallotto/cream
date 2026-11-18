@@ -96,12 +96,14 @@ test('CSV load, save and undo preserve unresolved values and report health consi
   assert.equal(state.transactions[0].Amount, '12oops');
   assert.equal(analyzeDataset(state.transactions, categories).counts.invalid_amount, 1);
   state.analyticsExclusions.categories.add('Investments');
+  state.analyticsReturnContext = { searchQuery: 'original', scrollY: 500 };
   await context.saveFile();
   assert.equal(exported[0].Amount, '12oops');
   assert.equal(exported[0].Category, 'Legacy');
   assert(!Object.hasOwn(exported[0], 'id'));
   assert(!Object.hasOwn(exported[0], 'analyticsExclusions'));
   assert(state.analyticsExclusions.categories.has('Investments'));
+  assert.equal(state.analyticsReturnContext.searchQuery, 'original');
   assert(written.includes('12oops'));
   state.transactions[0].Amount = -12;
   state.transactions[0].Category = 'Bar';
@@ -113,4 +115,5 @@ test('CSV load, save and undo preserve unresolved values and report health consi
   assert(state.analyticsExclusions.categories.has('Investments'));
   assert(context.parseCSV('fixture'));
   assert.equal(state.analyticsExclusions.categories.size, 0);
+  assert.equal(state.analyticsReturnContext, null);
 });

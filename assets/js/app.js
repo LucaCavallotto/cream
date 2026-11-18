@@ -22,6 +22,7 @@ export const state = {
   searchQuery: '',
   allTags: [],
   analyticsExclusions: createAnalyticsExclusions(),
+  analyticsReturnContext: null,
   isSelectionMode: false,
   selectedIds: [],
   viewOnlyMode: isIOS()
