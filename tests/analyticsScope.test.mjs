@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import vm from 'node:vm';
 import test from 'node:test';
 import { createAnalyticsExclusions, isExcludedFromAnalytics, selectAnalyticsTransactions, filterAnalyticsPeriod, buildMonthlyCashFlow, getAnalyticsExclusionOptions, excludeAnalyticsCategory, excludeAllAnalyticsCategories } from '../assets/js/analyticsScope.js';
-import { isValidTransactionDate } from '../assets/js/datasetHealth.js';
+import { analyticsModel, chartConfig } from '../assets/js/analyticsModel.js';
 
 const make = (id, Amount, Category, Subcategory, DateTime = '2026-11-02T12:00:00+01:00') =>
   ({ id, Amount, Category, Subcategory, DateTime, Description: id, Tags: '#example', Notes: '' });
@@ -128,53 +126,36 @@ test('monthly cash flow spans the selected data and fills missing months with ze
   assert.deepEqual(buildMonthlyCashFlow([]), []);
 });
 
-test('analytics renderer consistently excludes investments from every metric and breakdown', () => {
-  const elements = new Map();
-  const element = id => {
-    if (!elements.has(id)) elements.set(id, {
-      value: '', textContent: '', innerHTML: '', classList: { toggle() {}, add() {}, remove() {} },
-      addEventListener() {}, getContext: () => ({}), closest() { return this; }, querySelector() { return this; }
-    });
-    return elements.get(id);
-  };
-  element('analyticsTimePeriod').value = 'current_month';
+test('analytics model consistently excludes investments from every metric, chart and breakdown', () => {
   const exclusions = createAnalyticsExclusions();
   exclusions.categories.add('Investments');
-  const chartData = new Map();
-  const captures = {};
-  const state = { transactions: structuredClone(transactions), analyticsExclusions: exclusions };
-  const snapshot = JSON.stringify(state.transactions);
-  class TestDate extends Date { constructor(...args) { super(...(args.length ? args : [now])); } }
-  const context = vm.createContext({ state, Date: TestDate, isValidTransactionDate, selectAnalyticsTransactions,
-    filterAnalyticsPeriod, buildMonthlyCashFlow, captures, renderAnalyticsFilters() {},
-    document: { getElementById: element, querySelector: element, querySelectorAll: () => [] },
-    Chart: class { constructor(_, config) { chartData.set(config.type, config.data); } destroy() {} }
-  });
-  const source = readFileSync(new URL('../assets/js/analytics.js', import.meta.url), 'utf8')
-    .replace(/^import .*;\n/gm, '').replace(/^export /gm, '');
-  vm.runInContext(source, context);
-  vm.runInContext(`renderDetailedCategoryBreakdown = rows => captures.spending = rows;
-    renderDetailedIncomeBreakdown = rows => captures.income = rows;
-    renderDetailedTagsBreakdown = rows => captures.tags = rows;`, context);
-  context.renderAnalytics();
-  assert.equal(element('metricIncome').textContent, '€1000.00');
-  assert.equal(element('metricExpenses').textContent, '€10.00');
-  assert.equal(element('metricDelta').textContent, '+€990.00');
-  assert(element('metricCurrentMonth').innerHTML.startsWith('€10.00'));
-  assert.equal(element('metricPrevMonth').textContent, '€20.00');
-  for (const rows of Object.values(captures)) assert.deepEqual(Array.from(rows, t => t.id), ['salary', 'coffee']);
-  assert.deepEqual(Array.from(chartData.get('pie').labels), ['Bar']);
-  assert.deepEqual(Array.from(chartData.get('line').datasets[1].data), [10]);
+  const snapshot = JSON.stringify(transactions);
+  const model = analyticsModel(transactions, exclusions, 'current_month', '', now);
+  assert.equal(model.income, 1000);
+  assert.equal(model.expenses, 10);
+  assert.equal(model.net, 990);
+  assert.equal(model.current, 10);
+  assert.equal(model.previous, 20);
+  assert.deepEqual(model.rows.map(t => t.id), ['salary', 'coffee']);
+  assert.deepEqual(model.spending.map(g => g.name), ['Bar']);
+  assert.deepEqual(model.incomeGroups.map(g => g.name), ['Income']);
+  assert.equal(model.tags[0].total, 990);
+  assert.equal(model.tags[0].volume, 1010);
+  const pie = chartConfig('pie', model), line = chartConfig('line', model);
+  assert.deepEqual(pie.data.labels, ['Bar']);
+  assert.deepEqual(line.data.datasets[1].data, [10]);
+  assert.equal(line.options.locale, 'en-GB');
+  assert.equal(pie.options.locale, 'en-GB');
+  assert.equal(model.periodLabel, 'November 2026');
   exclusions.categories.clear();
-  context.renderAnalytics();
-  assert.equal(element('metricIncome').textContent, '€1025.00');
-  assert.equal(element('metricExpenses').textContent, '€510.00');
-  assert.equal(element('metricPrevMonth').textContent, '€220.00');
+  const restored = analyticsModel(transactions, exclusions, 'current_month', '', now);
+  assert.equal(restored.income, 1025);
+  assert.equal(restored.expenses, 510);
+  assert.equal(restored.previous, 220);
   exclusions.transactions = new Set(transactions.map(t => t.id));
-  context.renderAnalytics();
-  assert.equal(element('metricIncome').textContent, '€0.00');
-  assert.equal(element('metricExpenses').textContent, '€0.00');
-  assert.equal(chartData.get('line').labels.length, 0);
-  assert.equal(JSON.stringify(state.transactions), snapshot);
-  assert.equal(state.hasUnsavedChanges, undefined);
+  const empty = analyticsModel(transactions, exclusions, 'overall', '', now);
+  assert.equal(empty.income, 0);
+  assert.equal(empty.expenses, 0);
+  assert.equal(chartConfig('line', empty).data.labels.length, 0);
+  assert.equal(JSON.stringify(transactions), snapshot);
 });

@@ -5,7 +5,7 @@ A modular, privacy-first, browser-based personal finance manager that interacts 
 ---
 
 ## Project Overview
-**Expense Tracker** is a single-page application (SPA) designed to manage personal finances without cloud dependency. It leverages the **File System Access API** to read and write directly to the user's local disk, ensuring 100% data privacy. A `.gitignore` policy is in place to prevent accidental upload of any `.csv` files (except the provided `example_data.csv`).
+**Expense Tracker** is a single-page application (SPA) designed to manage personal finances without cloud dependency. It leverages the **File System Access API** to read and write directly to the user's local disk, ensuring 100% data privacy. A `.gitignore` policy is in place to prevent accidental upload of any `.csv` files (except the synthetic `demo.csv`).
 
 **Core User Flow:**
 1.  **Entry:** Create a new CSV or open/drag-and-drop an existing one.
@@ -19,7 +19,7 @@ A modular, privacy-first, browser-based personal finance manager that interacts 
 
 | Category | Technology | Usage |
 | :--- | :--- | :--- |
-| **Core** | HTML5 / JavaScript (ES6+) | Structure and Logic |
+| **Core** | React / JavaScript (ES6+) / Vite | Components, state and production build |
 | **Styling** | Bootstrap 5.3.3 / CSS3 | Responsive UI and Design System |
 | **Data Parsing** | [PapaParse 5.4.1](https://www.papaparse.com/) | CSV Reading and Writing |
 | **Visualization** | [Chart.js 4.4.2](https://www.chartjs.org/) | Financial Analytics |
@@ -29,20 +29,20 @@ A modular, privacy-first, browser-based personal finance manager that interacts 
 ---
 
 ## Architecture
-The project follows a modular ES6 design, separating concerns between state, UI rendering, and file I/O.
+React components in `src/` own UI rendering. Shared session state uses `appReducer` from `assets/js/appState.js`; reusable validation, CSV and analytics logic stays in `assets/js/`. File services return values or errors and do not mutate UI state.
 
 ```text
+├── src/
+│   ├── main.jsx             # React root and bundled styles
+│   ├── App.jsx              # Browser file lifecycle and shared state
+│   └── components/          # Transactions, modal, health, analytics and filters
 ├── assets/
-│   ├── css/
-│   │   └── style.css          # Design system, sticky footer, and layout overrides
-│   └── js/
-│       ├── app.js             # Central state management and lifecycle init
-│       ├── ui.js              # DOM rendering logic and user event handlers
-│       ├── fileSystem.js      # File System Access API abstraction & CSV logic
-│       └── analytics.js       # Chart.js instances and data aggregation
-├── data/
-│   └── categories.json        # Hierarchical JSON for categories/subcategories
-└── index.html                 # Main entry point and modal definitions
+│   ├── css/style.css        # Existing Bootstrap overrides
+│   └── js/                  # Reducer, CSV codec, validation and analytics models
+├── data/categories.json     # Hierarchical static catalog
+├── tests/                   # Unit, CSV integration, build and browser checks
+├── vite.config.js           # Relative assets and static data copied to dist/
+└── index.html               # Vite HTML entry point
 ```
 
 ---
@@ -50,21 +50,22 @@ The project follows a modular ES6 design, separating concerns between state, UI 
 ## Workflow & Rules
 
 ### 1. Local Development
-- Open `index.html` via a local server (e.g., Live Server extension) or directly in a modern browser.
-- Ensure the browser supports the **File System Access API** (Chrome/Edge/Safari 16.4+) for full functionality.
+- Use Node.js 24, `npm ci`, then `npm run dev`. Use `npm run build` and `npm run preview` to check the production site. Deploy `dist/`, not the source files.
+- Native file APIs require HTTPS or localhost and browser support. Other browsers use file-input/download fallback.
+- Run `npm test` before pushing; it includes production build checks and browser flows.
 
 ### 2. Coding Standards
 - **Naming Conventions:**
     - JS: `camelCase` for variables/functions.
     - HTML: `kebab-case` for IDs and classes.
 - **State Management:**
-    - All shared data resides in the `state` object in `app.js`.
-    - Always call `markUnsavedChanges()` after modifying `state.transactions`.
+    - Shared state lives in the reducer in `assets/js/appState.js`.
+    - Dispatch immutable reducer actions for transaction edits; keep the saved baseline separate.
     - `viewOnlyMode` state controls UI visibility for editing elements and is auto-detected for mobile.
 - **UI Logic:**
-    - Separate pure data calculations from DOM manipulation where possible.
-    - Use `renderApp()` as the main entry point to toggle visibility between Landing and App views.
-    - `renderTransactions()` and `renderAnalytics()` handle the heavy lifting for data display.
+    - Keep data calculations in reusable modules and render through React components.
+    - Clean up browser listeners and Chart.js instances in effects. Do not mix imperative DOM renderers with React.
+    - Keep analytics components mounted across tab navigation to preserve filters and expansion state.
 
 ### 3. Documentation & Commits
 - Keep comments focused on "why" rather than "what."
@@ -94,8 +95,8 @@ The program expects a specific column order for CSV compatibility:
 ## Lessons Learned & Gotchas
 - **File System API:** Requires a secure context (HTTPS or localhost) and explicit user activation (click event).
 - **Sticky Footer:** Must wrap main content in a `<main>` tag with `flex: 1 0 auto` to work with the vertical flexbox body.
-- **Bulk Parsing:** The `Quick Inline Entry` textarea uses `\n` splitting; ensure empty lines are filtered out to prevent parsing errors.
-- **Date Handling:** `parseInlineDate` handles both standard `YYYY-MM-DD` and full ISO timestamps (detecting time automatically).
+- **Bulk Parsing:** The `Quick Inline Entry` textarea uses real PapaParse and supports quoted multiline descriptions; do not split CSV manually.
+- **Date Handling:** `inlineDateTime` supports date-only and ISO input. Preserve original timezone offsets and fractional seconds when unrelated fields are edited.
 - **Mobile Compatibility:** File saving on iOS/iPadOS is restrictive; "View Only Mode" is used as a safety fallback to prevent confusing save prompts or accidental data loss on mobile devices.
 - **Analytics Performance:** Hierarchical breakdowns use interactive "Show More" toggles to maintain performance and UI cleanliness when dealing with large numbers of categories or tags.
 - **Tag System:** Tags are space-separated and prefixed with `#` (e.g. `#holiday #travel`). Old comma-separated CSV files are automatically migrated to this format upon loading to maintain seamless backwards compatibility.

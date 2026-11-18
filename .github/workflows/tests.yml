@@ -27,7 +27,7 @@ jobs:
           node-version: '24'
           package-manager-cache: false
 
-      - name: Install pinned test dependencies
+      - name: Install pinned dependencies
         run: npm ci
 
       - name: Unit tests
@@ -35,6 +35,9 @@ jobs:
 
       - name: CSV integration tests
         run: npm run test:integration
+
+      - name: Production build and bundled assets
+        run: npm run test:build
 
       - name: Repeat logic and integration checks in UTC
         env:
@@ -67,12 +70,15 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Install pinned test dependencies
+      - name: Install pinned dependencies
         run: npm ci
       - name: Install browser and system dependencies
         run: npx playwright install --with-deps ${{ matrix.engine }}
-      - name: Browser tests
+      - name: Production build and browser tests
         run: npm run test:browser -- --project=${{ matrix.project }}
+      - name: Vite development mode and React StrictMode
+        if: matrix.project == 'chromium'
+        run: npm run test:dev
       - name: Upload browser report and failure diagnostics
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v6

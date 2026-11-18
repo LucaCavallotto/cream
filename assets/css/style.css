@@ -276,3 +276,6 @@ footer {
   font-weight: 700;
   font-size: 1rem;
 }
+
+/* Keep the application shell filling the viewport after mounting in React. */
+#root { min-height: 100vh; display: flex; flex-direction: column; }

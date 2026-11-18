@@ -1,6 +1,5 @@
 import { test as base, expect } from '@playwright/test';
 import { readFile, mkdtemp, rm } from 'node:fs/promises';
-import { resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import Papa from 'papaparse';
@@ -33,21 +32,16 @@ export const test = base.extend({
   page: async ({ page }, use) => {
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
-    // Real, pinned library distributions replace their CDN transport only.
+    page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+    // Production assets must work without CDN or other external requests.
     await page.route('https://**/*', route => route.abort());
-    await page.route('https://cdn.jsdelivr.net/npm/**', async route => {
-      const match = new URL(route.request().url()).pathname.match(/^\/npm\/(bootstrap|bootstrap-icons|chart\.js|papaparse)@[^/]+\/(.+)$/);
-      if (!match) return route.abort();
-      // jsDelivr generates this minified filename; npm ships the same UMD build unminified.
-      const asset = match[1] === 'chart.js' && match[2] === 'dist/chart.umd.min.js' ? 'dist/chart.umd.js' : match[2];
-      await route.fulfill({ path: resolve('node_modules', match[1], asset) });
-    });
     await page.addInitScript(() => {
       window.showOpenFilePicker = undefined;
       window.showSaveFilePicker = undefined;
       Object.defineProperty(navigator, 'canShare', { configurable: true, value: undefined });
     });
-    await page.clock.setFixedTime(new Date('2026-11-18T12:00:00+01:00'));
+    // Keep calendar expectations stable while allowing Chart.js animations to advance.
+    await page.clock.install({ time: new Date('2026-11-18T12:00:00+01:00') });
     await use(page);
     expect(errors, 'Uncaught browser exceptions').toEqual([]);
   }
@@ -56,9 +50,9 @@ export const test = base.extend({
 export async function launch(page) {
   const categories = page.waitForResponse('**/data/categories.json');
   await page.goto('/');
-  // Initialization awaits categories before registering click listeners.
+  // React enables file actions after the category catalog is ready.
   await (await categories).finished();
-  await expect(page.getByRole('button', { name: 'Browse Files', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Browse Files', exact: true })).toBeEnabled();
 }
 
 export async function openRawCSV(page, text, name = 'test.csv') {

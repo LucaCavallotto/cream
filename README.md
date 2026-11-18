@@ -1,6 +1,6 @@
 # Personal Expense Tracker
 
-A modular, browser-based personal finance manager that works directly with your local CSV files. This application puts you in control of your data—no cloud required, no sign-ups, just privacy-focused financial tracking.
+A React application built with Vite: a modular, browser-based personal finance manager that works directly with your local CSV files. This application puts you in control of your data—no cloud required, no sign-ups, just privacy-focused financial tracking.
 
 ## Key Features
 
@@ -10,7 +10,7 @@ A modular, browser-based personal finance manager that works directly with your 
 - **Responsive Dashboard:** View your current net delta and monthly spend comparisons at a glance.
 - **Comprehensive Analytics:** Detailed hierarchical breakdowns for Spending, Income, and Tags with interactive "Show More" functionality.
 - **Reversible Analytics Exclusions:** Exclude investments, categories, subcategories or individual transactions from statistics without modifying the dataset.
-- **Advanced Search & Sorting:** Quickly find transactions by description or sort by any column.
+- **Advanced Search & Sorting:** Search descriptions, amounts, classifications, tags and notes; sort by date, amount or category.
 - **Dark Mode Support:** Automatically syncs with your system's light/dark preference.
 - **English Interface:** App labels, generated month names and chart number formatting use English regardless of the browser's language. Transaction descriptions and other imported data retain their original text.
 - **Dataset Health:** Find missing or invalid values and classification problems, then review each affected transaction in the standard edit modal.
@@ -18,17 +18,34 @@ A modular, browser-based personal finance manager that works directly with your 
 ## Project Structure
 
 ```text
+├── src/
+│   ├── main.jsx            # React entry point and bundled styles
+│   ├── App.jsx             # File lifecycle, navigation and shared state
+│   └── components/         # Transactions, modal, health, analytics and filters
 ├── assets/
-│   ├── css/        # Custom styling
-│   └── js/         # Application logic (App, UI, File System, Analytics)
-├── data/           # Categorization configuration
-└── index.html      # Main application entry point
+│   ├── css/style.css       # Existing Bootstrap overrides and responsive styling
+│   └── js/                 # Reusable CSV, validation, analytics and reducer logic
+├── data/categories.json    # Static category/subcategory catalog
+├── tests/                  # Unit, real CSV integration, build and browser tests
+├── index.html              # Vite entry point and early system-theme setup
+├── vite.config.js          # React build, relative asset paths and static data
+└── dist/                   # Generated production site (ignored by Git)
 ```
+
+React owns the UI and uses a reducer for shared session state. CSV parsing, validation, exclusions, date handling and sorting remain reusable JavaScript modules. Chart.js instances and browser listeners are created and cleaned up through component effects. Bootstrap CSS and icons preserve the existing appearance; Bootstrap's DOM-manipulating JavaScript is no longer required. Runtime libraries are bundled locally rather than loaded from CDNs.
 
 ## How to Use
 
 ### 1. Getting Started
-Simply open the `index.html` file in any modern web browser.
+Use Node.js 24, then start the Vite development server:
+
+```bash
+npm ci
+npm run dev
+```
+
+Open the localhost URL printed by Vite. The source `index.html` requires Vite; opening it directly from disk does not run the app.
+
 - **New Users:** Click **"Create New File"** to generate a fresh expense CSV on your computer.
 - **Trial:** You can also use the included `demo.csv` to explore the app's features immediately.
 - **Existing Users:** Click **"Browse Files"** or simply **Drag & Drop** your existing CSV anywhere on the screen.
@@ -183,9 +200,20 @@ This application is entirely client-side. Your financial data never leaves your 
 
 **Privacy Note:** The project includes a `.gitignore` rule that prevents any CSV files (except the provided `demo.csv`) from being uploaded to Git repositories, providing an extra layer of protection for your personal data.
 
+## Production build and hosting
+
+```bash
+npm run build
+npm run preview
+```
+
+`npm run build` creates `dist/`; preview serves that build locally. Deploy **the contents of `dist/`** to a static HTTP(S) host, rather than the source repository. No application server or database is required. Vite uses relative asset paths so a repository subdirectory such as `/expense-tracker/` works too. The build includes the category catalog, `demo.csv` and the app manifest; serve the site at a directory URL ending with `/`. Use HTTPS or localhost for native file APIs; other supported browsers use the file-input/download fallback.
+
+Data remains in the current browser session until explicitly saved to CSV. The migration preserves the seven-column CSV schema and existing files. Analytics filters and navigation state are session-only; there is no new storage service or upload step.
+
 ## Development and testing
 
-Use **Node.js 24**. Install the exact development dependencies and the isolated browser binaries once:
+Use **Node.js 24**. Install the exact application and development dependencies and the isolated browser binaries once:
 
 ```bash
 npm ci
@@ -205,29 +233,33 @@ Or run a layer separately:
 ```bash
 npm run test:unit
 npm run test:integration
+npm run test:build
 npm run test:browser
 npm run test:browser -- --project=chromium
 npm run test:report
+npm run test:dev
 ```
 
 ### Coverage and test boundaries
 
 | Layer | What it verifies |
 | --- | --- |
-| Unit tests (`tests/*.test.mjs`) | Input validation, tag normalization, dataset health, period filtering, investment/category/subcategory/individual exclusions, monthly aggregation and navigation state. An analytics renderer test also checks inputs passed to charts and breakdowns using a simulated DOM. |
-| Real CSV integration (`tests/integration/`) | The same CSV codec used by the app, with **real PapaParse 5.4.1**: BOM, line endings, reordered headers, quoting, Unicode, multiline notes, empty datasets, invalid values, malformed files, tag migration and roundtrips. File lifecycle tests check save failures, cancellation, undo and state preservation with controlled filesystem/share API doubles. |
-| Desktop browser flows (`tests/browser/app.spec.mjs`) | Real HTML, ES modules, Bootstrap, Chart.js and PapaParse on **Chromium, Firefox and WebKit**: create/open, form editing and deletion, bulk operations, search/sort, quick input, atomic validation, Dataset Health corrections, exclusions, drilldown/return, download/reopen and simulated native-save failures. |
+| Unit tests (`tests/*.test.mjs`) | Input validation, tag normalization, dataset health, period filtering, investment/category/subcategory/individual exclusions, monthly aggregation and navigation state. Reducer tests verify session resets, undo, immutable updates and asynchronous save baselines. Analytics model tests check the data shared by metrics, charts and breakdowns, including explicit English chart configuration. |
+| Real CSV integration (`tests/integration/`) | The same CSV codec used by the app, with **real PapaParse 5.4.1**: BOM, line endings, reordered headers, quoting, Unicode, multiline notes, empty datasets, invalid values, malformed files, tag migration and roundtrips. File lifecycle tests check save failures, cancellation, file-handle/drop/download/share behavior and reducer state preservation with controlled filesystem/share API doubles. |
+| Desktop browser flows (`tests/browser/app.spec.mjs`) | The production React/Vite build, Bootstrap CSS, Chart.js and PapaParse on **Chromium, Firefox and WebKit**: create/open, form editing and deletion, bulk operations, search/sort, quick input, atomic validation, Dataset Health corrections, exclusions, drilldown/return, download/reopen and simulated native-save failures. |
+| React lifecycle (`tests/browser/lifecycle.spec.mjs`) | Modal reset/focus/scroll cleanup, repeat navigation, session resets, live system theme, chart resizing and safe text rendering. These checks also run through Vite dev on Chromium with React StrictMode enabled. |
+| Production build (`tests/build/`) | Bundled entry/assets, relative deployment paths, static catalog/demo/manifest integrity, and absence of CDN scripts or old entry points. |
 | Mobile browser flows (`tests/browser/mobile.spec.mjs`) | WebKit with an iPhone viewport/touch profile: read-only inspection, health details, analytics exclusions and layout width. This is emulation, not a real iPhone. |
 
-Browser tests serve the app from an isolated local HTTP server and intercept CDN requests with the pinned npm distributions of the same library versions (Chart.js uses the equivalent unminified UMD build). A version-parity test checks these against the HTML references. Application logic and CSV parsing are not mocked in these flows. The date is fixed to November 18, 2026 and the browser timezone to Europe/Rome, so monthly expectations do not drift over time. Fixtures are synthetic and do not access personal CSV files. On macOS, Firefox also gets temporary application data to avoid accessing the user's protected browser directory; cleanup removes it where allowed, leaving any OS-protected temporary remnants for macOS to manage.
+Browser tests build the app first and serve `dist/` using Vite preview on an isolated localhost port. External HTTPS requests are blocked: these flows exercise the actual bundled libraries. A dependency test checks the exact runtime versions against the lockfile. Application logic and CSV parsing are not mocked in these flows. Each browser clock starts on November 18, 2026 in Europe/Rome and advances normally so chart animations still run while monthly expectations remain stable. Fixtures are synthetic and do not access personal CSV files. On macOS, Firefox also gets temporary application data to avoid accessing the user's protected browser directory; cleanup removes it where allowed, leaving any OS-protected temporary remnants for macOS to manage.
 
-The native operating-system file picker, disk permissions, the iOS share sheet, real devices, CDN availability and visual appearance still require manual checks. Tests exercise the browser file-input/download fallback, and simulate native API failures explicitly. A passing suite is evidence for the covered scenarios, not a guarantee that every possible input or environment is correct.
+The native operating-system file picker, disk permissions, the iOS share sheet, real devices and visual appearance still require manual checks. Tests exercise the browser file-input/download fallback, and simulate native API failures explicitly. A passing suite is evidence for the covered scenarios, not a guarantee that every possible input or environment is correct.
 
-Playwright runs without automatic retries. On failures it keeps screenshots and traces under `test-results/`, with an HTML report under `playwright-report/`; both are ignored by Git. Inspect a trace with `npx playwright show-trace path/to/trace.zip`. Keep `package-lock.json` committed whenever test dependencies change. The static app itself still needs no npm build.
+Playwright runs without automatic retries. On failures it keeps screenshots and traces under `test-results/`, with an HTML report under `playwright-report/`; both are ignored by Git. Inspect a trace with `npx playwright show-trace path/to/trace.zip`. Keep `package-lock.json` committed whenever test dependencies change. The app now requires a Vite build for deployment.
 
 ### GitHub Actions
 
-The [Tests workflow](.github/workflows/tests.yml) runs on every push and when a pull request is opened, reopened or updated. It installs dependencies with `npm ci`, runs logic and real CSV integration tests, and runs the browser matrix above. Browser reports and failure diagnostics are retained as workflow artifacts for seven days. The final **Test suite** check fails if any layer fails or is skipped/cancelled; it is the check to require for merge protection. The **Node.js tests** job also remains available individually. A push with an open pull request can trigger both events.
+The [Tests workflow](.github/workflows/tests.yml) runs on every push and when a pull request is opened, reopened or updated. It installs dependencies with `npm ci`, runs logic, real CSV integration and production-build checks, and runs the browser matrix against the production build above. Browser reports and failure diagnostics are retained as workflow artifacts for seven days. The final **Test suite** check fails if any layer fails or is skipped/cancelled; it is the check to require for merge protection. The **Node.js tests** job also remains available individually. A push with an open pull request can trigger both events.
 
 Local commits do not trigger GitHub Actions. For a direct push to `main`, tests run after GitHub receives the commits: a failure does not revert or remove them. If several commits are pushed together, the push run tests the final pushed revision. Fix failures locally, rerun the suite and push a corrective commit.
 

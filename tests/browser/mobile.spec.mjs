@@ -5,6 +5,9 @@ test('mobile layout inspects transactions and health records without allowing ed
   await launch(page);
   await openRows(page, [row('Mobile coffee'), row('Needs classification', -1, '', '')]);
   await expect(page.locator('#btnAddExpense')).toBeHidden();
+  await expect(page.locator('#btnSaveChanges')).toBeHidden();
+  await expect(page.locator('#btnUndoChanges')).toBeHidden();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.locator('#transactionsTbody .mobile-row-click').first().click();
   await expect(page.locator('#expenseModal')).toHaveCSS('opacity', '1');
   await expect(page.locator('#inputDescription')).toBeDisabled();

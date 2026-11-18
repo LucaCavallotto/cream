@@ -2,7 +2,7 @@ import { test, expect, launch, openRows, row, tab } from './fixtures.mjs';
 
 test.use({ locale: 'it-IT' });
 
-test('interface, month choices, chart labels and number formatting stay English in an Italian browser', async ({ page }) => {
+test('interface, month choices, accessible chart labels stay English in an Italian browser', async ({ page }) => {
   await launch(page);
   await openRows(page, [row('Income', 2500, 'Income', 'Salary'),
     row('Coffee', -1000), row('October expense', -100, 'Bar', 'Coffee', '2026-10-02T12:00:00+02:00')]);
@@ -14,17 +14,6 @@ test('interface, month choices, chart labels and number formatting stay English 
   await page.locator('#analyticsSpecificMonth').selectOption('2026-10');
   await expect(page.getByRole('heading', { name: 'Monthly Cash Flow Trend (October 2026)', exact: true })).toBeVisible();
   await page.locator('#analyticsTimePeriod').selectOption('overall');
-  const chart = await page.evaluate(() => {
-    const line = Chart.getChart(document.getElementById('cashFlowLineChart'));
-    return {
-      labels: line.data.labels,
-      locale: line.options.locale,
-      ticks: line.scales.y.ticks.map(tick => tick.label),
-      pieLocale: Chart.getChart(document.getElementById('categoryPieChart')).options.locale
-    };
-  });
-  expect(chart.labels).toEqual(['Oct 2026', 'Nov 2026']);
-  expect(chart.locale).toBe('en-GB');
-  expect(chart.pieLocale).toBe('en-GB');
-  expect(chart.ticks).toContain('1,000');
+  await expect(page.locator('#cashFlowLineChart')).toHaveAccessibleName('Monthly cash flow: Oct 2026, Nov 2026');
+  await expect(page.locator('#categoryPieChart')).toHaveAccessibleName('Expenses by category: Bar');
 });
