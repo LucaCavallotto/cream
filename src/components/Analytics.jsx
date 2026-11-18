@@ -358,7 +358,7 @@ export default function Analytics({
               ))}
             </select>
           </div>
-          <button className="btn btn-outline-secondary" onClick={() => { setPeriod('last_12_months'); setMonth(''); dispatch({ type: 'exclusions', value: createAnalyticsExclusions() }); setResetToken(value => value + 1); }}>Clear filters</button>
+          <button className="btn btn-outline-secondary" onClick={() => { setPeriod('last_12_months'); setMonth(''); dispatch({ type: 'exclusions', value: createAnalyticsExclusions() }); setResetToken(value => value + 1); }}>Clear</button>
         </div>
       </div>
       <AnalyticsFilters

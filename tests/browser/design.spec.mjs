@@ -304,7 +304,7 @@ test('analytics clear filters restores the period and all exclusions', async ({ 
   await page.getByText('Analytics exclusions', { exact: true }).click();
   await page.locator('#analyticsExcludeAll').click();
   await page.locator('#analyticsTimePeriod').selectOption('overall');
-  await page.getByRole('button', { name: 'Clear filters', exact: true }).click();
+  await page.getByRole('button', { name: 'Clear', exact: true }).click();
   await expect(page.locator('#analyticsTimePeriod')).toHaveValue('last_12_months');
   await expect(page.locator('#metricExpenses')).toHaveText('€1.00');
   await expect(page.locator('#analyticsExclusionSummary')).toContainText('0 categories');
@@ -318,7 +318,7 @@ test('ledger filters compose with search, scope bulk selection and survive analy
   await expect(page.locator('#transactionsTbody .mobile-row-click')).toHaveCount(1);
   await page.locator('#btnSelectMode').click(); await page.locator('#selectAllCheckbox').check();
   await expect(page.locator('#selectedCount')).toHaveText('1');
-  await page.getByRole('button', { name: 'Clear transaction filters', exact: true }).click();
+  await page.getByRole('button', { name: 'Clear', exact: true }).click();
   await page.locator('#filterType').selectOption('income');
   await expect(page.locator('#transactionsTbody .mobile-row-click')).toHaveCount(1);
   await tab(page, 'Analytics');
@@ -328,4 +328,17 @@ test('ledger filters compose with search, scope bulk selection and survive analy
   await expect(page.locator('#filterType')).toHaveValue('income');
   await expect(page.locator('#transactionsTbody .mobile-row-click')).toHaveCount(1);
   await expect(page.locator('#btnSaveChanges')).toBeDisabled();
+});
+
+test('transaction search uses one custom clear control without the native search cancel button', async ({ page }) => {
+  await launch(page); await openRows(page, [row('Coffee'), row('Salary', 100, 'Income', 'Salary')]);
+  const search = page.getByRole('searchbox', { name: 'Search transactions', exact: true });
+  await expect(search).toHaveAttribute('type', 'text');
+  await search.fill('Coffee');
+  await expect(page.locator('#btnClearSearch')).toBeVisible();
+  await expect(page.locator('#transactionsTbody .mobile-row-click')).toHaveCount(1);
+  await page.locator('#btnClearSearch').click();
+  await expect(search).toHaveValue('');
+  await expect(page.locator('#btnClearSearch')).toBeHidden();
+  await expect(page.locator('#transactionsTbody .mobile-row-click')).toHaveCount(2);
 });

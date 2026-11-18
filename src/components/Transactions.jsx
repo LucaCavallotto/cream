@@ -92,7 +92,9 @@ export default function Transactions({
           <i className="bi bi-search" aria-hidden="true" />
           <input
             id="inputSearchTransaction"
-            type="search"
+            type="text"
+            role="searchbox"
+            inputMode="search"
             className="form-control"
             aria-label="Search transactions"
             placeholder="Search transactions…"

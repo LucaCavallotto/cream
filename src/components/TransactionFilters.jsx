@@ -112,7 +112,7 @@ export default function TransactionFilters({ state, dispatch }) {
             className="btn btn-outline-secondary"
             onClick={() => dispatch({ type: 'clearTransactionFilters' })}
           >
-            Clear transaction filters
+            Clear
           </button>
         </div>
       </div>
