@@ -12,6 +12,7 @@ A modular, browser-based personal finance manager that works directly with your 
 - **Reversible Analytics Exclusions:** Exclude investments, categories, subcategories or individual transactions from statistics without modifying the dataset.
 - **Advanced Search & Sorting:** Quickly find transactions by description or sort by any column.
 - **Dark Mode Support:** Automatically syncs with your system's light/dark preference.
+- **English Interface:** App labels, generated month names and chart number formatting use English regardless of the browser's language. Transaction descriptions and other imported data retain their original text.
 - **Dataset Health:** Find missing or invalid values and classification problems, then review each affected transaction in the standard edit modal.
 
 ## Project Structure

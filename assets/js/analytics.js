@@ -100,9 +100,9 @@ export function renderAnalytics() {
   const selectedExcluded = filterAnalyticsPeriod(selection.excluded, period, specificMonth);
   let periodLabel = 'Overall';
   if (period === 'current_month') {
-    periodLabel = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
+    periodLabel = new Date().toLocaleString('en-GB', { month: 'long', year: 'numeric' });
   } else if (period === 'specific_month') {
-    periodLabel = specificMonth ? new Date(`${specificMonth}-01T12:00:00`).toLocaleString('default', { month: 'long', year: 'numeric' }) : 'Specific Month';
+    periodLabel = specificMonth ? new Date(`${specificMonth}-01T12:00:00`).toLocaleString('en-GB', { month: 'long', year: 'numeric' }) : 'Specific Month';
   } else if (period !== 'overall') {
     periodLabel = `Last ${{ last_3_months: 3, last_6_months: 6, last_12_months: 12 }[period]} Months`;
   }
@@ -204,6 +204,7 @@ function updatePieChart(categoryExpenses) {
       }]
     },
     options: {
+      locale: 'en-GB',
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
@@ -270,6 +271,7 @@ function updateLineChart(transactions, periodLabel) {
       ]
     },
     options: {
+      locale: 'en-GB',
       responsive: true,
       maintainAspectRatio: false,
       interaction: {
@@ -373,7 +375,7 @@ function populateAvailableMonths() {
   sortedMonths.forEach(m => {
     const [year, month] = m.split('-');
     const date = new Date(year, month - 1);
-    const label = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+    const label = date.toLocaleString('en-GB', { month: 'long', year: 'numeric' });
     
     const opt = document.createElement('option');
     opt.value = m;

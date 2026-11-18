@@ -81,7 +81,7 @@ export function buildMonthlyCashFlow(transactions) {
   while (cursor <= end) {
     const key = `${String(cursor.getFullYear()).padStart(4, '0')}-${String(cursor.getMonth() + 1).padStart(2, '0')}`;
     result.push({ ...(months.get(key) || { key, income: 0, expenses: 0 }),
-      label: cursor.toLocaleString('default', { month: 'short', year: 'numeric' }) });
+      label: cursor.toLocaleString('en-GB', { month: 'short', year: 'numeric' }) });
     cursor.setMonth(cursor.getMonth() + 1);
   }
   return result;

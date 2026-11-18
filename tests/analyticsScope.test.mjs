@@ -120,6 +120,7 @@ test('monthly cash flow spans the selected data and fills missing months with ze
   const rows = [make('jan', -10, 'Bar', 'Coffee', '2025-01-15T12:00:00Z'), make('march', 20, 'Income', 'Salary', '2025-03-15T12:00:00Z')];
   const result = buildMonthlyCashFlow(rows);
   assert.deepEqual(result.map(m => m.key), ['2025-01', '2025-02', '2025-03']);
+  assert.deepEqual(result.map(m => m.label), ['Jan 2025', 'Feb 2025', 'Mar 2025']);
   assert.equal(result[0].expenses, 10);
   assert.equal(result[1].expenses, 0);
   assert.equal(result[1].income, 0);
