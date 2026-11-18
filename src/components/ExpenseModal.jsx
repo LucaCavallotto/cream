@@ -384,7 +384,7 @@ export default function ExpenseModal({
                         }))
                       }
                     >
-                      <option value="" disabled>
+                      <option value="">
                         Select Category
                       </option>
                       {[...groups.keys()].filter(Boolean).map((category) => (
@@ -406,17 +406,18 @@ export default function ExpenseModal({
                           : ''
                       }
                       onChange={(e) => {
+                        if (!e.target.value) { update('subcategory', ''); return; }
                         const [category, subcategory] = JSON.parse(
                           e.target.value,
                         );
                         setDraft((d) => ({ ...d, category, subcategory }));
                       }}
                     >
-                      <option value="" disabled>
+                      <option value="">
                         Select Subcategory
                       </option>
                       {[...groups]
-                        .filter(([, subs]) => subs.length)
+                        .filter(([category, subs]) => subs.length && (!draft.category || category === draft.category))
                         .map(([category, subs]) => (
                           <optgroup
                             key={category}

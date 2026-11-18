@@ -31,9 +31,9 @@ test('unknown classifications and mismatched subcategories are detected without 
   assert.deepEqual(codes({ Subcategory: 'Salary' }), ['invalid_subcategory']);
   assert.deepEqual(codes({ Category: 'bar' }), ['unknown_category', 'invalid_subcategory']);
   assert.deepEqual(codes({ Category: '__proto__' }), ['unknown_category', 'invalid_subcategory']);
-  const original = { ...transaction, Category: 'Travel', Subcategory: 'Transport' };
+  const original = { ...transaction, Category: 'Travel', Subcategory: 'Invalid transport' };
   assert(getTransactionIssues(original, categories).some(issue => issue.code === 'invalid_subcategory'));
-  assert.equal(original.Subcategory, 'Transport');
+  assert.equal(original.Subcategory, 'Invalid transport');
 });
 
 test('missing classifications, orphaned subcategories and uncategorized entries need review', () => {
@@ -67,4 +67,9 @@ test('CSV amount parsing preserves missing and malformed data instead of manufac
   assert.equal(parseImportedAmount('0'), 0);
   assert.equal(parseImportedAmount(' -1.50 '), -1.5);
   assert.equal(parseImportedAmount('+20'), 20);
+});
+
+test('original Travel / Transport and newer Trip Transport remain valid', () => {
+  assert.deepEqual(codes({ Category: 'Travel', Subcategory: 'Transport' }), []);
+  assert.deepEqual(codes({ Category: 'Travel', Subcategory: 'Trip Transport' }), []);
 });

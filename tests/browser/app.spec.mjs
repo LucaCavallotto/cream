@@ -27,6 +27,7 @@ test('edit and delete a transaction, cancel deletion, then undo', async ({ page 
   await page.locator('.btn-edit').click();
   await expect(page.locator('#expenseModal')).toHaveCSS('opacity', '1');
   await page.locator('#inputDescription').fill('Changed');
+  await page.locator('#inputCategory').selectOption('Income');
   await page.locator('#inputSubcategory').selectOption(JSON.stringify(['Income', 'Salary']));
   await expect(page.locator('#inputCategory')).toHaveValue('Income');
   await saveModal(page);
@@ -128,6 +129,7 @@ test('Dataset Health repairs invalid source values and undo restores the report'
   await expect(page.locator('#transactionHealthIssues')).toContainText('12oops');
   await page.locator('#inputDate').fill('2026-11-02');
   await page.locator('#inputAmount').fill('-12');
+  await page.locator('#inputCategory').selectOption('Bar');
   await page.locator('#inputSubcategory').selectOption(JSON.stringify(['Bar', 'Coffee']));
   await saveModal(page);
   await expect(page.locator('#cleanupDirty')).toHaveText('0');

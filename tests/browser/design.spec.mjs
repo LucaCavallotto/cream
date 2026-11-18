@@ -286,3 +286,14 @@ test('issue counts highlight problems and the cream logo returns home without di
   await page.getByRole('button', { name: 'cream home', exact: true }).click();
   await expect(page.locator('#landingView')).toBeVisible();
 });
+
+test('subcategory choices narrow by category and clearing the category restores all groups', async ({ page }) => {
+  await launch(page); await openRows(page, []); await addModal(page);
+  await expect(page.locator('#inputSubcategory optgroup')).toHaveCount(21);
+  await page.locator('#inputCategory').selectOption('Travel');
+  await expect(page.locator('#inputSubcategory optgroup')).toHaveCount(1);
+  await page.locator('#inputSubcategory').selectOption(JSON.stringify(['Travel', 'Transport']));
+  await page.locator('#inputCategory').selectOption('');
+  await page.locator('#inputSubcategory').selectOption(JSON.stringify(['Income', 'Salary']));
+  await expect(page.locator('#inputCategory')).toHaveValue('Income');
+});
