@@ -102,6 +102,7 @@
       <div id="unsavedWarning" class="alert alert-warning d-none" role="alert">
         You have unsaved changes! Don't forget to click "Save Changes" before leaving.
       </div>
+      <div id="inlineImportNotice" class="alert alert-warning d-none" role="alert"></div>
 
       <!-- Tabs -->
       <ul class="nav nav-tabs mb-4 px-3" id="appTabs" role="tablist">
@@ -406,9 +407,11 @@
             <div class="mb-4 p-3 bg-body-tertiary rounded border border-primary-subtle">
               <label for="inlineInput" class="form-label fw-bold text-primary">Quick Inline Entry</label>
               <textarea class="form-control form-control-lg" id="inlineInput" rows="2"
-                placeholder="2026-04-28, €-20, Groceries&#10;2026-04-28T11:58:44+02:00, €34.5, Income..."></textarea>
-              <div class="form-text">Format: YYYY-MM-DD or ISO (YYYY-MM-DDThh:mm:ss), Amount (+/-), Description.
-                Separated by commas. Multiple lines supported.</div>
+                placeholder="2026-11-02T14:28:36+01:00, €-1, Coffee, Bar, Coffee&#10;2026-11-02, €-20, Groceries"></textarea>
+              <div class="form-text">Format: Date or ISO timestamp, Amount (+/-), Description[, Category[, Subcategory]].
+                Category and subcategory are optional. Multiple lines supported. Put descriptions containing commas in double quotes.
+                Unknown classifications are omitted with a warning.</div>
+              <div id="inlineInputFeedback" class="alert alert-warning d-none mt-2 mb-0" role="alert" style="white-space: pre-line;"></div>
             </div>
 
             <hr class="mb-4">

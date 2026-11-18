@@ -30,13 +30,75 @@ Simply open the `index.html` file in any modern web browser.
 - **Trial:** You can also use the included `demo.csv` to explore the app's features immediately.
 - **Existing Users:** Click **"Browse Files"** or simply **Drag & Drop** your existing CSV anywhere on the screen.
 
+The synthetic `demo.csv` uses the current category catalog and includes income, expenses, investments, repeated subcategory names under different categories, quoted descriptions, and intentionally empty classifications. Transactions span several periods, including October and November 2026, to exercise analytics and monthly comparisons. Open it and try the Quick Inline Entry examples below; use **Undo Changes** to discard test entries before saving, or test on a copy.
+
 ### 2. Adding Transactions
 There are two ways to add expenses:
 - **Manual Form:** Click **"+ Add Expense"** to fill out a detailed form including Category, Subcategory, Tags, and Notes.
-- **Quick Inline Entry:** Located at the top of the Add Expense modal. You can paste one or many lines using the format:
-  `YYYY-MM-DD, Amount, Description`
-  *Example:* `2026-04-28, -25.50, Groceries`
-  *(ISO timestamps with time/date are also supported).*
+- **Quick Inline Entry:** Paste one or more transactions into the textarea at the top of the modal. See the formats and copyable examples below.
+
+#### Quick Inline Entry: formats and examples
+
+Paste **only the transaction lines**, without a CSV header. Each transaction accepts three to five fields:
+
+```text
+DateTime, Amount, Description
+DateTime, Amount, Description, Category
+DateTime, Amount, Description, Category, Subcategory
+```
+
+- **DateTime:** `YYYY-MM-DD` or an ISO timestamp, such as `2026-11-02T14:28:36+01:00` or `2026-11-02T13:28:36Z`. Date-only entries use midnight in your local timezone.
+- **Amount:** Negative for expenses and positive for income. The euro symbol is optional; use a decimal point, e.g. `€-1.50`.
+- **Description:** Required. Enclose descriptions containing commas in double quotes. Escape a quote inside a quoted description by doubling it.
+- **Category / Subcategory:** Optional names from `data/categories.json`. Matching ignores letter case and surrounding spaces, but does not translate names: use `Coffee`, not `Caffe`. A subcategory must belong to the supplied category.
+- **Tags / Notes:** These are not inline fields; use the form. For multiple transactions, the same form tags and notes apply to every row.
+
+**Original three-field format:**
+
+```text
+2026-11-02T14:28:36+01:00, €-1, Caffè
+```
+
+**Category only:**
+
+```text
+2026-11-02T14:28:36+01:00, €-1, Caffè, Bar
+```
+
+**Category and subcategory:**
+
+```text
+2026-11-02T14:28:36+01:00, €-1, Caffè con amici, Bar, Coffee
+```
+
+**Multiple transactions with different classifications:**
+
+```text
+2026-11-02T14:28:36+01:00, €-1, Caffè con amici, Bar, Coffee
+2026-11-03, -25.50, Weekly groceries, Food & Dining, Groceries
+2026-11-04, -5, "Coffee, cake", Bar, Snack
+2026-11-05, +150, Freelance project, Income, Freelance
+2026-11-06, -12.99, Streaming subscription, Entertainment, Subscriptions
+```
+
+**Warnings to try:** These rows are accepted, but invalid classifications are omitted. The first keeps `Bar` and leaves the subcategory empty; the second leaves both classification fields empty.
+
+```text
+2026-11-02T14:28:36+01:00, €-1, Caffè, Bar, Caffe
+2026-11-03, -5, Unknown category example, Not A Category, Coffee
+```
+
+Warnings identify the affected rows in the modal and remain visible above the transaction list after insertion. A valid category is retained when only the subcategory is invalid. Rows without classification use the form's category and subcategory; supplying a category without a subcategory leaves the subcategory empty. Use empty trailing fields (`Description, , `) to explicitly leave classification empty.
+
+**Validation errors to try:** Test these separately from the valid examples. Invalid dates, amounts, missing descriptions, malformed CSV, or more than five fields block the **entire batch** until corrected; no partial insertion occurs.
+
+```text
+2026-02-30, -1, Invalid date, Bar, Coffee
+2026-11-02, not-an-amount, Invalid amount, Bar, Coffee
+2026-11-02, -1, , Bar, Coffee
+```
+
+For a single line, the form is prefilled so you can review or adjust it before adding. When editing an existing transaction, only one inline transaction is allowed. Click **Save Changes** afterward to persist added or edited transactions to your CSV.
 
 ### 3. Managing Data
 - **Saving:** Changes are kept in memory until you click **"Save Changes"** in the top navbar. This updates your local file.

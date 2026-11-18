@@ -1,5 +1,6 @@
 import { state, markUnsavedChanges, normalizeTags } from './app.js';
 import { renderAnalytics } from './analytics.js';
+import { parseInlineRow } from './inlineInput.js';
 
 const categoryMap = {
   'food': { icon: 'bi-cup-hot-fill', color: 'bg-danger' },
@@ -52,7 +53,7 @@ function parseInlineDate(dateStr) {
   // Check if it's already a full ISO string (with T and optional timezone)
   if (dateStr.includes('T')) {
     // If it has T but no timezone offset/Z, append system timezone
-    if (!dateStr.match(/[Z+-]\d{2}:?\d{2}$/)) {
+    if (!dateStr.match(/(?:Z|[+-]\d{2}:?\d{2})$/)) {
       return dateStr + getTimezoneOffset(new Date(dateStr));
     }
     return dateStr;
@@ -91,22 +92,24 @@ export function setupUIEvents() {
         document.getElementById('inputDate').required = true;
         document.getElementById('inputAmount').required = true;
         document.getElementById('inputDescription').required = true;
+        showInlineFeedback([]);
         return;
       }
 
-      const lines = val.split('\n').map(l => l.trim()).filter(l => l);
+      const parsed = parseInlineInput(val);
+      showInlineFeedback([...parsed.errors, ...parsed.warnings]);
 
       // If multiple lines, make standard fields non-mandatory so the form can submit
-      const isMultiLine = lines.length > 1;
+      const isMultiLine = parsed.rows.length > 1;
       document.getElementById('inputDate').required = !isMultiLine;
       document.getElementById('inputAmount').required = !isMultiLine;
       document.getElementById('inputDescription').required = !isMultiLine;
 
-      const firstLine = lines[0];
-      const parts = firstLine.split(',').map(p => p.trim());
-
-      if (parts.length > 0 && parts[0]) {
-        const isoStr = parseInlineDate(parts[0]);
+      const first = parsed.rows[0];
+      if (!first) return;
+      const transaction = first.transaction;
+      {
+        const isoStr = parseInlineDate(transaction.DateTime);
         if (isoStr) {
           const [d, tPart] = isoStr.split('T');
           document.getElementById('inputDate').value = d;
@@ -117,16 +120,13 @@ export function setupUIEvents() {
         }
       }
 
-      if (parts.length > 1 && parts[1]) {
-        let amountStr = parts[1].replace(',', '.').replace(/[^\d\.\+\-]/g, '');
-        const amountFloat = parseFloat(amountStr);
-        if (!isNaN(amountFloat)) {
-          document.getElementById('inputAmount').value = amountFloat;
-        }
-      }
-
-      if (parts.length > 2 && parts[2]) {
-        document.getElementById('inputDescription').value = parts.slice(2).join(', ');
+      document.getElementById('inputAmount').value = transaction.Amount;
+      document.getElementById('inputDescription').value = transaction.Description;
+      if (first.hasCategory) {
+        document.getElementById('inputCategory').value = transaction.Category;
+        // Explicit invalid or empty classifications must not inherit stale form values.
+        document.getElementById('inputSubcategory').value = transaction.Subcategory
+          ? JSON.stringify([transaction.Category, transaction.Subcategory]) : '';
       }
     });
   }
@@ -437,6 +437,7 @@ function resetForm() {
   document.getElementById('inlineInput').value = '';
   document.getElementById('expenseModalLabel').textContent = 'Add Transaction';
   populateCategoriesDropdown();
+  showInlineFeedback([]);
 
   document.getElementById('inputDate').required = true;
   document.getElementById('inputAmount').required = true;
@@ -901,42 +902,60 @@ function deleteTransaction(id) {
 /**
  * Handles saving standard or edited form inputs back to the state.
  */
+function parseInlineInput(text) {
+  const result = Papa.parse(text, { delimiter: ',', skipEmptyLines: 'greedy' });
+  const rows = [];
+  const errors = result.errors.map(error => `Line ${(error.row || 0) + 1}: ${error.message}`);
+  const warnings = [];
+  result.data.forEach((fields, index) => {
+    const row = parseInlineRow(fields, state.categories, index + 1);
+    if (row.error) errors.push(row.error);
+    else rows.push(row);
+    warnings.push(...row.warnings);
+  });
+  return { rows, errors, warnings };
+}
+
+function showInlineFeedback(messages) {
+  const feedback = document.getElementById('inlineInputFeedback');
+  feedback.textContent = messages.join('\n');
+  feedback.classList.toggle('d-none', messages.length === 0);
+}
+
 function handleTransactionSubmit(e) {
   e.preventDefault();
 
   const id = document.getElementById('editTransactionId').value;
   const inlineInput = document.getElementById('inlineInput');
   const inlineVal = inlineInput ? inlineInput.value.trim() : '';
-  const lines = inlineVal.split('\n').map(l => l.trim()).filter(l => l);
+  const parsed = inlineVal ? parseInlineInput(inlineVal) : null;
+  if (parsed && (parsed.errors.length || !parsed.rows.length)) {
+    showInlineFeedback(parsed.errors.length ? parsed.errors : ['Enter at least one transaction.']);
+    return;
+  }
+  if (id && parsed && parsed.rows.length > 1) {
+    showInlineFeedback(['Only one inline transaction is allowed when editing.']);
+    return;
+  }
 
-  const Category = document.getElementById('inputCategory').value || 'Uncategorized';
+  const Category = document.getElementById('inputCategory').value ||
+    (parsed?.rows[0]?.hasCategory ? '' : 'Uncategorized');
   const subcategoryOption = document.getElementById('inputSubcategory').selectedOptions[0];
   const Subcategory = subcategoryOption?.dataset.subcategory || '';
   const Tags = normalizeTags(document.getElementById('inputTags').value);
   const Notes = document.getElementById('inputNotes').value;
 
-  if (!id && lines.length > 1) {
+  if (!id && parsed && parsed.rows.length > 1) {
     // Multi-line add
-    lines.forEach((line, index) => {
-      const parts = line.split(',').map(p => p.trim());
-      if (parts.length < 2) return;
-
-      const isoStr = parseInlineDate(parts[0]);
-      if (!isoStr) return;
-
-      let amountStr = parts[1].replace(',', '.').replace(/[^\d\.\+\-]/g, '');
-      const amountFloat = parseFloat(amountStr);
-      if (isNaN(amountFloat)) return;
-
-      const desc = parts.length > 2 ? parts.slice(2).join(', ') : '';
-
+    parsed.rows.forEach(row => {
+      const transaction = row.transaction;
       state.transactions.push({
         id: crypto.randomUUID(),
-        DateTime: isoStr,
-        Amount: amountFloat,
-        Description: desc,
-        Category: Category,
-        Subcategory: Subcategory,
+        DateTime: parseInlineDate(transaction.DateTime),
+        Amount: transaction.Amount,
+        Description: transaction.Description,
+        Category: row.hasCategory ? transaction.Category : Category,
+        Subcategory: row.hasCategory ? transaction.Subcategory : Subcategory,
         Tags: Tags,
         Notes: Notes
       });
@@ -947,7 +966,12 @@ function handleTransactionSubmit(e) {
     const TimeVal = document.getElementById('inputTime') ? document.getElementById('inputTime').value : '00:00:00';
 
     const tempDate = new Date(`${DateVal}T${TimeVal}`);
-    const isoDateTime = `${DateVal}T${TimeVal.length === 5 ? TimeVal + ':00' : TimeVal}${getTimezoneOffset(tempDate)}`;
+    let isoDateTime = `${DateVal}T${TimeVal.length === 5 ? TimeVal + ':00' : TimeVal}${getTimezoneOffset(tempDate)}`;
+    const inlineDateTime = parsed ? parseInlineDate(parsed.rows[0].transaction.DateTime) : '';
+    if (inlineDateTime && DateVal === inlineDateTime.slice(0, 10) &&
+        TimeVal === inlineDateTime.slice(11, 19)) {
+      isoDateTime = inlineDateTime;
+    }
 
     const Amount = parseFloat(document.getElementById('inputAmount').value) || 0;
     const Description = document.getElementById('inputDescription').value;
@@ -978,6 +1002,10 @@ function handleTransactionSubmit(e) {
   if (expenseModalInstance) expenseModalInstance.hide();
 
   renderTransactions();
+  const notice = document.getElementById('inlineImportNotice');
+  notice.textContent = parsed?.warnings.length
+    ? `Transactions added to the current session. ${parsed.warnings.join(' ')}` : '';
+  notice.classList.toggle('d-none', !parsed?.warnings.length);
 }
 
 /**
