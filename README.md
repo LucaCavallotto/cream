@@ -108,6 +108,31 @@ For a single line, the form is prefilled so you can review or adjust it before a
 ### 4. Categorization
 Categories and subcategories are loaded from `data/categories.json`. You can customize this file to match your personal spending habits.
 
+- **Treats:** Expenses you pay for someone else, such as a friend's coffee (`Coffee`), drinks (`Drinks`), a meal (`Meals`), snacks, or an experience. Use `Bar` / `Food & Dining` for your own consumption and `Shopping / Gifts to Buy` for purchased gifts. If a payment covers both your share and a treat, split it into two transactions when you want to track the shares separately.
+- **Tools:** Tools and services used for work or productive activities: `AI Services` (e.g. a month of ChatGPT), `Software & Licenses`, `Equipment`, and `Online Services` (e.g. hosting or domains). Use tags such as `#work` or `#monthly` to specify purpose or recurrence; personal software purchases can remain under `Shopping / Software`.
+
+#### Choosing a category
+
+| Purchase or expense | Category / Subcategory |
+| --- | --- |
+| Reusable water bottle for everyday use | `Shopping / Everyday Accessories` |
+| Equipment specifically for sports | `Sports / Equipment` |
+| Rent, mortgage payment, condominium charges | `Housing / Rent`, `Mortgage`, or `Condominium Fees` |
+| Electricity, heating, water, waste collection, home repairs | The corresponding subcategory under `Housing` |
+| Furniture and household purchases | `Shopping / Home` |
+| Courses, tuition, certifications, study materials | The corresponding subcategory under `Education` |
+| Bank account, payment, or currency exchange fees | The corresponding subcategory under `Banking` |
+| Investment brokerage fees | `Investments / Fees & Commissions` |
+| Transport that belongs to a trip, including flights and local transfers | `Travel / Trip Transport` |
+| Commuting and other transport outside a trip | The corresponding subcategory under `Transportation` |
+| Vehicle insurance and vehicle tax | `Vehicles / Insurance` and `Vehicles / Vehicle Tax` |
+| Other insurance policies | The corresponding subcategory under `Insurance` |
+| Other taxes | The corresponding subcategory under `Taxes` |
+
+Classify subscriptions by purpose: entertainment under `Entertainment / Subscriptions`, productive tools under `Tools`, and other personal services under `Bills / Subscriptions`. Use tags such as `#monthly`, `#annual`, or `#vacation` for recurrence and context.
+
+`Travel / Trip Transport` replaces the catalog entry `Travel / Transport`; existing CSV transactions are not renamed automatically and retain their original classification when edited. Use the new name for new quick input entries, or reclassify older transactions explicitly if you want a single analytics group. `Vehicles / Insurance & Tax` remains available for historical combined payments; prefer the separate subcategories for new entries.
+
 The application expects a CSV file with the following header and column order:
 
 `DateTime, Amount, Description, Category, Subcategory, Tags, Notes`

@@ -1,4 +1,11 @@
 {
+  "Banking": [
+    "Account Fees",
+    "Transaction Fees",
+    "Currency Exchange Fees",
+    "Interest Charges",
+    "Other"
+  ],
   "Bar": [
     "Aperitif",
     "Beer",
@@ -13,6 +20,13 @@
   "Bills": [
     "Phone & Internet",
     "Subscriptions"
+  ],
+  "Education": [
+    "Courses",
+    "Tuition Fees",
+    "Certifications",
+    "Study Materials",
+    "Other"
   ],
   "Entertainment": [
     "Books",
@@ -44,6 +58,17 @@
     "Medical Expenses",
     "Medicines",
     "Treatments"
+  ],
+  "Housing": [
+    "Rent",
+    "Mortgage",
+    "Condominium Fees",
+    "Electricity",
+    "Gas & Heating",
+    "Water",
+    "Waste Collection",
+    "Maintenance & Repairs",
+    "Other"
   ],
   "Income": [
     "Family",
@@ -81,6 +106,7 @@
   ],
   "Shopping": [
     "Clothes & Accessories",
+    "Everyday Accessories",
     "Electronics & Gadgets",
     "Gifts to Buy",
     "Home",
@@ -103,6 +129,13 @@
     "State Taxes",
     "Other"
   ],
+  "Tools": [
+    "AI Services",
+    "Software & Licenses",
+    "Equipment",
+    "Online Services",
+    "Other"
+  ],
   "Transportation": [
     "Airline",
     "Bus",
@@ -118,11 +151,21 @@
     "Fees",
     "Souvenirs",
     "Tours",
-    "Transport"
+    "Trip Transport"
+  ],
+  "Treats": [
+    "Coffee",
+    "Drinks",
+    "Meals",
+    "Snacks",
+    "Experiences",
+    "Other"
   ],
   "Vehicles": [
     "Car Payment & Lease",
     "Fuel",
+    "Insurance",
+    "Vehicle Tax",
     "Insurance & Tax",
     "Maintenance",
     "Parking",
