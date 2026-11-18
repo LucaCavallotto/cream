@@ -297,6 +297,10 @@ With **Settings → Pages → Source → GitHub Actions** enabled, pushes to `ma
 
 Travel supports both the original `Transport` subcategory and `Trip Transport`; existing CSV classifications remain valid. In the transaction editor, choosing a category narrows the subcategory list. Clear the category to browse all groups and infer the parent from the chosen subcategory.
 
-In Analytics, **Clear filters** restores Last 12 Months and removes all exclusions and exclusion-search selections. The exclusion counts appear inside the expandable exclusions panel.
+In Analytics, **Clear** restores Last 12 Months and removes all exclusions and exclusion-search selections. The exclusion counts appear inside the expandable exclusions panel.
 
-Transactions has a collapsible filter panel for category, subcategory, income/expense/zero amounts and inclusive local-calendar date boundaries. Filters combine with text search, affect only the ledger and reset when a file is opened or closed. Clear transaction filters resets search and these selectors. Bulk Select all selects only visible matches. Analytics drilldowns temporarily clear ledger filters and restore them on Back to Analytics; View all transactions clears them explicitly.
+Transactions has a collapsible filter panel for category, subcategory, income/expense/zero amounts and inclusive local-calendar date boundaries. Filters combine with text search, affect only the ledger and reset when a file is opened or closed. The ledger’s Clear button resets search and these selectors. Bulk Select all selects only visible matches. Analytics drilldowns temporarily clear ledger filters and restore them on Back to Analytics; View all transactions clears them explicitly.
+
+### Home Screen icon
+
+The site ships a dedicated 180px Apple touch icon and 192px/512px PNG manifest icons, plus a separate padded maskable icon. On iPhone, use Safari → Share → Add to Home Screen after publishing the update. If an existing shortcut retains its old icon, remove it and add it again. This shortcut does not add offline storage or change CSV persistence. Icons can be regenerated from `public/cream.svg` with `node scripts/generate-icons.mjs` after installing Playwright Chromium.
