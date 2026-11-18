@@ -243,6 +243,8 @@ Run the complete suite before pushing, including when working directly on `main`
 npm test
 ```
 
+This runs logic tests, the production build, browser flows on Chromium, Firefox and WebKit, mobile emulation, and Vite dev mode checks. It is the definitive local validation step.
+
 Or run a layer separately:
 
 ```bash
@@ -275,15 +277,20 @@ Playwright runs without automatic retries. On failures it keeps screenshots and 
 
 ### GitHub Actions
 
-The [Tests workflow](.github/workflows/tests.yml) runs on every push and when a pull request is opened, reopened or updated. It installs dependencies with `npm ci`, runs logic, real CSV integration and production-build checks, and runs the browser matrix against the production build above. Browser reports and failure diagnostics are retained as workflow artifacts for seven days. The final **Test suite** check fails if any layer fails or is skipped/cancelled; it is the check to require for merge protection. The **Node.js tests** job also remains available individually. A push with an open pull request can trigger both events.
+The [Tests workflow](.github/workflows/tests.yml) runs on every push and when a pull request is opened, reopened or updated. It runs **logic tests only**: unit tests, real CSV integration tests and production-build checks, repeated under both `Europe/Rome` and `UTC` timezones. Browser tests (Playwright) are **not** run on CI—they are part of the full local suite (`npm test`) that should be run before pushing. This keeps CI fast (under a minute) and avoids flaky timeouts from headless browser setup on shared runners.
+
+| Script | Where | What it covers | Time |
+| --- | --- | --- | --- |
+| `npm run test:ci` | **GitHub Actions** | Unit + Integration + Build | ~1 second |
+| `npm test` | **Local** | Everything above + Playwright (4 browsers) + Vite dev mode | minutes |
 
 Local commits do not trigger GitHub Actions. For a direct push to `main`, tests run after GitHub receives the commits: a failure does not revert or remove them. If several commits are pushed together, the push run tests the final pushed revision. Fix failures locally, rerun the suite and push a corrective commit.
 
-**Merge blocking requires separate repository configuration.** After the workflow has run, make **Test suite** a required status check for `main` using a GitHub branch protection rule or ruleset. The workflow alone does not block merges. Required checks can also restrict direct pushes; review those settings if you want to continue pushing directly. This change does not configure repository protection or push permissions. See [GitHub's status check documentation](https://docs.github.com/en/pull-requests/reference/status-checks).
+**Merge blocking requires separate repository configuration.** After the workflow has run, make **Node.js tests** a required status check for `main` using a GitHub branch protection rule or ruleset. The workflow alone does not block merges. See [GitHub's status check documentation](https://docs.github.com/en/pull-requests/reference/status-checks).
 
 ---
 *"Cash Rules Everything Around Me"*
 
 ### Automatic GitHub Pages deployment
 
-With **Settings → Pages → Source → GitHub Actions** enabled, pushes to `main` run the complete test suite and then build and deploy `dist/`. Deployment waits for **Test suite** to succeed; failing tests leave the previous published version online. Pull requests run tests without deploying. The workflow can also be started manually from the Actions tab on `main`. No generated build files need to be committed.
+With **Settings → Pages → Source → GitHub Actions** enabled, pushes to `main` run the logic test suite and then build and deploy `dist/`. Deployment waits for **Node.js tests** to succeed; failing tests leave the previous published version online. Pull requests run tests without deploying. The workflow can also be started manually from the Actions tab on `main`. No generated build files need to be committed.

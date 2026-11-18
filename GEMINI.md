@@ -52,7 +52,8 @@ React components in `src/` own UI rendering. Shared session state uses `appReduc
 ### 1. Local Development
 - Use Node.js 24, `npm ci`, then `npm run dev`. Use `npm run build` and `npm run preview` to check the production site. Deploy `dist/`, not the source files.
 - Native file APIs require HTTPS or localhost and browser support. Other browsers use file-input/download fallback.
-- Run `npm test` before pushing; it includes production build checks and browser flows.
+- **Testing strategy:** GitHub Actions runs only fast, deterministic logic checks (`npm run test:ci`: unit, integration, build). Browser tests (Playwright across Chromium, Firefox, WebKit and mobile emulation) run locally with `npm test` before pushing. This split keeps CI under a minute and avoids flaky timeouts from headless browser setup on shared runners.
+- Run `npm run test:ci` for the CI-equivalent checks. Run `npm test` locally for the full suite including browser flows and dev mode.
 
 ### 2. Coding Standards
 - **Naming Conventions:**
@@ -102,4 +103,3 @@ The program expects a specific column order for CSV compatibility:
 - **Mobile Compatibility:** File saving on iOS/iPadOS is restrictive; "View Only Mode" is used as a safety fallback to prevent confusing save prompts or accidental data loss on mobile devices.
 - **Analytics Performance:** Hierarchical breakdowns use interactive "Show More" toggles to maintain performance and UI cleanliness when dealing with large numbers of categories or tags.
 - **Tag System:** Tags are space-separated and prefixed with `#` (e.g. `#holiday #travel`). Old comma-separated CSV files are automatically migrated to this format upon loading to maintain seamless backwards compatibility.
-
