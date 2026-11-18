@@ -1,4 +1,33 @@
 // Keep validation independent of the form so single and bulk entry use the same rules.
+export function parseInlineCSV(text, categories, parser) {
+  // Quick input permits spaces after commas, including before quoted fields.
+  // Remove only leading field whitespace outside quotes, never quoted content.
+  let cleaned = '', quoted = false, fieldStart = true;
+  for (let index = 0; index < text.length; index++) {
+    const char = text[index];
+    if (quoted) {
+      cleaned += char;
+      if (char === '"' && text[index + 1] === '"') cleaned += text[++index];
+      else if (char === '"') quoted = false;
+    } else {
+      if (fieldStart && (char === ' ' || char === '\t')) continue;
+      cleaned += char;
+      if (fieldStart && char === '"') quoted = true;
+      fieldStart = char === ',' || char === '\n' || char === '\r';
+    }
+  }
+  const result = parser.parse(cleaned, { delimiter: ',', skipEmptyLines: 'greedy' });
+  const rows = [], warnings = [];
+  const errors = result.errors.map(error => `Line ${(error.row || 0) + 1}: ${error.message}`);
+  result.data.forEach((fields, index) => {
+    const row = parseInlineRow(fields, categories, index + 1);
+    if (row.error) errors.push(row.error);
+    else rows.push(row);
+    warnings.push(...row.warnings);
+  });
+  return { rows, errors, warnings };
+}
+
 export function parseInlineRow(fields, categories, rowNumber) {
   const warnings = [];
   const fail = message => ({ error: `Line ${rowNumber}: ${message}`, warnings });

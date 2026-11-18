@@ -1,0 +1,97 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Node.js tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Europe/Rome
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Install pinned test dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: CSV integration tests
+        run: npm run test:integration
+
+      - name: Repeat logic and integration checks in UTC
+        env:
+          TZ: UTC
+        run: npm run test:unit && npm run test:integration
+
+  browser:
+    name: Browser tests (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: chromium
+            engine: chromium
+          - project: firefox
+            engine: firefox
+          - project: webkit
+            engine: webkit
+          - project: mobile-webkit
+            engine: webkit
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install pinned test dependencies
+        run: npm ci
+      - name: Install browser and system dependencies
+        run: npx playwright install --with-deps ${{ matrix.engine }}
+      - name: Browser tests
+        run: npm run test:browser -- --project=${{ matrix.project }}
+      - name: Upload browser report and failure diagnostics
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: browser-report-${{ matrix.project }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  test-suite:
+    name: Test suite
+    if: ${{ always() }}
+    needs: [test, browser]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require every test job to succeed
+        env:
+          LOGIC_RESULT: ${{ needs.test.result }}
+          BROWSER_RESULT: ${{ needs.browser.result }}
+        run: test "$LOGIC_RESULT" = success && test "$BROWSER_RESULT" = success

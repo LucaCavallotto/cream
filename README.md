@@ -167,6 +167,8 @@ The application expects a CSV file with the following header and column order:
 
 `DateTime, Amount, Description, Category, Subcategory, Tags, Notes`
 
+Import accepts reordered columns and trims whitespace around header names, but requires exactly these seven unique columns. Missing, duplicate or extra columns are rejected before replacing the open dataset, so unsupported data is not silently discarded on export. Export always writes the canonical order, including for an empty dataset.
+
 - **DateTime:** (Required) ISO 8601 format (e.g., `2026-04-29T13:00:00+02:00`).
 - **Amount:** (Required) Numeric value. Use negative for expenses and positive for income.
 - **Description:** (Required) A brief text about the transaction.
@@ -179,6 +181,56 @@ When you use **"Create New File"**, the app automatically generates a file with 
 This application is entirely client-side. Your financial data never leaves your computer and is never uploaded to any server. All processing happens locally in your browser.
 
 **Privacy Note:** The project includes a `.gitignore` rule that prevents any CSV files (except the provided `demo.csv`) from being uploaded to Git repositories, providing an extra layer of protection for your personal data.
+
+## Development and testing
+
+Use **Node.js 24**. Install the exact development dependencies and the isolated browser binaries once:
+
+```bash
+npm ci
+npx playwright install chromium firefox webkit
+```
+
+On Linux, use `npx playwright install --with-deps chromium firefox webkit` to install the required system libraries as well.
+
+Run the complete suite before pushing, including when working directly on `main`:
+
+```bash
+npm test
+```
+
+Or run a layer separately:
+
+```bash
+npm run test:unit
+npm run test:integration
+npm run test:browser
+npm run test:browser -- --project=chromium
+npm run test:report
+```
+
+### Coverage and test boundaries
+
+| Layer | What it verifies |
+| --- | --- |
+| Unit tests (`tests/*.test.mjs`) | Input validation, tag normalization, dataset health, period filtering, investment/category/subcategory/individual exclusions, monthly aggregation and navigation state. An analytics renderer test also checks inputs passed to charts and breakdowns using a simulated DOM. |
+| Real CSV integration (`tests/integration/`) | The same CSV codec used by the app, with **real PapaParse 5.4.1**: BOM, line endings, reordered headers, quoting, Unicode, multiline notes, empty datasets, invalid values, malformed files, tag migration and roundtrips. File lifecycle tests check save failures, cancellation, undo and state preservation with controlled filesystem/share API doubles. |
+| Desktop browser flows (`tests/browser/app.spec.mjs`) | Real HTML, ES modules, Bootstrap, Chart.js and PapaParse on **Chromium, Firefox and WebKit**: create/open, form editing and deletion, bulk operations, search/sort, quick input, atomic validation, Dataset Health corrections, exclusions, drilldown/return, download/reopen and simulated native-save failures. |
+| Mobile browser flows (`tests/browser/mobile.spec.mjs`) | WebKit with an iPhone viewport/touch profile: read-only inspection, health details, analytics exclusions and layout width. This is emulation, not a real iPhone. |
+
+Browser tests serve the app from an isolated local HTTP server and intercept CDN requests with the pinned npm distributions of the same library versions (Chart.js uses the equivalent unminified UMD build). A version-parity test checks these against the HTML references. Application logic and CSV parsing are not mocked in these flows. The date is fixed to November 18, 2026 and the browser timezone to Europe/Rome, so monthly expectations do not drift over time. Fixtures are synthetic and do not access personal CSV files. On macOS, Firefox also gets temporary application data to avoid accessing the user's protected browser directory; cleanup removes it where allowed, leaving any OS-protected temporary remnants for macOS to manage.
+
+The native operating-system file picker, disk permissions, the iOS share sheet, real devices, CDN availability and visual appearance still require manual checks. Tests exercise the browser file-input/download fallback, and simulate native API failures explicitly. A passing suite is evidence for the covered scenarios, not a guarantee that every possible input or environment is correct.
+
+Playwright runs without automatic retries. On failures it keeps screenshots and traces under `test-results/`, with an HTML report under `playwright-report/`; both are ignored by Git. Inspect a trace with `npx playwright show-trace path/to/trace.zip`. Keep `package-lock.json` committed whenever test dependencies change. The static app itself still needs no npm build.
+
+### GitHub Actions
+
+The [Tests workflow](.github/workflows/tests.yml) runs on every push and when a pull request is opened, reopened or updated. It installs dependencies with `npm ci`, runs logic and real CSV integration tests, and runs the browser matrix above. Browser reports and failure diagnostics are retained as workflow artifacts for seven days. The final **Test suite** check fails if any layer fails or is skipped/cancelled; it is the check to require for merge protection. The **Node.js tests** job also remains available individually. A push with an open pull request can trigger both events.
+
+Local commits do not trigger GitHub Actions. For a direct push to `main`, tests run after GitHub receives the commits: a failure does not revert or remove them. If several commits are pushed together, the push run tests the final pushed revision. Fix failures locally, rerun the suite and push a corrective commit.
+
+**Merge blocking requires separate repository configuration.** After the workflow has run, make **Test suite** a required status check for `main` using a GitHub branch protection rule or ruleset. The workflow alone does not block merges. Required checks can also restrict direct pushes; review those settings if you want to continue pushing directly. This change does not configure repository protection or push permissions. See [GitHub's status check documentation](https://docs.github.com/en/pull-requests/reference/status-checks).
 
 ---
 *"Cash Rules Everything Around Me"*

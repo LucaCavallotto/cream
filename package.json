@@ -1,0 +1,22 @@
+{
+  "name": "personal-expense-tracker",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "test": "npm run test:unit && npm run test:integration && npm run test:browser",
+    "test:unit": "node --test tests/*.test.mjs",
+    "test:integration": "node --test tests/integration/*.test.mjs",
+    "test:browser": "playwright test",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "bootstrap": "5.3.3",
+    "bootstrap-icons": "1.11.3",
+    "chart.js": "4.4.2",
+    "papaparse": "5.4.1"
+  }
+}

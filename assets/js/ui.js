@@ -1,9 +1,10 @@
 import { state, markUnsavedChanges, normalizeTags } from './app.js';
 import { renderAnalytics } from './analytics.js';
-import { parseInlineRow } from './inlineInput.js';
+import { parseInlineRow, parseInlineCSV } from './inlineInput.js';
 import { renderDatasetHealth } from './cleanup.js';
 import { getTransactionIssues, isValidTransactionDate } from './datasetHealth.js';
 import { beginAnalyticsDrilldown, finishAnalyticsDrilldown } from './analyticsNavigation.js';
+import { compareTransactions } from './transactions.js';
 
 const categoryMap = {
   'food': { icon: 'bi-cup-hot-fill', color: 'bg-danger' },
@@ -548,20 +549,7 @@ export function renderTransactions() {
   }
 
   // Copy and sort the data based on current state parameters
-  const sorted = [...filteredTransactions].sort((a, b) => {
-    const col = state.sort.column;
-    const dir = state.sort.direction === 'asc' ? 1 : -1;
-
-    if (col === 'Amount') {
-      return (a.Amount - b.Amount) * dir;
-    } else if (col === 'Date') {
-      const dateA = a.DateTime || '';
-      const dateB = b.DateTime || '';
-      return dateA.localeCompare(dateB) * dir;
-    } else {
-      return (a[col] || '').localeCompare(b[col] || '') * dir;
-    }
-  });
+  const sorted = [...filteredTransactions].sort((a, b) => compareTransactions(a, b, state.sort));
 
   tbody.innerHTML = '';
 
@@ -775,6 +763,7 @@ function handleBulkApplyCategory() {
     state.transactions.forEach(t => {
       if (idsToUpdate.has(t.id)) {
         t.Category = category;
+        if (!state.categories[category]?.includes(t.Subcategory)) t.Subcategory = '';
       }
     });
 
@@ -943,17 +932,7 @@ function deleteTransaction(id) {
  * Handles saving standard or edited form inputs back to the state.
  */
 function parseInlineInput(text) {
-  const result = Papa.parse(text, { delimiter: ',', skipEmptyLines: 'greedy' });
-  const rows = [];
-  const errors = result.errors.map(error => `Line ${(error.row || 0) + 1}: ${error.message}`);
-  const warnings = [];
-  result.data.forEach((fields, index) => {
-    const row = parseInlineRow(fields, state.categories, index + 1);
-    if (row.error) errors.push(row.error);
-    else rows.push(row);
-    warnings.push(...row.warnings);
-  });
-  return { rows, errors, warnings };
+  return parseInlineCSV(text, state.categories, Papa);
 }
 
 function showInlineFeedback(messages) {
