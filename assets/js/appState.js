@@ -1,3 +1,4 @@
+import { createTransactionFilters } from './transactionFilters.js';
 import { createAnalyticsExclusions } from './analyticsScope.js';
 import {
   beginAnalyticsDrilldown,
@@ -18,6 +19,7 @@ export function createAppState(viewOnlyMode = false) {
     sort: { column: 'Date', direction: 'desc' },
     searchQuery: '',
     searchText: '',
+    transactionFilters: createTransactionFilters(),
     tab: 'Overview',
     analyticsExclusions: createAnalyticsExclusions(),
     analyticsReturnContext: null,
@@ -111,9 +113,26 @@ export function appReducer(state, action) {
           return { ...t, Tags: normalizeTags(`${t.Tags} ${action.value}`) };
         }),
       );
+    case 'transactionFilters':
+      return {
+        ...state,
+        transactionFilters: action.value,
+        selectedIds: [],
+        isSelectionMode: false,
+      };
+    case 'clearTransactionFilters':
+      return {
+        ...state,
+        transactionFilters: createTransactionFilters(),
+        searchText: '',
+        searchQuery: '',
+        selectedIds: [],
+        isSelectionMode: false,
+      };
     case 'search':
       return {
         ...state,
+        selectedIds: [],
         searchText: action.value,
         searchQuery: action.value.trim().toLowerCase(),
       };
@@ -151,7 +170,13 @@ export function appReducer(state, action) {
         state.searchText,
         action.scrollY,
       );
-      return { ...next, searchText: action.filter, tab: 'Transactions' };
+      return {
+        ...next,
+        searchText: action.filter,
+        tab: 'Transactions',
+        selectedIds: [],
+        isSelectionMode: false,
+      };
     }
     case 'tab': {
       const next = { ...state, tab: action.tab };

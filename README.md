@@ -298,3 +298,5 @@ With **Settings → Pages → Source → GitHub Actions** enabled, pushes to `ma
 Travel supports both the original `Transport` subcategory and `Trip Transport`; existing CSV classifications remain valid. In the transaction editor, choosing a category narrows the subcategory list. Clear the category to browse all groups and infer the parent from the chosen subcategory.
 
 In Analytics, **Clear filters** restores Last 12 Months and removes all exclusions and exclusion-search selections. The exclusion counts appear inside the expandable exclusions panel.
+
+Transactions has a collapsible filter panel for category, subcategory, income/expense/zero amounts and inclusive local-calendar date boundaries. Filters combine with text search, affect only the ledger and reset when a file is opened or closed. Clear transaction filters resets search and these selectors. Bulk Select all selects only visible matches. Analytics drilldowns temporarily clear ledger filters and restore them on Back to Analytics; View all transactions clears them explicitly.

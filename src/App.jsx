@@ -529,7 +529,7 @@ export default function App() {
                       onTab={changeTab}
                       onEdit={openModal}
                       onViewAll={() => {
-                        dispatch({ type: 'search', value: '' });
+                        dispatch({ type: 'clearTransactionFilters' });
                         changeTab('Transactions');
                       }}
                     />

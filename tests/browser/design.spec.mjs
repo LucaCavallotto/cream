@@ -309,3 +309,23 @@ test('analytics clear filters restores the period and all exclusions', async ({ 
   await expect(page.locator('#metricExpenses')).toHaveText('€1.00');
   await expect(page.locator('#analyticsExclusionSummary')).toContainText('0 categories');
 });
+
+test('ledger filters compose with search, scope bulk selection and survive analytics drilldown round trips', async ({ page }) => {
+  await launch(page); await openRows(page, [row('Coffee', -10), row('Pay', 100, 'Income', 'Salary'), row('Earlier coffee', -20, 'Bar', 'Coffee', '2026-10-01T12:00:00+02:00')]);
+  await page.getByText('Transaction filters', { exact: true }).click();
+  await page.locator('#filterCategory').selectOption(JSON.stringify('Bar'));
+  await page.locator('#filter-from').fill('2026-11-01');
+  await expect(page.locator('#transactionsTbody .mobile-row-click')).toHaveCount(1);
+  await page.locator('#btnSelectMode').click(); await page.locator('#selectAllCheckbox').check();
+  await expect(page.locator('#selectedCount')).toHaveText('1');
+  await page.getByRole('button', { name: 'Clear transaction filters', exact: true }).click();
+  await page.locator('#filterType').selectOption('income');
+  await expect(page.locator('#transactionsTbody .mobile-row-click')).toHaveCount(1);
+  await tab(page, 'Analytics');
+  await page.locator('#detailedCategoryList .category-header .btn-filter-tx').click();
+  await expect(page.locator('#transactionsTbody .mobile-row-click')).toHaveCount(2);
+  await page.locator('#btnBackToAnalytics').click(); await tab(page, 'Transactions');
+  await expect(page.locator('#filterType')).toHaveValue('income');
+  await expect(page.locator('#transactionsTbody .mobile-row-click')).toHaveCount(1);
+  await expect(page.locator('#btnSaveChanges')).toBeDisabled();
+});

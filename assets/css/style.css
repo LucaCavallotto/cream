@@ -3278,3 +3278,5 @@ button:disabled {
 
 button.cream-wordmark { padding: 0; border: 0; background: transparent; color: var(--ink); text-align: left; }
 button.cream-wordmark:hover { color: var(--green); }
+.transaction-filters { padding: 14px 18px; }
+.transaction-filters summary { cursor: pointer; font-size: 13px; font-weight: 550; }

@@ -1,3 +1,5 @@
+import TransactionFilters from './TransactionFilters.jsx';
+import { matchesTransactionFilters } from '../../assets/js/transactionFilters.js';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { compareTransactions } from '../../assets/js/transactions.js';
 import { formatDate } from '../../assets/js/dateTime.js';
@@ -42,8 +44,14 @@ export default function Transactions({
                 .includes(state.searchQuery),
             ),
         )
+        .filter((t) => matchesTransactionFilters(t, state.transactionFilters))
         .sort((a, b) => compareTransactions(a, b, state.sort)),
-    [state.transactions, state.searchQuery, state.sort],
+    [
+      state.transactions,
+      state.searchQuery,
+      state.sort,
+      state.transactionFilters,
+    ],
   );
   const toggle = (id) =>
     dispatch({
@@ -138,6 +146,7 @@ export default function Transactions({
           </select>
         </div>
       </div>
+      <TransactionFilters state={state} dispatch={dispatch} />
       <div
         id="bulkActionsMenu"
         className={`mb-3 p-3 bg-body-tertiary rounded shadow-sm border border-primary-subtle ${state.isSelectionMode ? '' : 'd-none'}`}
@@ -284,15 +293,13 @@ export default function Transactions({
                   className="form-check-input"
                   aria-label="Select all transactions"
                   checked={
-                    !!state.transactions.length &&
-                    state.selectedIds.length === state.transactions.length
+                    !!rows.length &&
+                    rows.every((t) => state.selectedIds.includes(t.id))
                   }
                   onChange={(e) =>
                     dispatch({
                       type: 'select',
-                      ids: e.target.checked
-                        ? state.transactions.map((t) => t.id)
-                        : [],
+                      ids: e.target.checked ? rows.map((t) => t.id) : [],
                     })
                   }
                 />
