@@ -226,6 +226,7 @@ test('native file-save failure keeps the edit pending and baseline unchanged', a
   });
   await launch(page);
   await page.getByRole('button', { name: 'Browse Files', exact: true }).click();
+  await tab(page, 'Transactions');
   await expect(page.locator('.btn-edit')).toHaveCount(1);
   await page.locator('.btn-edit').click();
   await expect(page.locator('#expenseModal')).toHaveCSS('opacity', '1');

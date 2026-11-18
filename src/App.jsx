@@ -3,6 +3,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useReducer,
   useRef,
@@ -19,6 +20,12 @@ import {
 import Transactions from './components/Transactions.jsx';
 import DatasetHealth from './components/DatasetHealth.jsx';
 import ExpenseModal from './components/ExpenseModal.jsx';
+import Landing from './components/Landing.jsx';
+import Overview from './components/Overview.jsx';
+import Ticker from './components/Ticker.jsx';
+import useMediaQuery from './hooks/useMediaQuery.js';
+import { overviewModel } from '../assets/js/presentation.js';
+import { analyzeDataset } from '../assets/js/datasetHealth.js';
 
 const Analytics = lazy(() => import('./components/Analytics.jsx'));
 
@@ -29,6 +36,7 @@ function isIOS() {
   );
 }
 const tabs = [
+  ['Overview', 'overview'],
   ['Transactions', 'list'],
   ['Analytics', 'analytics'],
   ['Dataset Health', 'cleanup'],
@@ -42,10 +50,25 @@ export default function App() {
     [notice, setNotice] = useState(''),
     [saving, setSaving] = useState(false),
     [saved, setSaved] = useState(false),
-    [dragging, setDragging] = useState(false);
+    [dragging, setDragging] = useState(false),
+    [demoLoading, setDemoLoading] = useState(false);
+  const theme = useMediaQuery('(prefers-color-scheme: dark)')
+    ? 'dark'
+    : 'light';
+  const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  const mobileNavigation = useMediaQuery('(max-width: 767.98px)');
+  const model = useMemo(
+    () => overviewModel(state.transactions, state.analyticsExclusions),
+    [state.transactions, state.analyticsExclusions],
+  );
+  const health = useMemo(
+    () => analyzeDataset(state.transactions, state.categories),
+    [state.transactions, state.categories],
+  );
   const picker = useRef(null),
     dragDepth = useRef(0),
-    saveTimer = useRef(null);
+    saveTimer = useRef(null),
+    pendingScroll = useRef(null);
   const closeModal = useCallback(() => setModal(null), []);
   const tags = useMemo(
     () =>
@@ -74,18 +97,11 @@ export default function App() {
     return () => controller.abort();
   }, []);
   useEffect(() => {
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const update = (event) =>
-      document.documentElement.setAttribute(
-        'data-bs-theme',
-        event.matches ? 'dark' : 'light',
-      );
-    media.addEventListener('change', update);
-    return () => media.removeEventListener('change', update);
-  }, []);
+    document.documentElement.setAttribute('data-bs-theme', theme);
+  }, [theme]);
   useEffect(() => {
     const beforeUnload = (event) => {
-      if (state.fileName || state.hasUnsavedChanges) {
+      if (state.hasUnsavedChanges) {
         event.preventDefault();
         event.returnValue = '';
       }
@@ -105,6 +121,7 @@ export default function App() {
       if (!source || !canReplace()) return;
       try {
         const session = await readCSVSession(source);
+        pendingScroll.current = 0;
         dispatch({ type: 'open', session });
         setNotice('');
         closeModal();
@@ -153,6 +170,13 @@ export default function App() {
       window.removeEventListener('drop', drop);
     };
   }, [open]);
+  useLayoutEffect(() => {
+    if (pendingScroll.current !== null) {
+      window.scrollTo(0, pendingScroll.current);
+      pendingScroll.current = null;
+    }
+  }, [state]);
+
   async function browse() {
     if (!window.showOpenFilePicker) return picker.current.click();
     try {
@@ -166,6 +190,7 @@ export default function App() {
     try {
       const session = await createCSVSession();
       if (session) {
+        pendingScroll.current = 0;
         dispatch({ type: 'open', session });
         setNotice('');
       }
@@ -209,9 +234,8 @@ export default function App() {
   function changeTab(tab) {
     const scrollY =
       tab === 'Analytics' ? state.analyticsReturnContext?.scrollY : null;
+    pendingScroll.current = scrollY ?? 0;
     dispatch({ type: 'tab', tab });
-    if (scrollY != null)
-      requestAnimationFrame(() => window.scrollTo(0, scrollY));
   }
   function commit(rows, id, warnings) {
     if (state.viewOnlyMode) return;
@@ -219,9 +243,41 @@ export default function App() {
     setNotice(warnings?.length ? warnings.join(' ') : '');
     closeModal();
   }
+  async function openDemo() {
+    setDemoLoading(true);
+    try {
+      const response = await fetch(`${import.meta.env.BASE_URL}demo.csv`);
+      if (!response.ok) throw new Error('Cannot open the sample dataset.');
+      await open(
+        new File([await response.text()], 'demo.csv', { type: 'text/csv' }),
+      );
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setDemoLoading(false);
+    }
+  }
+  function closeFile() {
+    if (
+      !state.hasUnsavedChanges ||
+      confirm('You have unsaved changes. Close without saving?')
+    ) {
+      pendingScroll.current = 0;
+      dispatch({ type: 'close' });
+      setNotice('');
+      setSaved(false);
+      closeModal();
+    }
+  }
+  function openModal(transaction, returnFocus) {
+    setModal({ transaction, returnFocus });
+  }
   const loaded = !!state.fileName;
   return (
     <>
+      <a className="skip-link" href={loaded ? '#appView' : '#landingView'}>
+        Skip to content
+      </a>
       <input
         ref={picker}
         type="file"
@@ -234,51 +290,76 @@ export default function App() {
       />
       <div
         id="globalDropOverlay"
-        className={`position-fixed top-0 start-0 w-100 h-100 bg-body bg-opacity-75 d-flex align-items-center justify-content-center ${dragging ? '' : 'd-none'}`}
-        style={{ zIndex: 9999, border: '4px dashed var(--primary-accent)' }}
+        className={`global-drop-overlay ${dragging ? '' : 'd-none'}`}
       >
-        <div className="text-center">
-          <i className="bi bi-file-earmark-arrow-up display-1 text-primary mb-3" />
-          <h2 className="fw-bold">Drop CSV file to open</h2>
+        <div>
+          <span className="drop-overlay-icon" aria-hidden="true">
+            ↘
+          </span>
+          <h2>Drop it like it’s yours.</h2>
+          <p>Drop CSV file to open</p>
         </div>
       </div>
-      <nav className="navbar navbar-expand-lg sticky-top bg-body-tertiary border-bottom">
-        <div className="container-fluid px-4">
-          <span className="navbar-brand text-primary fw-bold">
-            Expense Tracker
-          </span>
-          <div className="d-flex align-items-center flex-grow-1 justify-content-center">
-            <span id="currentFileName" className="text-muted fw-semibold">
-              {state.fileName}
+      <div className="app-chrome">
+        <header className={`cream-header ${loaded ? 'has-file' : ''}`}>
+          <div className="brand-lockup">
+            <span className="cream-wordmark" aria-label="cream">
+              cream<span aria-hidden="true">✳</span>
             </span>
+            {!loaded && (
+              <span className="brand-descriptor">
+                A clearer view of your money.
+              </span>
+            )}
           </div>
+          {loaded ? (
+            <div className="file-context">
+              <i className="bi bi-file-earmark-text" aria-hidden="true" />
+              <span id="currentFileName" title={state.fileName}>
+                {state.fileName}
+              </span>
+              <span
+                className={`file-status ${state.hasUnsavedChanges ? 'pending' : ''}`}
+              >
+                <span className="status-dot" />
+                {state.hasUnsavedChanges ? 'Unsaved changes' : 'Up to date'}
+              </span>
+            </div>
+          ) : (
+            <span className="header-note">
+              <i className="bi bi-lock" aria-hidden="true" /> NO ACCOUNTS. NO
+              UPLOADS.
+            </span>
+          )}
           <div
             id="navActions"
-            className={`${loaded ? 'd-flex' : 'd-none'} align-items-center gap-1`}
+            className={`file-actions ${loaded ? '' : 'd-none'}`}
           >
             <button
               id="btnToggleViewOnly"
-              className="btn btn-outline-secondary btn-sm me-2 d-none d-md-inline-block"
+              className="icon-button view-mode-toggle"
               title="Toggle View Only Mode"
+              aria-label="Toggle View Only Mode"
+              aria-pressed={state.viewOnlyMode}
               onClick={() => dispatch({ type: 'viewOnly' })}
             >
               <i
-                className={`bi bi-${state.viewOnlyMode ? 'lock-fill text-warning' : 'unlock-fill'}`}
+                className={`bi bi-${state.viewOnlyMode ? 'lock' : 'unlock'}`}
+                aria-hidden="true"
               />
             </button>
             <span
               id="textViewOnly"
-              className={`badge bg-warning-subtle text-warning border border-warning-subtle me-2 d-md-none ${state.viewOnlyMode ? '' : 'd-none'}`}
-              title="View Only Mode Active"
+              className={`read-only-badge ${state.viewOnlyMode ? '' : 'd-none'}`}
             >
-              <i className="bi bi-lock-fill" />
+              Read only
             </span>
             <button
               id="btnUndoChanges"
-              className={`btn btn-outline-secondary btn-sm me-2 ${state.viewOnlyMode ? 'd-none' : ''}`}
-              disabled={
-                !state.hasUnsavedChanges || state.viewOnlyMode || saving
-              }
+              className={`icon-button ${state.viewOnlyMode ? 'd-none' : ''}`}
+              aria-label="Undo Changes"
+              title="Undo Changes"
+              disabled={!state.hasUnsavedChanges || saving}
               onClick={() => {
                 if (confirm('Discard all unsaved changes?')) {
                   dispatch({ type: 'undo' });
@@ -286,97 +367,124 @@ export default function App() {
                 }
               }}
             >
-              Undo Changes
+              <i className="bi bi-arrow-counterclockwise" aria-hidden="true" />
             </button>
             <button
               id="btnSaveChanges"
-              className={`btn btn-outline-primary btn-sm me-2 ${state.viewOnlyMode ? 'd-none' : ''}`}
-              disabled={
-                !state.hasUnsavedChanges || state.viewOnlyMode || saving
-              }
+              aria-label="Save Changes"
+              className={`btn btn-outline-secondary save-file-button ${state.viewOnlyMode ? 'd-none' : ''}`}
+              disabled={!state.hasUnsavedChanges || saving}
               onClick={save}
             >
-              {saved && !state.hasUnsavedChanges
-                ? 'Saved!'
-                : saving
-                  ? 'Saving...'
-                  : 'Save Changes'}
+              <i className="bi bi-check2" aria-hidden="true" />
+              <span>
+                {saved && !state.hasUnsavedChanges
+                  ? 'Saved!'
+                  : saving
+                    ? 'Saving...'
+                    : 'Save Changes'}
+              </span>
             </button>
+            {!state.viewOnlyMode && (
+              <button
+                id="btnAddExpense"
+                className="btn btn-primary global-add"
+                aria-label="Add transaction"
+                onClick={(event) => openModal(null, event.currentTarget)}
+              >
+                <i className="bi bi-plus-lg" aria-hidden="true" />
+                <span>Add transaction</span>
+              </button>
+            )}
             <button
               id="btnCloseFile"
-              className="btn btn-outline-danger btn-sm"
+              className="icon-button close-file-button"
+              aria-label="Close File"
+              title="Close File"
               disabled={saving}
-              onClick={() => {
-                if (
-                  !state.hasUnsavedChanges ||
-                  confirm('You have unsaved changes. Close without saving?')
-                ) {
-                  dispatch({ type: 'close' });
-                  setNotice('');
-                  setSaved(false);
-                  closeModal();
-                }
-              }}
+              onClick={closeFile}
             >
-              Close File
+              <i className="bi bi-x-lg" aria-hidden="true" />
             </button>
           </div>
-        </div>
-      </nav>
-      <main>
-        <div
-          id="landingView"
-          className={`container mt-5 ${loaded ? 'd-none' : ''}`}
-        >
-          <div className="row justify-content-center">
-            <div className="col-md-8 text-center">
-              <h2 className="mb-4">Welcome to Personal Expense Tracker</h2>
-              <p className="text-muted mb-5">
-                Manage your personal finances efficiently directly in your
-                browser. All data stays local.
-              </p>
-              <div className="d-grid gap-3 d-sm-flex justify-content-sm-center">
+        </header>
+        <Ticker key={state.sessionId} model={model} loaded={loaded} />
+      </div>
+      {!loaded && (
+        <Landing
+          ready={state.ready}
+          onCreate={create}
+          onOpen={browse}
+          onDemo={openDemo}
+          demoLoading={demoLoading}
+        />
+      )}
+      <div className={`workspace ${loaded ? '' : 'd-none'}`}>
+        <aside className="workspace-sidebar" aria-label="Workspace navigation">
+          <div className="sidebar-top">
+            <p className="eyebrow sidebar-label">YOUR WORKSPACE</p>
+            <nav
+              id="appTabs"
+              className="workspace-nav"
+              role="tablist"
+              aria-label="Workspace sections"
+              aria-orientation={mobileNavigation ? 'horizontal' : 'vertical'}
+            >
+              {tabs.map(([name, id], index) => (
                 <button
-                  id="btnCreateNewFile"
-                  className="btn btn-primary btn-lg px-4 gap-3"
-                  disabled={!state.ready}
-                  onClick={create}
+                  key={id}
+                  id={`${id}-tab`}
+                  className={`workspace-tab ${state.tab === name ? 'active' : ''}`}
+                  type="button"
+                  role="tab"
+                  aria-controls={`${id}-tab-pane`}
+                  aria-selected={state.tab === name}
+                  aria-label={name}
+                  title={name}
+                  tabIndex={state.tab === name ? 0 : -1}
+                  onClick={() => changeTab(name)}
+                  onKeyDown={(event) => {
+                    const step = ['ArrowRight', 'ArrowDown'].includes(event.key)
+                      ? 1
+                      : ['ArrowLeft', 'ArrowUp'].includes(event.key)
+                        ? -1
+                        : 0;
+                    if (!step && !['Home', 'End'].includes(event.key)) return;
+                    event.preventDefault();
+                    const next =
+                      event.key === 'Home'
+                        ? 0
+                        : event.key === 'End'
+                          ? tabs.length - 1
+                          : (index + step + tabs.length) % tabs.length;
+                    changeTab(tabs[next][0]);
+                    document.getElementById(`${tabs[next][1]}-tab`).focus();
+                  }}
                 >
-                  Create New File
+                  <i
+                    className={`bi ${['bi-grid-1x2', 'bi-list-ul', 'bi-graph-up', 'bi-shield-check'][index]}`}
+                    aria-hidden="true"
+                  />
+                  <span>{name}</span>
+                  {name === 'Dataset Health' && health.dirty.length > 0 && (
+                    <span className="health-nav-count" aria-hidden="true">
+                      {health.dirty.length}
+                    </span>
+                  )}
                 </button>
-              </div>
-              <div className="mt-5">
-                <p className="text-muted mb-3">Or open an existing CSV file</p>
-                <div
-                  id="dropZone"
-                  className="drop-zone p-5 mb-4 bg-body-tertiary rounded-3 border"
-                >
-                  <h5 className="mb-3">Drag &amp; Drop your CSV file here</h5>
-                  <p className="text-muted mb-4">- or -</p>
-                  <button
-                    id="btnOpenFile"
-                    className="btn btn-outline-primary"
-                    disabled={!state.ready}
-                    onClick={browse}
-                  >
-                    Browse Files
-                  </button>
-                </div>
-              </div>
-            </div>
+              ))}
+            </nav>
           </div>
-        </div>
-        <div
-          id="appView"
-          className={`container-fluid mt-4 ${loaded ? '' : 'd-none'}`}
-        >
+        </aside>
+        <main id="appView" className="workspace-content" tabIndex={-1}>
           <div
             id="unsavedWarning"
-            className={`alert alert-warning ${state.hasUnsavedChanges ? '' : 'd-none'}`}
-            role="alert"
+            className={`save-notice ${state.hasUnsavedChanges ? '' : 'd-none'}`}
+            role="status"
           >
-            You have unsaved changes! Don't forget to click "Save Changes"
-            before leaving.
+            <span className="status-dot" />
+            You have unsaved changes.
+            <span>Save Changes to keep them in your CSV.</span>
           </div>
           <div
             id="inlineImportNotice"
@@ -385,52 +493,39 @@ export default function App() {
           >
             {notice}
           </div>
-          <ul className="nav nav-tabs mb-4 px-3" id="appTabs" role="tablist">
-            {tabs.map(([name, id]) => (
-              <li key={id} className="nav-item" role="presentation">
-                <button
-                  className={`nav-link fw-semibold ${state.tab === name ? 'active' : ''}`}
-                  id={`${id}-tab`}
-                  type="button"
-                  role="tab"
-                  aria-controls={`${id}-tab-pane`}
-                  aria-selected={state.tab === name}
-                  onClick={() => changeTab(name)}
-                >
-                  {name}
-                </button>
-              </li>
-            ))}
-          </ul>
           {loaded && (
             <div
-              className="tab-content px-3"
+              className="tab-content"
               id="appTabsContent"
               key={state.sessionId}
             >
               {tabs.map(([name, id]) => (
                 <div
                   key={id}
-                  className={`tab-pane fade ${state.tab === name ? 'show active' : ''}`}
+                  className={`tab-pane ${state.tab === name ? 'show active' : ''}`}
                   id={`${id}-tab-pane`}
                   role="tabpanel"
                   aria-labelledby={`${id}-tab`}
                   tabIndex="0"
                 >
-                  {name === 'Transactions' ? (
+                  {name === 'Overview' ? (
+                    <Overview
+                      state={state}
+                      model={model}
+                      health={health}
+                      onTab={changeTab}
+                      onEdit={openModal}
+                      onViewAll={() => {
+                        dispatch({ type: 'search', value: '' });
+                        changeTab('Transactions');
+                      }}
+                    />
+                  ) : name === 'Transactions' ? (
                     <Transactions
                       state={state}
                       dispatch={dispatch}
                       tags={tags}
-                      onEdit={(transaction, returnFocus) =>
-                        setModal({ transaction, returnFocus })
-                      }
-                      onAdd={(event) =>
-                        setModal({
-                          transaction: null,
-                          returnFocus: event.currentTarget,
-                        })
-                      }
+                      onEdit={openModal}
                       onDelete={remove}
                       onTab={changeTab}
                     />
@@ -442,13 +537,15 @@ export default function App() {
                         state={state}
                         dispatch={dispatch}
                         active={state.tab === name}
+                        theme={theme}
+                        reducedMotion={reducedMotion}
                         onDrilldown={(filter) => {
+                          pendingScroll.current = 0;
                           dispatch({
                             type: 'drilldown',
                             filter,
                             scrollY: window.scrollY,
                           });
-                          requestAnimationFrame(() => window.scrollTo(0, 0));
                         }}
                       />
                     </Suspense>
@@ -457,17 +554,15 @@ export default function App() {
                       transactions={state.transactions}
                       categories={state.categories}
                       viewOnly={state.viewOnlyMode}
-                      onEdit={(transaction, returnFocus) =>
-                        setModal({ transaction, returnFocus })
-                      }
+                      onEdit={openModal}
                     />
                   )}
                 </div>
               ))}
             </div>
           )}
-        </div>
-      </main>
+        </main>
+      </div>
       {modal && (
         <ExpenseModal
           transaction={modal.transaction}
@@ -480,12 +575,12 @@ export default function App() {
           onDelete={(id) => remove([id])}
         />
       )}
-      <footer className="py-4 mt-5 border-top bg-body-tertiary">
-        <div className="container text-center">
-          <p className="text-muted mb-0 small" style={{ letterSpacing: 2 }}>
-            &quot;Cash Rules Everything Around Me&quot;
-          </p>
-        </div>
+      <footer className="cream-footer">
+        <span className="footer-brand">cream.</span>
+        <span>Cash Rules Everything Around Me.</span>
+        <span className="footer-note">
+          A little clarity goes a long way. <span aria-hidden="true">↗</span>
+        </span>
       </footer>
     </>
   );

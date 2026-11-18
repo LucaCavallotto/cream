@@ -1,17 +1,19 @@
-# Personal Expense Tracker
+# cream
 
-A React application built with Vite: a modular, browser-based personal finance manager that works directly with your local CSV files. This application puts you in control of your data—no cloud required, no sign-ups, just privacy-focused financial tracking.
+**Your money, in perspective.** A React application built with Vite: a private, browser-based personal finance workspace that works directly with your local CSV files. This application puts you in control of your data—no cloud required, no sign-ups, just privacy-focused financial tracking.
 
 ## Key Features
 
 - **Direct File Access:** Uses the modern File System Access API to open and save CSV files directly to your device.
 - **View Only Mode:** Automatically protects data on mobile devices (iOS/iPadOS) where file saving is restrictive, with a manual lock toggle for desktop users.
 - **Bulk Entry:** Smart "Quick Inline Entry" supports pasting multiple transactions at once (e.g., from bank statements).
-- **Responsive Dashboard:** View your current net delta and monthly spend comparisons at a glance.
+- **Overview:** See all-time net cash flow, this month’s spending, recent activity and dataset health before diving into the details.
+- **Always-visible Dataset Ticker:** A scrolling, Wall Street-inspired strip of real dataset totals and top spending categories. Pause it at any time; reduced-motion preferences show a static, horizontally scrollable strip.
+- **Responsive Workspace:** Sidebar navigation on desktop, compact icon navigation on tablets and a fixed bottom navigation on mobile. Add transactions and save changes from the header.
 - **Comprehensive Analytics:** Detailed hierarchical breakdowns for Spending, Income, and Tags with interactive "Show More" functionality.
 - **Reversible Analytics Exclusions:** Exclude investments, categories, subcategories or individual transactions from statistics without modifying the dataset.
 - **Advanced Search & Sorting:** Search descriptions, amounts, classifications, tags and notes; sort by date, amount or category.
-- **Dark Mode Support:** Automatically syncs with your system's light/dark preference.
+- **Automatic Appearance:** A minimal black-and-white interface follows your system’s light/dark preference, including chart labels, grid lines and colors. Green/red accents distinguish cash coming in and going out.
 - **English Interface:** App labels, generated month names and chart number formatting use English regardless of the browser's language. Transaction descriptions and other imported data retain their original text.
 - **Dataset Health:** Find missing or invalid values and classification problems, then review each affected transaction in the standard edit modal.
 
@@ -21,10 +23,11 @@ A React application built with Vite: a modular, browser-based personal finance m
 ├── src/
 │   ├── main.jsx            # React entry point and bundled styles
 │   ├── App.jsx             # File lifecycle, navigation and shared state
-│   └── components/         # Transactions, modal, health, analytics and filters
+│   └── components/         # Landing, overview, ticker, ledger, modal, health and analytics
 ├── assets/
 │   ├── css/style.css       # Existing Bootstrap overrides and responsive styling
 │   └── js/                 # Reusable CSV, validation, analytics and reducer logic
+├── public/cream.svg        # Local brand icon
 ├── data/categories.json    # Static category/subcategory catalog
 ├── tests/                  # Unit, real CSV integration, build and browser tests
 ├── index.html              # Vite entry point and early system-theme setup
@@ -32,7 +35,7 @@ A React application built with Vite: a modular, browser-based personal finance m
 └── dist/                   # Generated production site (ignored by Git)
 ```
 
-React owns the UI and uses a reducer for shared session state. CSV parsing, validation, exclusions, date handling and sorting remain reusable JavaScript modules. Chart.js instances and browser listeners are created and cleaned up through component effects. Bootstrap CSS and icons preserve the existing appearance; Bootstrap's DOM-manipulating JavaScript is no longer required. Runtime libraries are bundled locally rather than loaded from CDNs.
+React owns the UI and uses a reducer for shared session state. CSV parsing, validation, exclusions, date handling and sorting remain reusable JavaScript modules. Chart.js instances and browser listeners are created and cleaned up through component effects. Bootstrap utilities and icons support a custom, theme-aware design system; Bootstrap's DOM-manipulating JavaScript is no longer required. Runtime libraries are bundled locally rather than loaded from CDNs.
 
 ## How to Use
 
@@ -47,14 +50,24 @@ npm run dev
 Open the localhost URL printed by Vite. The source `index.html` requires Vite; opening it directly from disk does not run the app.
 
 - **New Users:** Click **"Create New File"** to generate a fresh expense CSV on your computer.
-- **Trial:** You can also use the included `demo.csv` to explore the app's features immediately.
+- **Trial:** Click **"Take a look around"** to open the bundled `demo.csv` directly. It contains synthetic sample data and uses the same file/editing workflow.
 - **Existing Users:** Click **"Browse Files"** or simply **Drag & Drop** your existing CSV anywhere on the screen.
 
 The synthetic `demo.csv` uses the current category catalog and includes income, expenses, investments, repeated subcategory names under different categories, quoted descriptions, and intentionally empty classifications. Transactions span several periods, including October and November 2026, to exercise analytics and monthly comparisons. Open it and try the Quick Inline Entry examples below; use **Undo Changes** to discard test entries before saving, or test on a copy.
 
+### Your workspace
+
+Opening or creating a file takes you to **Overview**. Use the sidebar (or bottom navigation on mobile) to switch between **Overview**, **Transactions**, **Analytics** and **Dataset Health**. Arrow keys, Home and End work when the navigation has keyboard focus.
+
+Overview shows **all-time included cash flow**, not a bank-account balance. Recent activity and Dataset Health always cover all records. The always-visible ticker uses the same analytics exclusions as Overview and identifies invalid records that stay outside calculations. Analytics retains its own selected period. Filtering a period does not change the ticker’s all-time scope.
+
+The **Add transaction** button is available in the header from every section. In the editor, **Now** fills the current local date and time without changing the other fields or submitting. Use **Save Changes**, the undo arrow, or the close icon for the file session. Downloads do not navigate away from the app; browser unload warnings apply only to unsaved changes. On mobile, the ledger includes a sort selector. Read-only sessions keep editing and saving disabled as before.
+
+Pause or resume the ticker with its control; hovering or focusing its text pauses it temporarily. When your system requests reduced motion, the ticker stops moving and can be scrolled horizontally. Charts also disable animation. Appearance follows system changes automatically without resetting your work, filters or current section.
+
 ### 2. Adding Transactions
 There are two ways to add expenses:
-- **Manual Form:** Click **"+ Add Expense"** to fill out a detailed form including Category, Subcategory, Tags, and Notes.
+- **Manual Form:** Click **"Add transaction"** to fill out a detailed form including Category, Subcategory, Tags, and Notes.
 - **Quick Inline Entry:** Paste one or more transactions into the textarea at the top of the modal. See the formats and copyable examples below.
 
 #### Quick Inline Entry: formats and examples
@@ -220,7 +233,7 @@ npm ci
 npx playwright install chromium firefox webkit
 ```
 
-On Linux, use `npx playwright install --with-deps chromium firefox webkit` to install the required system libraries as well.
+On Linux, use `npx playwright install --with-deps chromium firefox webkit` to install the required system libraries as well. The development-mode tests use a separate Vite server on port 5174, leaving the usual development server on 5173 alone. Override it with `PLAYWRIGHT_DEV_PORT` if needed.
 
 Run the complete suite before pushing, including when working directly on `main`:
 
@@ -244,9 +257,10 @@ npm run test:dev
 
 | Layer | What it verifies |
 | --- | --- |
-| Unit tests (`tests/*.test.mjs`) | Input validation, tag normalization, dataset health, period filtering, investment/category/subcategory/individual exclusions, monthly aggregation and navigation state. Reducer tests verify session resets, undo, immutable updates and asynchronous save baselines. Analytics model tests check the data shared by metrics, charts and breakdowns, including explicit English chart configuration. |
+| Unit tests (`tests/*.test.mjs`) | Input validation, tag normalization, dataset health, period filtering, investment/category/subcategory/individual exclusions, monthly aggregation, navigation state, overview/ticker scope and theme-aware chart configuration. Reducer tests verify session resets, undo, immutable updates and asynchronous save baselines. Analytics model tests check the data shared by metrics, charts and breakdowns, including explicit English chart configuration. |
 | Real CSV integration (`tests/integration/`) | The same CSV codec used by the app, with **real PapaParse 5.4.1**: BOM, line endings, reordered headers, quoting, Unicode, multiline notes, empty datasets, invalid values, malformed files, tag migration and roundtrips. File lifecycle tests check save failures, cancellation, file-handle/drop/download/share behavior and reducer state preservation with controlled filesystem/share API doubles. |
 | Desktop browser flows (`tests/browser/app.spec.mjs`) | The production React/Vite build, Bootstrap CSS, Chart.js and PapaParse on **Chromium, Firefox and WebKit**: create/open, form editing and deletion, bulk operations, search/sort, quick input, atomic validation, Dataset Health corrections, exclusions, drilldown/return, download/reopen and simulated native-save failures. |
+| Restyling (`tests/browser/design.spec.mjs`) | Bundled demo, overview shortcuts and totals, ticker pause/reduced motion, keyboard navigation, live theme changes and reflow from 320px through desktop across every section and the editor. |
 | React lifecycle (`tests/browser/lifecycle.spec.mjs`) | Modal reset/focus/scroll cleanup, repeat navigation, session resets, live system theme, chart resizing and safe text rendering. These checks also run through Vite dev on Chromium with React StrictMode enabled. |
 | Production build (`tests/build/`) | Bundled entry/assets, relative deployment paths, static catalog/demo/manifest integrity, and absence of CDN scripts or old entry points. |
 | Mobile browser flows (`tests/browser/mobile.spec.mjs`) | WebKit with an iPhone viewport/touch profile: read-only inspection, health details, analytics exclusions and layout width. This is emulation, not a real iPhone. |

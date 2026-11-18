@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { compareTransactions } from '../../assets/js/transactions.js';
 import { formatDate } from '../../assets/js/dateTime.js';
+import { formatMoney } from '../../assets/js/presentation.js';
 import { getCategoryMeta } from '../../assets/js/categoryMeta.js';
 import TagInput from './TagInput.jsx';
 
@@ -9,7 +10,6 @@ export default function Transactions({
   dispatch,
   tags,
   onEdit,
-  onAdd,
   onDelete,
   onTab,
 }) {
@@ -70,51 +70,72 @@ export default function Transactions({
       >
         <i className="bi bi-arrow-left" aria-hidden="true" /> Back to Analytics
       </button>
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-3">
-        <h4 className="mb-0">Transaction List</h4>
-        <div className="d-flex gap-2 align-items-center flex-grow-1 justify-content-md-end">
-          <div
-            className={`position-relative ${state.viewOnlyMode ? 'w-auto' : 'w-100'}`}
-            style={{ maxWidth: 300 }}
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow">THE DAILY DETAILS</p>
+          <h1>Your money, line by line.</h1>
+          <p className="page-description">
+            Every little thing, all in one place.
+          </p>
+        </div>
+      </div>
+      <div className="ledger-toolbar">
+        <div className="ledger-search">
+          <i className="bi bi-search" aria-hidden="true" />
+          <input
+            id="inputSearchTransaction"
+            type="search"
+            className="form-control"
+            aria-label="Search transactions"
+            placeholder="Search transactions…"
+            value={state.searchText}
+            onChange={(event) =>
+              dispatch({ type: 'search', value: event.target.value })
+            }
+          />
+          <button
+            id="btnClearSearch"
+            type="button"
+            aria-label="Clear search"
+            className={`btn btn-link position-absolute top-50 end-0 translate-middle-y me-2 p-0 border-0 ${state.searchText ? '' : 'd-none'}`}
+            onClick={() => dispatch({ type: 'search', value: '' })}
           >
-            <i className="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
-            <input
-              id="inputSearchTransaction"
-              className="form-control shadow-sm ps-5"
-              placeholder="Search by description..."
-              value={state.searchText}
-              onChange={(e) =>
-                dispatch({ type: 'search', value: e.target.value })
-              }
-            />
-            <button
-              id="btnClearSearch"
-              type="button"
-              aria-label="Clear search"
-              className={`btn btn-link position-absolute top-50 end-0 translate-middle-y me-2 p-0 border-0 shadow-none ${state.searchText ? '' : 'd-none'}`}
-              onClick={() => dispatch({ type: 'search', value: '' })}
-            >
-              <i className="bi bi-x-circle-fill text-secondary" />
-            </button>
-          </div>
-          {!state.viewOnlyMode && (
-            <>
-              <button
-                id="btnSelectMode"
-                className="btn btn-outline-primary shadow-sm text-nowrap"
-                onClick={() => dispatch({ type: 'selection', value: true })}
-              >
-                <i className="bi bi-check2-square" /> Select
-              </button>
-              <button
-                id="btnAddExpense"
-                className="btn btn-primary shadow-sm text-nowrap btn-add-expense"
-                onClick={onAdd}
-              >
-                + Add Expense
-              </button>
-            </>
-          )}
+            <i className="bi bi-x-circle" aria-hidden="true" />
+          </button>
+        </div>
+        {!state.viewOnlyMode && (
+          <button
+            id="btnSelectMode"
+            className="btn btn-outline-secondary"
+            onClick={() =>
+              dispatch({ type: 'selection', value: !state.isSelectionMode })
+            }
+          >
+            <i className="bi bi-check2-square" aria-hidden="true" />{' '}
+            {state.isSelectionMode ? 'Cancel' : 'Select'}
+          </button>
+        )}
+        <span className="ledger-count">
+          {rows.length} {rows.length === 1 ? 'transaction' : 'transactions'}
+        </span>
+        <div className="ledger-sort">
+          <label htmlFor="transactionSort">Sort</label>
+          <select
+            id="transactionSort"
+            className="form-select"
+            value={`${state.sort.column}:${state.sort.direction}`}
+            onChange={(event) => {
+              const [column, direction] = event.target.value.split(':');
+              dispatch({ type: 'sort', column, direction });
+            }}
+          >
+            <option value="Date:desc">Newest first</option>
+            <option value="Date:asc">Oldest first</option>
+            <option value="Amount:desc">Amount: high to low</option>
+            <option value="Amount:asc">Amount: low to high</option>
+            <option value="Category:asc">Category: A–Z</option>
+            <option value="Category:desc">Category: Z–A</option>
+          </select>
         </div>
       </div>
       <div
@@ -277,33 +298,62 @@ export default function Transactions({
                 />
               </th>
               {[
-                'Date',
-                'Amount',
                 'Description',
+                'Date',
                 'Category',
-                'Subcategory',
                 'Tags',
                 'Notes',
-              ].map((field, i) => (
-                <th
-                  key={field}
-                  scope="col"
-                  data-sort={
-                    ['Date', 'Amount', 'Category'].includes(field)
-                      ? field
-                      : undefined
-                  }
-                  className={`${['Date', 'Amount', 'Category'].includes(field) ? 'sortable' : ''} d-none ${i < 3 ? 'd-md-table-cell' : i < 5 ? 'd-lg-table-cell' : 'd-xl-table-cell'}`}
-                  onClick={
-                    ['Date', 'Amount', 'Category'].includes(field)
-                      ? () => dispatch({ type: 'sort', column: field })
-                      : undefined
-                  }
-                >
-                  {field}
-                  {['Date', 'Amount', 'Category'].includes(field) ? ' ↕' : ''}
-                </th>
-              ))}
+                'Amount',
+              ].map((field) => {
+                const sortable = ['Date', 'Category', 'Amount'].includes(field);
+                const responsive = ['Description', 'Date', 'Amount'].includes(
+                  field,
+                )
+                  ? 'd-md-table-cell'
+                  : field === 'Category'
+                    ? 'd-lg-table-cell'
+                    : 'd-xl-table-cell';
+                return (
+                  <th
+                    key={field}
+                    scope="col"
+                    data-sort={sortable ? field : undefined}
+                    aria-sort={
+                      sortable && state.sort.column === field
+                        ? state.sort.direction === 'asc'
+                          ? 'ascending'
+                          : 'descending'
+                        : undefined
+                    }
+                    className={`d-none ${responsive} ${field === 'Amount' ? 'text-end' : ''}`}
+                    onClick={
+                      sortable
+                        ? () => dispatch({ type: 'sort', column: field })
+                        : undefined
+                    }
+                  >
+                    {sortable ? (
+                      <button
+                        className="sort-header-button"
+                        aria-label={`Sort by ${field.toLowerCase()}`}
+                      >
+                        {field}
+                        <span aria-hidden="true">
+                          {state.sort.column === field
+                            ? state.sort.direction === 'asc'
+                              ? '↑'
+                              : '↓'
+                            : '↕'}
+                        </span>
+                      </button>
+                    ) : field === 'Description' ? (
+                      'Transaction'
+                    ) : (
+                      field
+                    )}
+                  </th>
+                );
+              })}
               <th
                 scope="col"
                 id="thActions"
@@ -324,7 +374,7 @@ export default function Transactions({
               const valid = Number.isFinite(t.Amount),
                 income = t.Amount >= 0;
               const amount = valid
-                ? `${income ? '+' : ''}${t.Amount.toFixed(2)} €`
+                ? formatMoney(t.Amount, true)
                 : 'Invalid / missing amount';
               const color = !valid
                 ? 'text-warning fw-bold'
@@ -337,7 +387,7 @@ export default function Transactions({
                     (!previous || previous.DateTime.slice(0, 4) !== year) && (
                       <tr className="year-divider-row divider-row">
                         <td
-                          colSpan={9}
+                          colSpan={8}
                           className="p-2 text-center text-muted fw-bold small text-uppercase border-0"
                         >
                           — {year} —
@@ -350,7 +400,7 @@ export default function Transactions({
                         t.DateTime.slice(0, 7)) && (
                       <tr className="month-divider-row divider-row">
                         <td
-                          colSpan={9}
+                          colSpan={8}
                           className="px-3 py-2 text-primary fw-semibold small text-uppercase border-0"
                           style={{
                             backgroundColor: 'var(--bs-secondary-bg)',
@@ -370,7 +420,8 @@ export default function Transactions({
                             'October',
                             'November',
                             'December',
-                          ][Number(month) - 1] || month}
+                          ][Number(month) - 1] || month}{' '}
+                          {year}
                         </td>
                       </tr>
                     )}
@@ -395,33 +446,40 @@ export default function Transactions({
                         onChange={() => toggle(t.id)}
                       />
                     </td>
-                    <td className="d-none d-md-table-cell">
+                    <td className="d-none d-md-table-cell description-cell">
+                      <span>{t.Description || '(Missing description)'}</span>
+                      <div className="description-meta">
+                        {t.Subcategory || 'No subcategory'}
+                      </div>
+                    </td>
+                    <td className="d-none d-md-table-cell text-muted">
                       {formatDate(t.DateTime)}
                     </td>
-                    <td className={`d-none d-md-table-cell ${color}`}>
-                      {amount}
-                    </td>
-                    <td className="d-none d-md-table-cell">{t.Description}</td>
                     <td className="d-none d-lg-table-cell">
                       <span className="badge bg-secondary">
                         {t.Category || 'Uncategorized'}
                       </span>
                     </td>
-                    <td className="d-none d-lg-table-cell">{t.Subcategory}</td>
                     <td className="d-none d-xl-table-cell">
                       {t.Tags.split(/\s+/)
                         .filter(Boolean)
                         .map((tag) => (
-                          <span
-                            key={tag}
-                            className="badge rounded-pill text-bg-light border text-dark me-1"
-                            style={{ fontWeight: 500 }}
-                          >
+                          <span className="badge me-1" key={tag}>
                             {tag}
                           </span>
                         ))}
                     </td>
-                    <td className="d-none d-xl-table-cell">{t.Notes}</td>
+                    <td
+                      className="d-none d-xl-table-cell notes-cell"
+                      title={t.Notes}
+                    >
+                      {t.Notes}
+                    </td>
+                    <td
+                      className={`d-none d-md-table-cell amount-cell ${color}`}
+                    >
+                      {amount}
+                    </td>
                     {!state.viewOnlyMode && (
                       <td
                         className={`text-end text-nowrap ${state.isSelectionMode ? 'd-none' : 'd-none d-md-table-cell'}`}
@@ -505,6 +563,15 @@ export default function Transactions({
         className={`text-center py-5 text-muted ${rows.length ? 'd-none' : ''}`}
       >
         No transactions found. Add one to get started!
+      </div>
+      <div className="ledger-footer">
+        <span>
+          {rows.length} of {state.transactions.length} records
+        </span>
+        <span>
+          Click a transaction for the full picture.{' '}
+          <span aria-hidden="true">↗</span>
+        </span>
       </div>
     </>
   );

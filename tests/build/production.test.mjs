@@ -31,3 +31,18 @@ test('production HTML ships relative, existing bundles without CDN or source scr
     );
   }
 });
+
+test('cream branding and manifest reference the shipped local icon', async () => {
+  const manifest = JSON.parse(await readFile('dist/manifest.json', 'utf8'));
+  assert.equal(manifest.name, 'cream');
+  assert.equal(manifest.short_name, 'cream');
+  assert.equal(manifest.icons[0].src, './cream.svg');
+  assert.deepEqual(
+    await readFile('dist/cream.svg'),
+    await readFile('public/cream.svg'),
+  );
+  assert.match(
+    await readFile('dist/index.html', 'utf8'),
+    /<title>cream — A clearer view of your money\.<\/title>/,
+  );
+});

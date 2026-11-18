@@ -18,7 +18,7 @@ export function createAppState(viewOnlyMode = false) {
     sort: { column: 'Date', direction: 'desc' },
     searchQuery: '',
     searchText: '',
-    tab: 'Transactions',
+    tab: 'Overview',
     analyticsExclusions: createAnalyticsExclusions(),
     analyticsReturnContext: null,
     isSelectionMode: false,
@@ -123,10 +123,11 @@ export function appReducer(state, action) {
         sort: {
           column: action.column,
           direction:
-            state.sort.column === action.column &&
+            action.direction ||
+            (state.sort.column === action.column &&
             state.sort.direction === 'desc'
               ? 'asc'
-              : 'desc',
+              : 'desc'),
         },
       };
     case 'selection':

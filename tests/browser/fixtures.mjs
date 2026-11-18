@@ -64,11 +64,12 @@ export async function openRawCSV(page, text, name = 'test.csv') {
 export async function openRows(page, rows) {
   await openRawCSV(page, Papa.unparse({ fields: headers, data: rows.map(row => headers.map(field => row[field] ?? '')) }));
   await expect(page.locator('#appView')).toBeVisible();
+  await tab(page, 'Transactions');
 }
 
 export async function tab(page, name) {
   await page.getByRole('tab', { name, exact: true }).click();
-  const id = { Transactions: 'list', Analytics: 'analytics', 'Dataset Health': 'cleanup' }[name];
+  const id = { Overview: 'overview', Transactions: 'list', Analytics: 'analytics', 'Dataset Health': 'cleanup' }[name];
   await expect(page.locator(`#${id}-tab-pane`)).toHaveCSS('opacity', '1');
 }
 

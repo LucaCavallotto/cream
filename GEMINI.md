@@ -1,11 +1,11 @@
-# Project Context: Expense Tracker
+# Project Context: cream
 
 A modular, privacy-first, browser-based personal finance manager that interacts directly with local CSV files.
 
 ---
 
 ## Project Overview
-**Expense Tracker** is a single-page application (SPA) designed to manage personal finances without cloud dependency. It leverages the **File System Access API** to read and write directly to the user's local disk, ensuring 100% data privacy. A `.gitignore` policy is in place to prevent accidental upload of any `.csv` files (except the synthetic `demo.csv`).
+**cream** is a single-page application (SPA) designed to manage personal finances without cloud dependency. It leverages the **File System Access API** to read and write directly to the user's local disk, ensuring 100% data privacy. A `.gitignore` policy is in place to prevent accidental upload of any `.csv` files (except the synthetic `demo.csv`).
 
 **Core User Flow:**
 1.  **Entry:** Create a new CSV or open/drag-and-drop an existing one.
@@ -74,15 +74,17 @@ React components in `src/` own UI rendering. Shared session state uses `appReduc
 ---
 
 ## Design System & UI
-The app uses a **Premium Green** accent theme with a focus on rich aesthetics.
+The app uses a minimal black-and-white design with green/red financial accents. The system appearance controls both CSS and chart palettes.
 
-- **Typography:** Uses the `Inter` font family with system fallbacks.
+- **Typography:** Uses system sans-serif fonts, tight editorial headings and tabular figures.
 - **Layout:** Sticky footer implemented via Flexbox (`html, body { height: 100% }`).
 - **Styling:** 
     - Strictly **Vanilla CSS** + **Bootstrap 5 Utilities**. 
     - **Avoid Tailwind CSS** unless explicitly requested.
     - Custom variables are defined in `:root` for consistency.
-- **Aesthetics:** Use subtle micro-animations and `box-shadow` on cards for a premium feel.
+- **Aesthetics:** Use clear hierarchy, restrained surfaces, fine borders and generous spacing. Respect reduced-motion preferences. Avoid adding decorative shadows to every panel.
+- **Navigation:** Overview is the initial workspace section. Desktop uses a sidebar; mobile uses bottom navigation. Keep the dataset ticker and file controls visible across sections.
+- **Scope:** Overview and ticker use all-time analytics exclusions; recent activity and Dataset Health cover all records.
 
 ---
 

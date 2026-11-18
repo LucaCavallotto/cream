@@ -64,6 +64,9 @@ export function downloadCSV(content, name, environment = globalThis) {
   const link = environment.document.createElement('a');
   link.href = url;
   link.download = name;
+  // Keep downloads out of the app's browsing context and its unload guard.
+  link.target = '_blank';
+  link.rel = 'noopener';
   environment.document.body.appendChild(link);
   link.click();
   link.remove();

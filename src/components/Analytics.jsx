@@ -3,26 +3,30 @@ import Chart from 'chart.js/auto';
 import { analyticsModel, chartConfig } from '../../assets/js/analyticsModel.js';
 import { isValidTransactionDate } from '../../assets/js/datasetHealth.js';
 import AnalyticsFilters from './AnalyticsFilters.jsx';
+import { formatMoney } from '../../assets/js/presentation.js';
 
-const euro = (value) => `€${value.toFixed(2)}`;
+const euro = formatMoney;
 
-function ChartCard({ type, model, active }) {
+function ChartCard({ type, model, active, theme, reducedMotion }) {
   const canvas = useRef(null),
     instance = useRef(null);
   const title = `${type === 'pie' ? 'Expenses by Category' : 'Monthly Cash Flow Trend'} (${model.periodLabel})`;
   useEffect(() => {
-    const chart = new Chart(canvas.current, chartConfig(type, model));
+    const chart = new Chart(
+      canvas.current,
+      chartConfig(type, model, { dark: theme === 'dark', reducedMotion }),
+    );
     instance.current = chart;
     return () => {
       instance.current = null;
       chart.destroy();
     };
-  }, [type, model]);
+  }, [type, model, theme, reducedMotion]);
   useEffect(() => {
     if (active) instance.current?.resize();
   }, [active]);
   return (
-    <div className="col-lg-6 mb-4">
+    <div className="analytics-chart">
       <div className="card shadow-sm h-100">
         <div className="card-header bg-transparent border-bottom-0">
           <h5 className="card-title mb-0">{title}</h5>
@@ -97,9 +101,7 @@ function Breakdown({ kind, groups, periodLabel, onDrilldown }) {
       return next;
     });
   return (
-    <div
-      className={`col-xl-4 ${kind === 'expenses' ? 'col-lg-12' : 'col-lg-6'} mb-4`}
-    >
+    <div className="analytics-breakdown">
       <div className="card shadow-sm h-100">
         <div className="card-header bg-transparent border-bottom-0 d-flex justify-content-between align-items-center">
           <h5 className="card-title mb-0">
@@ -128,6 +130,19 @@ function Breakdown({ kind, groups, periodLabel, onDrilldown }) {
                   >
                     <div
                       className="category-header d-flex align-items-center"
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={expanded.has(group.name)}
+                      aria-label={`Toggle ${group.name} breakdown`}
+                      onKeyDown={(event) => {
+                        if (
+                          event.target === event.currentTarget &&
+                          ['Enter', ' '].includes(event.key)
+                        ) {
+                          event.preventDefault();
+                          toggle(group.name);
+                        }
+                      }}
                       onClick={() => toggle(group.name)}
                     >
                       <div className="flex-grow-1">
@@ -242,7 +257,14 @@ function Breakdown({ kind, groups, periodLabel, onDrilldown }) {
   );
 }
 
-export default function Analytics({ state, dispatch, onDrilldown, active }) {
+export default function Analytics({
+  state,
+  dispatch,
+  onDrilldown,
+  active,
+  theme,
+  reducedMotion,
+}) {
   const [period, setPeriod] = useState('last_12_months'),
     [month, setMonth] = useState('');
   const months = useMemo(
@@ -277,9 +299,15 @@ export default function Analytics({ state, dispatch, onDrilldown, active }) {
   );
   return (
     <>
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-        <h4 className="mb-0">Analytics Overview</h4>
-        <div className="d-flex gap-2 align-items-center">
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow">THE WHY BEHIND THE NUMBERS</p>
+          <h1>Follow the flow.</h1>
+          <p className="page-description">
+            Patterns, perspective, and a little more peace of mind.
+          </p>
+        </div>
+        <div className="analytics-period-controls">
           <label
             htmlFor="analyticsTimePeriod"
             className="form-label mb-0 text-nowrap fw-semibold small text-muted text-uppercase"
@@ -343,78 +371,71 @@ export default function Analytics({ state, dispatch, onDrilldown, active }) {
       >
         No transactions remain for the selected period and exclusions.
       </div>
-      <div className="row mb-4">
-        {[
-          ['metricIncome', 'Total Income', model.income, 'success'],
-          ['metricExpenses', 'Total Expenses', model.expenses, 'danger'],
-          [
-            'metricDelta',
-            'Net Delta',
-            model.net,
-            model.net >= 0 ? 'success' : 'danger',
-          ],
-        ].map(([id, label, amount, color], index) => (
-          <div
-            key={id}
-            className={`col-md-3 col-sm-6 ${index === 1 ? 'mt-3 mt-sm-0' : index === 2 ? 'mt-3 mt-md-0' : ''}`}
+      <div className="analytics-summary">
+        <div className="analytics-net">
+          <p className="eyebrow">NET FLOW · {model.periodLabel}</p>
+          <h2
+            id="metricDelta"
+            className={model.net >= 0 ? 'positive' : 'negative'}
           >
-            <div
-              className={`card text-center shadow-sm h-100 border-${id === 'metricDelta' ? 'primary' : color}`}
-            >
-              <div className="card-body">
-                <h6
-                  className={`card-subtitle mb-2 text-${id === 'metricDelta' ? 'primary' : color} fw-bold text-uppercase small`}
-                >
-                  {label}
-                </h6>
-                <h2
-                  id={id}
-                  className={`card-text fw-bold ${id === 'metricDelta' ? `text-${color}` : ''}`}
-                >
-                  {id === 'metricDelta'
-                    ? `${amount >= 0 ? '+' : '-'}${euro(Math.abs(amount))}`
-                    : euro(amount)}
-                </h2>
-              </div>
-            </div>
+            {model.net >= 0 ? '+' : '-'}
+            {euro(Math.abs(model.net))}
+          </h2>
+        </div>
+        <div className="analytics-in-out">
+          <div>
+            <span className="eyebrow">↙ MONEY IN</span>
+            <h2 id="metricIncome" className="positive">
+              {euro(model.income)}
+            </h2>
           </div>
-        ))}
-        <div className="col-md-3 col-sm-6 mt-3 mt-md-0">
-          <div className="card shadow-sm h-100 border-secondary">
-            <div className="card-body py-2 d-flex flex-column justify-content-center">
-              <h6 className="card-subtitle mb-2 text-secondary fw-bold text-uppercase small text-center">
-                Monthly Spend Comparison
-              </h6>
-              <div className="d-flex flex-column gap-1">
-                <div className="d-flex justify-content-between align-items-center">
-                  <span className="small text-muted">Current Month:</span>
-                  <span id="metricCurrentMonth" className="fw-bold">
-                    {euro(model.current)}{' '}
-                    <span
-                      id="metricComparisonPercent"
-                      className={`small ${model.current > model.previous ? 'text-danger' : 'text-success'}`}
-                    >
-                      ({model.percent >= 0 ? '+' : ''}
-                      {model.percent.toFixed(1)}%)
-                    </span>
-                  </span>
-                </div>
-                <div className="d-flex justify-content-between align-items-center">
-                  <span className="small text-muted">Previous Month:</span>
-                  <span id="metricPrevMonth" className="fw-bold">
-                    {euro(model.previous)}
-                  </span>
-                </div>
-              </div>
-            </div>
+          <div>
+            <span className="eyebrow">↗ MONEY OUT</span>
+            <h2 id="metricExpenses" className="negative">
+              {euro(model.expenses)}
+            </h2>
+          </div>
+        </div>
+        <div className="analytics-comparison">
+          <p className="eyebrow">MONTHLY SPEND COMPARISON</p>
+          <div>
+            <span>Current month</span>
+            <strong id="metricCurrentMonth">
+              {euro(model.current)}{' '}
+              <span
+                id="metricComparisonPercent"
+                className={
+                  model.current > model.previous ? 'negative' : 'positive'
+                }
+              >
+                ({model.percent >= 0 ? '+' : ''}
+                {model.percent.toFixed(1)}%)
+              </span>
+            </strong>
+          </div>
+          <div>
+            <span>Previous month</span>
+            <strong id="metricPrevMonth">{euro(model.previous)}</strong>
           </div>
         </div>
       </div>
-      <div className="row">
-        <ChartCard type="pie" model={model} active={active} />
-        <ChartCard type="line" model={model} active={active} />
+      <div className="analytics-charts">
+        <ChartCard
+          type="line"
+          model={model}
+          active={active}
+          theme={theme}
+          reducedMotion={reducedMotion}
+        />
+        <ChartCard
+          type="pie"
+          model={model}
+          active={active}
+          theme={theme}
+          reducedMotion={reducedMotion}
+        />
       </div>
-      <div className="row">
+      <div className="analytics-breakdowns">
         <Breakdown
           kind="expenses"
           groups={model.spending}

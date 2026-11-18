@@ -281,6 +281,26 @@ export default function ExpenseModal({
                   </div>
                 </div>
                 <hr className="mb-4" />
+                {!viewOnly && (
+                  <div className="date-shortcuts">
+                    <span>Date &amp; time</span>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary btn-sm"
+                      onClick={() => {
+                        const now = new Date();
+                        const pad = (value) => String(value).padStart(2, '0');
+                        setDraft((previous) => ({
+                          ...previous,
+                          date: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`,
+                          time: `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
+                        }));
+                      }}
+                    >
+                      <i className="bi bi-clock" aria-hidden="true" /> Now
+                    </button>
+                  </div>
+                )}
                 <div className="row g-3 mb-3">
                   <div className="col-md-4">
                     <label htmlFor="inputDate" className="form-label">

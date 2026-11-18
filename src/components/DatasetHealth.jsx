@@ -21,14 +21,16 @@ export default function DatasetHealth({
   );
   return (
     <>
-      <h4>Dataset Health</h4>
-      <p className="text-muted">
-        Review missing fields, invalid dates or amounts, and classifications
-        outside the current catalog. Tags and notes are optional. Missing
-        subcategories and explicitly uncategorized records are reminders to
-        review, not blocked transactions.
-      </p>
-      <div className="row g-3 mb-3" aria-live="polite">
+      <div className="page-heading">
+        <div>
+          <p className="eyebrow">A LITTLE HOUSEKEEPING</p>
+          <h1>Clarity starts here.</h1>
+          <p className="page-description health-description">
+            Find the missing pieces. Make every transaction count.
+          </p>
+        </div>
+      </div>
+      <div className="health-summary" aria-live="polite">
         {[
           ['cleanupTotal', 'Total transactions', report.total, ''],
           ['cleanupClean', 'No detected issues', report.clean, 'text-success'],
@@ -40,15 +42,11 @@ export default function DatasetHealth({
           ],
           ['cleanupIssueCount', 'Issues found', report.issueCount, ''],
         ].map(([id, label, value, color]) => (
-          <div key={id} className="col-6 col-lg-3">
-            <div className="card h-100">
-              <div className="card-body">
-                <h6 className="text-muted">{label}</h6>
-                <p id={id} className={`h3 mb-0 ${color}`}>
-                  {value}
-                </p>
-              </div>
-            </div>
+          <div key={id}>
+            <h6 className="text-muted">{label}</h6>
+            <p id={id} className={`h3 mb-0 ${color}`}>
+              {value}
+            </p>
           </div>
         ))}
       </div>
@@ -57,13 +55,21 @@ export default function DatasetHealth({
           ? `${Math.round((report.clean / report.total) * 100)}% of transactions have no detected issues.`
           : 'No transactions to check. Open a CSV or add transactions to get started.'}
       </p>
-      <p className="small text-muted">
-        Checks cover the entire open dataset, independently of transaction
-        search and analytics filters. Rows with invalid or missing dates or
-        amounts are excluded from analytics until corrected. Corrections stay in
-        memory until you click Save Changes; Undo Changes restores the last
-        saved data.
-      </p>
+      <details className="health-explainer">
+        <summary>What gets checked?</summary>
+        <p>
+          Missing fields, invalid dates or amounts, unknown categories and
+          incompatible subcategories. Tags and notes are optional. Missing
+          subcategories and explicitly uncategorized records are reminders to
+          review, not blocked transactions.
+        </p>
+        <p>
+          Checks cover the entire open dataset, independently of search and
+          analytics filters. Invalid dates and amounts stay outside analytics
+          until corrected. Corrections stay in memory until Save Changes; Undo
+          Changes restores your last saved data.
+        </p>
+      </details>
       <div
         id="cleanupReadOnly"
         className={`alert alert-info ${viewOnly ? '' : 'd-none'}`}

@@ -124,7 +124,20 @@ export function analyticsModel(
   };
 }
 
-export function chartConfig(type, model) {
+export function chartConfig(
+  type,
+  model,
+  { dark = false, reducedMotion = false } = {},
+) {
+  const ink = dark ? '#f3f5f1' : '#161817';
+  const muted = dark ? '#a1a69f' : '#717570';
+  const paper = dark ? '#0b0c0b' : '#ffffff';
+  const grid = dark ? '#2a2e28' : '#e4e7e2';
+  const green = dark ? '#80d7a4' : '#147a4b';
+  const red = dark ? '#f08c85' : '#c13e3b';
+  const palette = dark
+    ? [green, '#bdc7be', '#657c6a', '#bcab83', '#a0a2ba']
+    : ['#1f4932', '#849d8a', '#bfcac0', '#aa966b', '#8c8ea8'];
   return {
     type,
     data:
@@ -135,10 +148,10 @@ export function chartConfig(type, model) {
               {
                 data: model.pie.map(([, total]) => total),
                 backgroundColor: model.pie.map(
-                  (_, i) => `hsl(${(i * 137.508) % 360}, 60%, 50%)`,
+                  (_, i) => palette[i % palette.length],
                 ),
                 borderWidth: 1,
-                borderColor: '#ffffff',
+                borderColor: paper,
               },
             ],
           }
@@ -148,32 +161,53 @@ export function chartConfig(type, model) {
               {
                 label: 'Total Income',
                 data: model.monthly.map((m) => m.income),
-                borderColor: '#28a745',
-                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                borderColor: green,
+                backgroundColor: dark ? '#80d7a410' : '#147a4b0a',
                 fill: true,
                 tension: 0.3,
-                pointRadius: 4,
-                pointBackgroundColor: '#28a745',
+                pointRadius: 3,
+                pointBackgroundColor: green,
               },
               {
                 label: 'Total Expenses',
                 data: model.monthly.map((m) => m.expenses),
-                borderColor: '#dc3545',
-                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                borderColor: red,
+                backgroundColor: dark ? '#f08c8510' : '#c13e3b0a',
                 fill: true,
                 tension: 0.3,
-                pointRadius: 4,
-                pointBackgroundColor: '#dc3545',
+                pointRadius: 3,
+                pointBackgroundColor: red,
               },
             ],
           },
     options: {
       locale: 'en-GB',
+      color: muted,
+      animation: reducedMotion ? false : { duration: 450 },
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: type === 'pie' ? 'right' : 'top' },
+        legend: {
+          position: type === 'pie' ? 'right' : 'top',
+          labels: {
+            color: muted,
+            boxWidth: 8,
+            boxHeight: 8,
+            usePointStyle: true,
+            pointStyle: 'circle',
+            padding: 17,
+            font: {
+              size: 10,
+              family: '-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
+            },
+          },
+        },
         tooltip: {
+          backgroundColor: ink,
+          titleColor: paper,
+          bodyColor: paper,
+          padding: 12,
+          cornerRadius: 7,
           callbacks: {
             label: (context) =>
               type === 'pie'
@@ -186,8 +220,17 @@ export function chartConfig(type, model) {
         ? {
             interaction: { mode: 'index', intersect: false },
             scales: {
-              y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-              x: { grid: { display: false } },
+              y: {
+                beginAtZero: true,
+                grid: { color: grid },
+                border: { display: false },
+                ticks: { color: muted, font: { size: 9 } },
+              },
+              x: {
+                grid: { display: false },
+                border: { display: false },
+                ticks: { color: muted, font: { size: 9 }, maxTicksLimit: 6 },
+              },
             },
           }
         : {}),

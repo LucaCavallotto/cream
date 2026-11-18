@@ -265,6 +265,8 @@ test('download cleans up its anchor and releases the Blob URL after the browser 
     },
   });
   assert.equal(anchor.download, 'export.csv');
+  assert.equal(anchor.target, '_blank');
+  assert.equal(anchor.rel, 'noopener');
   assert.deepEqual(events, ['append', 'click', 'remove']);
   release();
   assert.equal(events.at(-1), 'blob:csv');
