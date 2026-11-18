@@ -283,3 +283,7 @@ Local commits do not trigger GitHub Actions. For a direct push to `main`, tests 
 
 ---
 *"Cash Rules Everything Around Me"*
+
+### Automatic GitHub Pages deployment
+
+With **Settings → Pages → Source → GitHub Actions** enabled, pushes to `main` run the complete test suite and then build and deploy `dist/`. Deployment waits for **Test suite** to succeed; failing tests leave the previous published version online. Pull requests run tests without deploying. The workflow can also be started manually from the Actions tab on `main`. No generated build files need to be committed.
