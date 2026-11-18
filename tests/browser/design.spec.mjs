@@ -297,3 +297,15 @@ test('subcategory choices narrow by category and clearing the category restores 
   await page.locator('#inputSubcategory').selectOption(JSON.stringify(['Income', 'Salary']));
   await expect(page.locator('#inputCategory')).toHaveValue('Income');
 });
+
+test('analytics clear filters restores the period and all exclusions', async ({ page }) => {
+  await launch(page); await openRows(page, [row()]); await tab(page, 'Analytics');
+  await expect(page.locator('#analyticsExclusionSummary')).toBeHidden();
+  await page.getByText('Analytics exclusions', { exact: true }).click();
+  await page.locator('#analyticsExcludeAll').click();
+  await page.locator('#analyticsTimePeriod').selectOption('overall');
+  await page.getByRole('button', { name: 'Clear filters', exact: true }).click();
+  await expect(page.locator('#analyticsTimePeriod')).toHaveValue('last_12_months');
+  await expect(page.locator('#metricExpenses')).toHaveText('€1.00');
+  await expect(page.locator('#analyticsExclusionSummary')).toContainText('0 categories');
+});

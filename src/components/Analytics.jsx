@@ -1,3 +1,4 @@
+import { createAnalyticsExclusions } from '../../assets/js/analyticsScope.js';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
 import { analyticsModel, chartConfig } from '../../assets/js/analyticsModel.js';
@@ -266,7 +267,8 @@ export default function Analytics({
   reducedMotion,
 }) {
   const [period, setPeriod] = useState('last_12_months'),
-    [month, setMonth] = useState('');
+    [month, setMonth] = useState(''),
+    [resetToken, setResetToken] = useState(0);
   const months = useMemo(
     () =>
       [
@@ -356,9 +358,11 @@ export default function Analytics({
               ))}
             </select>
           </div>
+          <button className="btn btn-outline-secondary" onClick={() => { setPeriod('last_12_months'); setMonth(''); dispatch({ type: 'exclusions', value: createAnalyticsExclusions() }); setResetToken(value => value + 1); }}>Clear filters</button>
         </div>
       </div>
       <AnalyticsFilters
+        resetToken={resetToken}
         transactions={state.transactions}
         exclusions={state.analyticsExclusions}
         onChange={(value) => dispatch({ type: 'exclusions', value })}

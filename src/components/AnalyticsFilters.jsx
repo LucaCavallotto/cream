@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   createAnalyticsExclusions,
   getAnalyticsExclusionOptions,
@@ -12,11 +12,13 @@ export default function AnalyticsFilters({
   exclusions,
   onChange,
   model,
+  resetToken,
 }) {
   const [category, setCategory] = useState(''),
     [sub, setSub] = useState(''),
     [search, setSearch] = useState(''),
     [limit, setLimit] = useState(50);
+  useEffect(() => { setCategory(''); setSub(''); setSearch(''); setLimit(50); }, [resetToken]);
   const groups = getAnalyticsExclusionOptions(transactions, exclusions);
   const chosen = category && groups.has(JSON.parse(category)) ? category : '';
   const availableSubs = chosen
@@ -75,6 +77,22 @@ export default function AnalyticsFilters({
           Analytics exclusions
         </summary>
         <div className="card-body">
+      <div
+        id="analyticsExclusionSummary"
+        role="status"
+        aria-live="polite"
+        className={`alert small mb-3 ${active ? 'alert-warning' : 'alert-info'}`}
+      >
+        Excluded:{' '}
+        {counted(exclusions.categories.size, 'category', 'categories')},{' '}
+        {counted(exclusions.subcategories.size, 'subcategory', 'subcategories')}
+        , {counted(exclusions.transactions.size, 'individual selection')}.{' '}
+        {counted(model.selection.excluded.length, 'transaction')} total;{' '}
+        {model.excluded.length} in the selected period.
+        {model.selection.invalidCount
+          ? ` ${counted(model.selection.invalidCount, 'invalid record')} also outside analytics.`
+          : ''}
+      </div>
           <div className="d-flex flex-wrap gap-2 mb-3">
             <button
               id="analyticsExcludeAll"
@@ -298,22 +316,7 @@ export default function AnalyticsFilters({
           </div>
         </div>
       </details>
-      <div
-        id="analyticsExclusionSummary"
-        role="status"
-        aria-live="polite"
-        className={`alert small mb-3 ${active ? 'alert-warning' : 'alert-info'}`}
-      >
-        Excluded:{' '}
-        {counted(exclusions.categories.size, 'category', 'categories')},{' '}
-        {counted(exclusions.subcategories.size, 'subcategory', 'subcategories')}
-        , {counted(exclusions.transactions.size, 'individual selection')}.{' '}
-        {counted(model.selection.excluded.length, 'transaction')} total;{' '}
-        {model.excluded.length} in the selected period.
-        {model.selection.invalidCount
-          ? ` ${counted(model.selection.invalidCount, 'invalid record')} also outside analytics.`
-          : ''}
-      </div>
+
     </>
   );
 }

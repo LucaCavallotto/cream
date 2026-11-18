@@ -296,3 +296,5 @@ Local commits do not trigger GitHub Actions. For a direct push to `main`, tests 
 With **Settings → Pages → Source → GitHub Actions** enabled, pushes to `main` run the logic test suite and then build and deploy `dist/`. Deployment waits for **Node.js tests** to succeed; failing tests leave the previous published version online. Pull requests run tests without deploying. The workflow can also be started manually from the Actions tab on `main`. No generated build files need to be committed.
 
 Travel supports both the original `Transport` subcategory and `Trip Transport`; existing CSV classifications remain valid. In the transaction editor, choosing a category narrows the subcategory list. Clear the category to browse all groups and infer the parent from the chosen subcategory.
+
+In Analytics, **Clear filters** restores Last 12 Months and removes all exclusions and exclusion-search selections. The exclusion counts appear inside the expandable exclusions panel.
