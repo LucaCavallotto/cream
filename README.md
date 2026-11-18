@@ -11,6 +11,7 @@ A modular, browser-based personal finance manager that works directly with your 
 - **Comprehensive Analytics:** Detailed hierarchical breakdowns for Spending, Income, and Tags with interactive "Show More" functionality.
 - **Advanced Search & Sorting:** Quickly find transactions by description or sort by any column.
 - **Dark Mode Support:** Automatically syncs with your system's light/dark preference.
+- **Dataset Health:** Find missing or invalid values and classification problems, then review each affected transaction in the standard edit modal.
 
 ## Project Structure
 
@@ -105,7 +106,17 @@ For a single line, the form is prefilled so you can review or adjust it before a
 - **Undo:** If you made a mistake before saving, use the **"Undo Changes"** button to revert to the last saved state.
 - **Searching:** Use the search bar in the Transactions tab to filter by description.
 
-### 4. Categorization
+### 4. Dataset Health
+
+Open the **Dataset Health** tab after loading a CSV to see the total transaction count, records with no detected issues, records to review, and the number of individual issues. A transaction may have several issues, so issue counts can exceed the number of affected records. The checks always cover the whole dataset, regardless of transaction search or analytics filters.
+
+Checks include missing or invalid dates and amounts, blank descriptions, missing categories or subcategories, categories absent from `data/categories.json`, subcategories not belonging to the selected category, and explicitly uncategorized records. Empty tags and notes are allowed. Missing subcategories are completeness reminders; they do not prevent saving. These checks cannot determine whether an otherwise valid transaction represents the correct real-world expense.
+
+Use **Filter by issue** to focus on a problem, then **Review / Edit** to open the existing transaction modal. The modal shows the original issues, including invalid source values that a date or number input cannot display. Saving a correction immediately refreshes the counts and list; a record remains listed until all of its issues are resolved. Long lists load 50 records at a time. View Only Mode allows inspection without editing.
+
+Missing and invalid imported amounts are preserved rather than silently replaced with zero. Rows with missing or invalid dates or amounts are excluded from analytics until repaired; classification issues alone do not exclude a transaction. No records are automatically changed or deleted by the health check. Click **Save Changes** to write corrections to the CSV, or **Undo Changes** to restore the last saved state and its health report.
+
+### 5. Categorization
 Categories and subcategories are loaded from `data/categories.json`. You can customize this file to match your personal spending habits.
 
 - **Treats:** Expenses you pay for someone else, such as a friend's coffee (`Coffee`), drinks (`Drinks`), a meal (`Meals`), snacks, or an experience. Use `Bar` / `Food & Dining` for your own consumption and `Shopping / Gifts to Buy` for purchased gifts. If a payment covers both your share and a treat, split it into two transactions when you want to track the shares separately.

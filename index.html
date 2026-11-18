@@ -115,6 +115,10 @@
             data-bs-target="#analytics-tab-pane" type="button" role="tab" aria-controls="analytics-tab-pane"
             aria-selected="false">Analytics</button>
         </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link fw-semibold" id="cleanup-tab" data-bs-toggle="tab" data-bs-target="#cleanup-tab-pane"
+            type="button" role="tab" aria-controls="cleanup-tab-pane" aria-selected="false">Dataset Health</button>
+        </li>
       </ul>
 
       <div class="tab-content px-3" id="appTabsContent">
@@ -387,6 +391,40 @@
           </div>
         </div>
 
+        <div class="tab-pane fade" id="cleanup-tab-pane" role="tabpanel" aria-labelledby="cleanup-tab" tabindex="0">
+          <h4>Dataset Health</h4>
+          <p class="text-muted">Review missing fields, invalid dates or amounts, and classifications outside the current catalog.
+            Tags and notes are optional. Missing subcategories and explicitly uncategorized records are reminders to review, not blocked transactions.</p>
+          <div class="row g-3 mb-3" aria-live="polite">
+            <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body">
+              <h6 class="text-muted">Total transactions</h6><p id="cleanupTotal" class="h3 mb-0">0</p>
+            </div></div></div>
+            <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body">
+              <h6 class="text-muted">No detected issues</h6><p id="cleanupClean" class="h3 mb-0 text-success">0</p>
+            </div></div></div>
+            <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body">
+              <h6 class="text-muted">Transactions to review</h6><p id="cleanupDirty" class="h3 mb-0 text-warning">0</p>
+            </div></div></div>
+            <div class="col-6 col-lg-3"><div class="card h-100"><div class="card-body">
+              <h6 class="text-muted">Issues found</h6><p id="cleanupIssueCount" class="h3 mb-0">0</p>
+            </div></div></div>
+          </div>
+          <p id="cleanupStatus" role="status"></p>
+          <p class="small text-muted">Checks cover the entire open dataset, independently of transaction search and analytics filters.
+            Rows with invalid or missing dates or amounts are excluded from analytics until corrected.
+            Corrections stay in memory until you click Save Changes; Undo Changes restores the last saved data.</p>
+          <div id="cleanupReadOnly" class="alert alert-info d-none" role="status">View Only Mode is active. You can inspect transactions, but editing is disabled.</div>
+          <div class="mb-3" style="max-width: 420px;">
+            <label for="cleanupFilter" class="form-label">Filter by issue</label>
+            <select id="cleanupFilter" class="form-select"><option value="">All issues</option></select>
+          </div>
+          <div id="cleanupRecords" class="list-group mb-3"></div>
+          <div id="cleanupEmpty" class="alert alert-success d-none" role="status"></div>
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <span id="cleanupVisibleCount" class="small text-muted"></span>
+            <button id="cleanupShowMore" type="button" class="btn btn-outline-secondary d-none">Show 50 more</button>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -400,6 +438,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+          <div id="transactionHealthIssues" class="alert alert-warning d-none" role="status"></div>
           <form id="expenseForm">
             <input type="hidden" id="editTransactionId" value="">
 

@@ -1,5 +1,6 @@
 import { state, clearUnsavedChanges, normalizeTags } from './app.js';
 import { renderApp, showStatusMessage } from './ui.js';
+import { parseImportedAmount } from './datasetHealth.js';
 
 const REQUIRED_HEADERS = ["DateTime", "Amount", "Description", "Category", "Subcategory", "Tags", "Notes"];
 
@@ -150,8 +151,12 @@ async function handleOpenFilePicker() {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = '.csv';
+      input.hidden = true;
+      document.body.appendChild(input);
+      input.oncancel = () => input.remove();
       input.onchange = async (e) => {
         const file = e.target.files[0];
+        input.remove();
         if (!file) return;
         const text = await file.text();
         if (parseCSV(text)) {
@@ -221,7 +226,7 @@ function parseCSV(csvText) {
       return {
         id: crypto.randomUUID(),
         DateTime: row.DateTime || '',
-        Amount: parseFloat(row.Amount) || 0,
+        Amount: parseImportedAmount(row.Amount),
         Description: row.Description || '',
         Category: row.Category || '',
         Subcategory: row.Subcategory || '',

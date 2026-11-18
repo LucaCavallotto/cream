@@ -1,6 +1,8 @@
 import { state, markUnsavedChanges, normalizeTags } from './app.js';
 import { renderAnalytics } from './analytics.js';
 import { parseInlineRow } from './inlineInput.js';
+import { renderDatasetHealth } from './cleanup.js';
+import { getTransactionIssues, isValidTransactionDate } from './datasetHealth.js';
 
 const categoryMap = {
   'food': { icon: 'bi-cup-hot-fill', color: 'bg-danger' },
@@ -438,6 +440,7 @@ function resetForm() {
   document.getElementById('expenseModalLabel').textContent = 'Add Transaction';
   populateCategoriesDropdown();
   showInlineFeedback([]);
+  document.getElementById('transactionHealthIssues').classList.add('d-none');
 
   document.getElementById('inputDate').required = true;
   document.getElementById('inputAmount').required = true;
@@ -480,6 +483,7 @@ function formatDate(isoString) {
  * Renders the transactions table in sorted order.
  */
 export function renderTransactions() {
+  renderDatasetHealth(state, editTransaction);
   const tbody = document.getElementById('transactionsTbody');
   const emptyState = document.getElementById('emptyState');
   const tableContainer = document.getElementById('transactionsTable').parentElement;
@@ -582,8 +586,9 @@ export function renderTransactions() {
       txCounter++;
 
       const isIncome = t.Amount >= 0;
-      const amountStr = isIncome ? `+${t.Amount.toFixed(2)} €` : `${t.Amount.toFixed(2)} €`;
-      const amountClass = isIncome ? 'text-success fw-bold' : 'text-danger fw-bold';
+      const validAmount = Number.isFinite(t.Amount);
+      const amountStr = validAmount ? `${isIncome ? '+' : ''}${t.Amount.toFixed(2)} €` : 'Invalid / missing amount';
+      const amountClass = !validAmount ? 'text-warning fw-bold' : isIncome ? 'text-success fw-bold' : 'text-danger fw-bold';
       const meta = getCategoryMeta(t.Category);
       const isSelected = state.selectedIds.includes(t.id);
 
@@ -808,11 +813,18 @@ function editTransaction(id) {
 
   document.getElementById('editTransactionId').value = t.id;
 
+  const healthIssues = document.getElementById('transactionHealthIssues');
+  const issues = getTransactionIssues(t, state.categories);
+  healthIssues.textContent = issues.map(issue => issue.message).join(' · ');
+  healthIssues.classList.toggle('d-none', !issues.length);
+  document.getElementById('inputDate').value = '';
+  document.getElementById('inputTime').value = '';
+
   if (t.DateTime) {
     const [d, tPart] = t.DateTime.split('T');
     document.getElementById('inputDate').value = d;
     if (tPart) {
-      document.getElementById('inputTime').value = tPart.substring(0, 8);
+      document.getElementById('inputTime').value = tPart.match(/^\d{2}:\d{2}(?::\d{2})?/)?.[0] || '';
     }
   }
 
@@ -963,7 +975,7 @@ function handleTransactionSubmit(e) {
   } else {
     // Standard Single Add/Edit
     const DateVal = document.getElementById('inputDate').value;
-    const TimeVal = document.getElementById('inputTime') ? document.getElementById('inputTime').value : '00:00:00';
+    const TimeVal = document.getElementById('inputTime').value || '00:00:00';
 
     const tempDate = new Date(`${DateVal}T${TimeVal}`);
     let isoDateTime = `${DateVal}T${TimeVal.length === 5 ? TimeVal + ':00' : TimeVal}${getTimezoneOffset(tempDate)}`;
@@ -973,8 +985,21 @@ function handleTransactionSubmit(e) {
       isoDateTime = inlineDateTime;
     }
 
-    const Amount = parseFloat(document.getElementById('inputAmount').value) || 0;
-    const Description = document.getElementById('inputDescription').value;
+    // Classification-only repairs must preserve the original timezone and precision.
+    const original = id ? state.transactions.find(t => t.id === id) : null;
+    if (!parsed && original && isValidTransactionDate(original.DateTime) &&
+        DateVal === original.DateTime.slice(0, 10) && TimeVal === original.DateTime.slice(11, 19)) {
+      isoDateTime = original.DateTime;
+    }
+
+    const amountInput = document.getElementById('inputAmount').value;
+    const Description = document.getElementById('inputDescription').value.trim();
+    const validated = parseInlineRow([isoDateTime, amountInput, Description], state.categories, 1);
+    if (validated.error) {
+      showInlineFeedback([validated.error]);
+      return;
+    }
+    const Amount = validated.transaction.Amount;
 
     if (id) {
       // Perform Edit

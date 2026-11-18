@@ -1,4 +1,5 @@
 import { state } from './app.js';
+import { isValidTransactionDate } from './datasetHealth.js';
 
 let pieChartInstance = null;
 let lineChartInstance = null;
@@ -86,7 +87,8 @@ export function renderAnalytics() {
   const period = periodSelect ? periodSelect.value : 'overall';
   const monthSelect = document.getElementById('analyticsSpecificMonth');
   
-  let transactions = state.transactions;
+  const validTransactions = state.transactions.filter(t => Number.isFinite(t.Amount) && isValidTransactionDate(t.DateTime));
+  let transactions = validTransactions;
   let periodLabel = 'Overall';
 
   // Filter based on period
@@ -95,7 +97,7 @@ export function renderAnalytics() {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
 
-    transactions = state.transactions.filter(t => {
+    transactions = validTransactions.filter(t => {
       const tDate = new Date(t.DateTime);
       if (isNaN(tDate)) return false;
 
@@ -168,8 +170,8 @@ export function renderAnalytics() {
   }
 
   updatePieChart(categoryExpenses);
-  updateLineChart(state.transactions, periodLabel);
-  updateComparisonMetrics(state.transactions);
+  updateLineChart(validTransactions, periodLabel);
+  updateComparisonMetrics(validTransactions);
   renderDetailedCategoryBreakdown(transactions, periodLabel);
   renderDetailedIncomeBreakdown(transactions, periodLabel);
   renderDetailedTagsBreakdown(transactions, periodLabel);
