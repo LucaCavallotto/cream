@@ -147,6 +147,11 @@ export function setupUIEvents() {
     inputCategory.addEventListener('change', handleCategoryChange);
   }
 
+  const inputSubcategory = document.getElementById('inputSubcategory');
+  if (inputSubcategory) {
+    inputSubcategory.addEventListener('change', handleSubcategoryChange);
+  }
+
 
 
   // Attach sorting events to sortable headers
@@ -357,6 +362,7 @@ function populateCategoriesDropdown() {
 
   if (select) select.innerHTML = options + optionsHtml;
   if (bulkSelect) bulkSelect.innerHTML = bulkOptions + optionsHtml;
+  populateSubcategoriesDropdown();
 
   if (bulkSubSelect) {
     let bulkSubHtml = bulkSubOptions;
@@ -375,20 +381,50 @@ function populateCategoriesDropdown() {
 }
 
 /**
- * Updates the subcategory dropdown based on the chosen category.
+ * Keeps every category/subcategory pair available, including an imported value
+ * when editing a transaction whose classification is absent from the catalog.
  */
-function handleCategoryChange(e) {
-  const category = e.target.value;
+function populateSubcategoriesDropdown(transaction = null) {
   const subSelect = document.getElementById('inputSubcategory');
   subSelect.innerHTML = '<option value="" disabled selected>Select Subcategory</option>';
 
-  if (state.categories[category]) {
-    state.categories[category].forEach(sub => {
+  const categories = Object.fromEntries(
+    Object.entries(state.categories).map(([category, subs]) => [category, [...subs]])
+  );
+  if (transaction && transaction.Subcategory) {
+    const subs = categories[transaction.Category] || [];
+    if (!subs.includes(transaction.Subcategory)) subs.push(transaction.Subcategory);
+    categories[transaction.Category] = subs;
+  }
+
+  Object.entries(categories).forEach(([category, subs]) => {
+    if (!subs.length) return;
+    const group = document.createElement('optgroup');
+    group.label = category || '(No Category)';
+    subs.forEach(sub => {
       const opt = document.createElement('option');
-      opt.value = sub;
+      opt.value = JSON.stringify([category, sub]);
+      opt.dataset.category = category;
+      opt.dataset.subcategory = sub;
       opt.textContent = sub;
-      subSelect.appendChild(opt);
+      group.appendChild(opt);
     });
+    subSelect.appendChild(group);
+  });
+}
+
+function handleCategoryChange(e) {
+  const subSelect = document.getElementById('inputSubcategory');
+  const option = subSelect.selectedOptions[0];
+  if (option && option.dataset.category !== e.target.value) {
+    subSelect.value = '';
+  }
+}
+
+function handleSubcategoryChange(e) {
+  const option = e.target.selectedOptions[0];
+  if (option && option.dataset.category !== undefined) {
+    document.getElementById('inputCategory').value = option.dataset.category;
   }
 }
 
@@ -400,7 +436,7 @@ function resetForm() {
   document.getElementById('editTransactionId').value = '';
   document.getElementById('inlineInput').value = '';
   document.getElementById('expenseModalLabel').textContent = 'Add Transaction';
-  document.getElementById('inputSubcategory').innerHTML = '<option value="" disabled selected>Select Subcategory</option>';
+  populateCategoriesDropdown();
 
   document.getElementById('inputDate').required = true;
   document.getElementById('inputAmount').required = true;
@@ -783,10 +819,18 @@ function editTransaction(id) {
   document.getElementById('inputDescription').value = t.Description;
 
   const catSelect = document.getElementById('inputCategory');
+  // Rebuild to discard temporary options from a previously edited transaction.
+  populateCategoriesDropdown();
+  if (t.Category && !Array.from(catSelect.options).some(option => option.value === t.Category)) {
+    const option = document.createElement('option');
+    option.value = t.Category;
+    option.textContent = t.Category;
+    catSelect.appendChild(option);
+  }
   catSelect.value = t.Category;
-  catSelect.dispatchEvent(new Event('change')); // Trigger population of subcategory dropdown
-
-  document.getElementById('inputSubcategory').value = t.Subcategory;
+  populateSubcategoriesDropdown(t);
+  document.getElementById('inputSubcategory').value = t.Subcategory
+    ? JSON.stringify([t.Category, t.Subcategory]) : '';
   document.getElementById('inputTags').value = t.Tags;
   document.getElementById('inputNotes').value = t.Notes;
 
@@ -866,7 +910,8 @@ function handleTransactionSubmit(e) {
   const lines = inlineVal.split('\n').map(l => l.trim()).filter(l => l);
 
   const Category = document.getElementById('inputCategory').value || 'Uncategorized';
-  const Subcategory = document.getElementById('inputSubcategory').value || '';
+  const subcategoryOption = document.getElementById('inputSubcategory').selectedOptions[0];
+  const Subcategory = subcategoryOption?.dataset.subcategory || '';
   const Tags = normalizeTags(document.getElementById('inputTags').value);
   const Notes = document.getElementById('inputNotes').value;
 
