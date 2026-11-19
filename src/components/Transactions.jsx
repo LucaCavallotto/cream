@@ -1,3 +1,4 @@
+import { isValidTransactionDate } from '../../assets/js/datasetHealth.js';
 import { drilldownTransactions } from '../../assets/js/analyticsNavigation.js';
 import TransactionFilters from './TransactionFilters.jsx';
 import { matchesTransactionFilters } from '../../assets/js/transactionFilters.js';
@@ -378,10 +379,11 @@ export default function Transactions({
           </thead>
           <tbody id="transactionsTbody">
             {rows.map((t, index) => {
-              const year = t.DateTime.slice(0, 4),
-                month = t.DateTime.slice(5, 7),
+              const date = new Date(t.DateTime),
+                year = String(date.getFullYear()),
+                month = String(date.getMonth() + 1).padStart(2, '0'),
                 previous = rows[index - 1];
-              const dated = state.sort.column === 'Date' && t.DateTime;
+              const dated = state.sort.column === 'Date' && isValidTransactionDate(t.DateTime);
               const selected = state.selectedIds.includes(t.id),
                 meta = getCategoryMeta(t.Category);
               const valid = Number.isFinite(t.Amount),
@@ -397,7 +399,7 @@ export default function Transactions({
               return (
                 <Fragment key={t.id}>
                   {dated &&
-                    (!previous || previous.DateTime.slice(0, 4) !== year) && (
+                    (!previous || String(new Date(previous.DateTime).getFullYear()) !== year) && (
                       <tr className="year-divider-row divider-row">
                         <td
                           colSpan={8}
@@ -409,8 +411,7 @@ export default function Transactions({
                     )}
                   {dated &&
                     (!previous ||
-                      previous.DateTime.slice(0, 7) !==
-                        t.DateTime.slice(0, 7)) && (
+                      new Date(previous.DateTime).getMonth() !== date.getMonth() || new Date(previous.DateTime).getFullYear() !== date.getFullYear()) && (
                       <tr className="month-divider-row divider-row">
                         <td
                           colSpan={8}

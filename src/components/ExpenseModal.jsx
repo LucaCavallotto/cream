@@ -8,7 +8,7 @@ import {
   isValidTransactionDate,
 } from '../../assets/js/datasetHealth.js';
 import { normalizeTags } from '../../assets/js/transactions.js';
-import { inlineDateTime, timezoneOffset } from '../../assets/js/dateTime.js';
+import { formatDate, inlineDateTime, timezoneOffset } from '../../assets/js/dateTime.js';
 import TagInput from './TagInput.jsx';
 
 const timePart = (value) =>
@@ -263,7 +263,7 @@ export default function ExpenseModal({
                   value={transaction?.id || ''}
                   readOnly
                 />
-                <div className="mb-4 p-3 bg-body-tertiary rounded border border-primary-subtle">
+                {!viewOnly && <div className="mb-4 p-3 bg-body-tertiary rounded border border-primary-subtle">
                   <label
                     htmlFor="inlineInput"
                     className="form-label fw-bold text-primary"
@@ -297,6 +297,7 @@ export default function ExpenseModal({
                     {messages.join('\n')}
                   </div>
                 </div>
+                }
                 <hr className="mb-4" />
                 {!viewOnly && (
                   <div className="date-shortcuts">
@@ -318,8 +319,9 @@ export default function ExpenseModal({
                     </button>
                   </div>
                 )}
+                {viewOnly && <p className="transaction-display-date"><strong>Date &amp; time</strong><br />{formatDate(transaction?.DateTime)}</p>}
                 <div className="row g-3 mb-3">
-                  <div className="col-md-4">
+                  <div className={viewOnly ? 'd-none' : 'col-md-4'}>
                     <label htmlFor="inputDate" className="form-label">
                       Date <span className="text-danger">*</span>
                     </label>
@@ -333,7 +335,7 @@ export default function ExpenseModal({
                       onChange={(e) => update('date', e.target.value)}
                     />
                   </div>
-                  <div className="col-md-4">
+                  <div className={viewOnly ? 'd-none' : 'col-md-4'}>
                     <label htmlFor="inputTime" className="form-label">
                       Time <span className="text-muted">(Optional)</span>
                     </label>

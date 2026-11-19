@@ -1,3 +1,4 @@
+import { formatDate } from '../../assets/js/dateTime.js';
 import { useEffect, useState } from 'react';
 import {
   createAnalyticsExclusions,
@@ -274,7 +275,7 @@ export default function AnalyticsFilters({
                             className="form-check-input flex-shrink-0 mt-1"
                             checked={isExcludedFromAnalytics(t, exclusions)}
                             disabled={byRule}
-                            aria-label={`Exclude transaction: ${t.Description || '(Missing description)'} (${t.DateTime || 'No date'})`}
+                            aria-label={`Exclude transaction: ${t.Description || '(Missing description)'} (${formatDate(t.DateTime)})`}
                             onChange={(e) =>
                               mutate((next) =>
                                 e.target.checked
@@ -284,7 +285,7 @@ export default function AnalyticsFilters({
                             }
                           />
                           <span className="small text-break">
-                            {t.DateTime || '(No date)'} ·{' '}
+                            {formatDate(t.DateTime)} ·{' '}
                             {t.Description || '(Missing description)'} ·{' '}
                             {Number.isFinite(t.Amount)
                               ? `€${t.Amount.toFixed(2)}`

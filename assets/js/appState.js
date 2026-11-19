@@ -7,7 +7,7 @@ import {
 } from './analyticsNavigation.js';
 import { normalizeTags } from './transactions.js';
 
-export function createAppState(viewOnlyMode = false) {
+export function createAppState(viewOnlyMode = false, deviceReadOnly = false) {
   return {
     fileName: '',
     fileHandle: null,
@@ -19,6 +19,7 @@ export function createAppState(viewOnlyMode = false) {
     catalogAdditions: {},
     ready: false,
     viewOnlyMode,
+    deviceReadOnly,
     sort: { column: 'Date', direction: 'desc' },
     searchQuery: '',
     searchText: '',
@@ -52,7 +53,7 @@ export function appReducer(state, action) {
     }
     case 'open':
       return {
-        ...createAppState(state.viewOnlyMode),
+        ...createAppState(state.viewOnlyMode, state.deviceReadOnly),
         ...action.session,
         suggestedCategories: state.suggestedCategories,
         categories: buildCatalog(state.suggestedCategories, action.session.transactions),
@@ -62,7 +63,7 @@ export function appReducer(state, action) {
       };
     case 'close':
       return {
-        ...createAppState(state.viewOnlyMode),
+        ...createAppState(state.viewOnlyMode, state.deviceReadOnly),
         suggestedCategories: state.suggestedCategories,
         categories: buildCatalog(state.suggestedCategories),
         ready: state.ready,
@@ -167,6 +168,7 @@ export function appReducer(state, action) {
     case 'select':
       return { ...state, selectedIds: action.ids };
     case 'viewOnly':
+      if (state.deviceReadOnly) return state;
       return {
         ...state,
         viewOnlyMode: !state.viewOnlyMode,

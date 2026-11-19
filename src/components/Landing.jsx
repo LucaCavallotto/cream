@@ -1,6 +1,7 @@
 import Star from './Star.jsx';
 export default function Landing({
   ready,
+  readOnly,
   onCreate,
   onOpen,
   onDemo,
@@ -26,7 +27,7 @@ export default function Landing({
             Bring your transactions together and see
             <br className="desktop-break" /> the bigger picture.
           </p>
-          <button
+          {!readOnly && <button
             id="btnCreateNewFile"
             className="btn btn-primary landing-create"
             disabled={!ready}
@@ -34,7 +35,7 @@ export default function Landing({
           >
             Create New File{' '}
             <i className="bi bi-arrow-up-right" aria-hidden="true" />
-          </button>
+          </button>}
           <button
             className="text-action landing-demo"
             disabled={!ready || demoLoading}
@@ -76,8 +77,7 @@ export default function Landing({
                 The whole picture.
               </h2>
               <p>
-                Drop your CSV here to open it. Starting fresh? Create a new file
-                below.
+                {readOnly ? 'Open your CSV to explore it. Editing is available on a computer.' : 'Drop your CSV here to open it, or create a new file to start fresh.'}
               </p>
             </div>
             <button

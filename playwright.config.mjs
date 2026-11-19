@@ -24,6 +24,7 @@ export default defineConfig({
     { name: 'chromium', testIgnore: /mobile\.spec\.mjs/, use: { browserName: 'chromium' } },
     { name: 'firefox', testIgnore: /mobile\.spec\.mjs/, use: { browserName: 'firefox' } },
     { name: 'webkit', testIgnore: /mobile\.spec\.mjs/, use: { browserName: 'webkit' } },
+    { name: 'mobile-android', testMatch: /mobile\.spec\.mjs/, use: { ...devices['Pixel 7'], browserName: 'chromium' } },
     { name: 'mobile-webkit', testMatch: /mobile\.spec\.mjs/, use: { ...devices['iPhone 13'], browserName: 'webkit' } }
   ]
 });

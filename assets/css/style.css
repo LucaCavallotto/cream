@@ -3280,3 +3280,15 @@ button.cream-wordmark { padding: 0; border: 0; background: transparent; color: v
 button.cream-wordmark:hover { color: var(--green); }
 .transaction-filters { padding: 14px 18px; }
 .transaction-filters summary { cursor: pointer; font-size: 13px; font-weight: 550; }
+
+/* Read-only inspection keeps useful information ahead of unavailable controls. */
+.transaction-display-date { line-height: 1.65; }
+@media (max-width: 767.98px) {
+  .health-explainer { overflow-wrap: anywhere; }
+  #cleanupRecords .list-group-item > div { flex-wrap: wrap; }
+  #cleanupRecords .list-group-item button { min-height: 44px; }
+  .analytics-period-controls { gap: .65rem; }
+  .modal-dialog { margin: .65rem; }
+  .modal-content { max-width: 100%; }
+  .classification-create .d-flex { flex-wrap: wrap; }
+}

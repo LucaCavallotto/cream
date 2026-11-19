@@ -38,8 +38,9 @@ test('timezone suffixes support both signs and non-hour offsets', () => {
   assert.equal(timezoneOffset({ getTimezoneOffset: () => -345 }), '+05:45');
 });
 
-test('display dates use stable day/month order and retain malformed source text for repair', () => {
-  assert.equal(formatDate('2026-11-02T14:28:36'), '02/11/2026 14:28');
-  assert.equal(formatDate('invalid-date'), 'invalid-date');
-  assert.equal(formatDate(''), '');
+test('display dates use local DD-MM-YYYY HH:MM:SS and mark invalid or missing dates', () => {
+  assert.equal(formatDate('2026-11-02T14:28:36'), '02-11-2026 14:28:36');
+  assert.equal(formatDate('invalid-date'), 'Invalid date');
+  assert.equal(formatDate(''), 'Missing date');
+  assert.equal(formatDate('2026-02-30'), 'Invalid date');
 });

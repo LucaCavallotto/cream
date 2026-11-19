@@ -110,3 +110,15 @@ test('read-only mobile header stays on one row and explains how to edit on a com
   await expect(page.getByRole('dialog')).toBeHidden();
   await expect(page.locator('#textViewOnly')).toBeFocused();
 });
+
+test('smartphone inspection hides write-only entry controls and shows local human dates', async ({ page }) => {
+  await launch(page);
+  await expect(page.locator('#btnCreateNewFile')).toBeHidden();
+  await openRows(page, [row('Timezone sample', -1, 'Bar', 'Coffee', '2026-11-02T23:30:36-05:00')]);
+  await expect(page.locator('#btnToggleViewOnly')).toBeHidden();
+  await expect(page.locator('#btnSelectMode')).toBeHidden();
+  await expect(page.locator('#transactionsTbody')).toContainText('03-11-2026 05:30:36');
+  await page.locator('#transactionsTbody .mobile-row-click').click();
+  await expect(page.locator('#inlineInput')).toBeHidden();
+  await expect(page.locator('.transaction-display-date')).toContainText('03-11-2026 05:30:36');
+});

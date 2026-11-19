@@ -1,3 +1,4 @@
+import { isReadOnlyDevice } from '../assets/js/device.js';
 import Star from './components/Star.jsx';
 import {
   lazy,
@@ -30,12 +31,6 @@ import { analyzeDataset } from '../assets/js/datasetHealth.js';
 
 const Analytics = lazy(() => import('./components/Analytics.jsx'));
 
-function isIOS() {
-  return (
-    /^(iPad|iPhone|iPod)( Simulator)?$/.test(navigator.platform) ||
-    (navigator.userAgent.includes('Mac') && 'ontouchend' in document)
-  );
-}
 const tabs = [
   ['Overview', 'overview'],
   ['Transactions', 'list'],
@@ -45,7 +40,7 @@ const tabs = [
 
 export default function App() {
   const [state, dispatch] = useReducer(appReducer, undefined, () =>
-    createAppState(isIOS()),
+    createAppState(isReadOnlyDevice(navigator, document), isReadOnlyDevice(navigator, document)),
   );
   const [modal, setModal] = useState(null),
     [notice, setNotice] = useState(''),
@@ -188,7 +183,7 @@ export default function App() {
     }
   }
   async function create() {
-    if (!canReplace()) return;
+    if (state.deviceReadOnly || !canReplace()) return;
     try {
       const session = await createCSVSession();
       if (session) {
@@ -344,7 +339,7 @@ export default function App() {
           >
             <button
               id="btnToggleViewOnly"
-              className="icon-button view-mode-toggle"
+              className={`icon-button view-mode-toggle ${state.deviceReadOnly ? 'd-none' : ''}`}
               title="Toggle View Only Mode"
               aria-label="Toggle View Only Mode"
               aria-pressed={state.viewOnlyMode}
@@ -426,6 +421,7 @@ export default function App() {
       {!loaded && (
         <Landing
           ready={state.ready}
+          readOnly={state.deviceReadOnly}
           onCreate={create}
           onOpen={browse}
           onDemo={openDemo}
@@ -596,7 +592,7 @@ export default function App() {
       >
         <h2 id="readOnlyTitle">Your money, on the go.</h2>
         <p>
-          On iPhone and iPad, cream is read only. You can explore transactions,
+          On smartphones and iPad, cream is read only. You can explore transactions,
           analytics and dataset health. To add, edit or save transactions, open
           your CSV in cream on a computer.
         </p>

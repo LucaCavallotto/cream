@@ -1,3 +1,4 @@
+import { formatDate } from '../../assets/js/dateTime.js';
 import { useMemo, useState } from 'react';
 import {
   analyzeDataset,
@@ -118,7 +119,7 @@ export default function DatasetHealth({
                   </h6>
                   <p className="small text-muted text-break mb-2">
                     {[
-                      t.DateTime || '(Missing date)',
+                      formatDate(t.DateTime),
                       Number.isFinite(t.Amount)
                         ? `€${t.Amount.toFixed(2)}`
                         : t.Amount || '(Missing amount)',
