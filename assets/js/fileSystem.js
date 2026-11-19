@@ -2,13 +2,14 @@ import { createTransactionId } from './transactionId.js';
 import Papa from 'papaparse';
 import { parseTransactionsCSV, serializeTransactionsCSV } from './csv.js';
 
-export async function readCSVSession(source) {
+export async function readCSVSession(source, { isDemo = false } = {}) {
   const handle = typeof source.getFile === 'function' ? source : null;
   const file = handle ? await handle.getFile() : source;
   const result = parseTransactionsCSV(await file.text(), Papa);
   if (result.errors.length)
     throw new Error(`Incompatible CSV file. ${result.errors.join(' ')}`);
   return {
+    isDemo,
     fileName: file.name || source.name,
     fileHandle: handle,
     transactions: result.transactions.map((row) => ({
@@ -80,6 +81,7 @@ export async function saveCSVSession(
   environment = globalThis,
   download = downloadCSV,
 ) {
+  if (session.isDemo) throw new Error('Demo edits are temporary. Saving or exporting the built-in demo is unavailable. Open your own CSV to keep changes.');
   if (!session.fileName && !session.fileHandle)
     throw new Error('No file available to save.');
   const content = serializeTransactionsCSV(session.transactions, Papa);

@@ -110,14 +110,14 @@ export default function App() {
   const canReplace = useCallback(
     () =>
       !state.hasUnsavedChanges ||
-      confirm('You have unsaved changes. Discard them and open another file?'),
-    [state.hasUnsavedChanges],
+      confirm(state.isDemo ? 'Discard temporary demo edits and open another file?' : 'You have unsaved changes. Discard them and open another file?'),
+    [state.hasUnsavedChanges, state.isDemo],
   );
   const open = useCallback(
-    async (source) => {
+    async (source, options) => {
       if (!source || !canReplace()) return;
       try {
-        const session = await readCSVSession(source);
+        const session = await readCSVSession(source, options);
         pendingScroll.current = 0;
         dispatch({ type: 'open', session });
         setNotice('');
@@ -196,7 +196,7 @@ export default function App() {
     }
   }
   async function save() {
-    if (state.viewOnlyMode || saving) return;
+    if (state.viewOnlyMode || state.isDemo || saving) return;
     const snapshot = state;
     setSaving(true);
     try {
@@ -247,6 +247,7 @@ export default function App() {
       if (!response.ok) throw new Error('Cannot open the sample dataset.');
       await open(
         new File([await response.text()], 'demo.csv', { type: 'text/csv' }),
+        { isDemo: true },
       );
     } catch (error) {
       alert(error.message);
@@ -257,7 +258,7 @@ export default function App() {
   function closeFile() {
     if (
       !state.hasUnsavedChanges ||
-      confirm('You have unsaved changes. Close without saving?')
+      confirm(state.isDemo ? 'Close the demo and discard temporary edits?' : 'You have unsaved changes. Close without saving?')
     ) {
       pendingScroll.current = 0;
       dispatch({ type: 'close' });
@@ -324,7 +325,7 @@ export default function App() {
                 className={`file-status ${state.hasUnsavedChanges ? 'pending' : ''}`}
               >
                 <span className="status-dot" />
-                {state.hasUnsavedChanges ? 'Unsaved changes' : 'Up to date'}
+                {state.isDemo ? 'Temporary demo' : state.hasUnsavedChanges ? 'Unsaved changes' : 'Up to date'}
               </span>
             </div>
           ) : (
@@ -380,7 +381,7 @@ export default function App() {
             <button
               id="btnSaveChanges"
               aria-label="Save Changes"
-              className={`btn btn-outline-secondary save-file-button ${state.viewOnlyMode ? 'd-none' : ''}`}
+              className={`btn btn-outline-secondary save-file-button ${state.viewOnlyMode || state.isDemo ? 'd-none' : ''}`}
               disabled={!state.hasUnsavedChanges || saving}
               onClick={save}
             >
@@ -486,14 +487,15 @@ export default function App() {
           </div>
         </aside>
         <main id="appView" className="workspace-content" tabIndex={-1}>
+          {state.isDemo && <p className="scope-note" role="status" id="demoNotice">Demo session. Try editing transactions; saving and exporting are unavailable. Open your own CSV to keep changes.</p>}
           <div
             id="unsavedWarning"
             className={`save-notice ${state.hasUnsavedChanges ? '' : 'd-none'}`}
             role="status"
           >
             <span className="status-dot" />
-            You have unsaved changes.
-            <span>Save Changes to keep them in your CSV.</span>
+            {state.isDemo ? 'Temporary demo edits.' : 'You have unsaved changes.'}
+            <span>{state.isDemo ? 'Edits are discarded when you leave the demo.' : 'Save Changes to keep them in your CSV.'}</span>
           </div>
           <div
             id="inlineImportNotice"

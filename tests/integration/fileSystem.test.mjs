@@ -271,3 +271,20 @@ test('download cleans up its anchor and releases the Blob URL after the browser 
   release();
   assert.equal(events.at(-1), 'blob:csv');
 });
+
+test('explicit demo sessions cannot save through any service path, while personal demo.csv files can', async () => {
+  const demo = await readCSVSession(source(text, 'demo.csv'), { isDemo: true });
+  let touched = false;
+  const forbidden = () => { touched = true; throw new Error('Unexpected write'); };
+  demo.fileHandle = { createWritable: forbidden };
+  await assert.rejects(saveCSVSession(demo, { showSaveFilePicker: forbidden, navigator: { canShare: forbidden } }, forbidden), /Demo edits are temporary/);
+  assert.equal(touched, false);
+  const state = appReducer(createAppState(), { type: 'open', session: demo });
+  assert.equal(appReducer(state, { type: 'save', transactions: [] }), state);
+  const personal = await readCSVSession(source(text, 'demo.csv'));
+  assert.equal(personal.isDemo, false);
+  let downloaded = false;
+  await saveCSVSession(personal, {}, () => { downloaded = true; });
+  assert.equal(downloaded, true);
+  assert.equal(appReducer(state, { type: 'close' }).isDemo, false);
+});

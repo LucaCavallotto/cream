@@ -10,6 +10,7 @@ import { normalizeTags } from './transactions.js';
 export function createAppState(viewOnlyMode = false, deviceReadOnly = false) {
   return {
     fileName: '',
+    isDemo: false,
     fileHandle: null,
     transactions: [],
     originalTransactions: [],
@@ -70,6 +71,7 @@ export function appReducer(state, action) {
         sessionId: state.sessionId + 1,
       };
     case 'save':
+      if (state.isDemo) return state;
       return action.sessionId != null && action.sessionId !== state.sessionId
         ? state
         : {

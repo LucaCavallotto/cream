@@ -1,0 +1,22 @@
+import { test, expect, launch, openRawCSV, tab, saveModal } from './fixtures.mjs';
+test('built-in demo edits are temporary and a personal demo.csv remains saveable', async ({ page }) => {
+  await launch(page);
+  await page.getByRole('button', { name: /Take a look around/ }).click();
+  await expect(page.locator('#demoNotice')).toBeVisible();
+  await expect(page.locator('#btnSaveChanges')).toBeHidden();
+  await page.locator('.recent-transaction').first().click();
+  await page.locator('#inputDescription').fill('Temporary test');
+  await saveModal(page);
+  await expect(page.locator('#unsavedWarning')).toContainText('Temporary demo edits');
+  await expect(page.locator('#btnSaveChanges')).toBeHidden();
+  page.once('dialog', async dialog => { expect(dialog.message()).toContain('temporary'); await dialog.accept(); });
+  await page.locator('#btnCloseFile').click();
+  await openRawCSV(page, 'DateTime,Amount,Description,Category,Subcategory,Tags,Notes\n2026-11-02,-1,Personal,Bar,Coffee,,', 'demo.csv');
+  await expect(page.locator('#demoNotice')).toHaveCount(0);
+  await tab(page, 'Transactions');
+  await page.locator('#transactionsTbody .mobile-row-click').click();
+  await page.locator('#inputDescription').fill('Kept test');
+  await saveModal(page);
+  await expect(page.locator('#btnSaveChanges')).toBeVisible();
+  await expect(page.locator('#btnSaveChanges')).toBeEnabled();
+});
