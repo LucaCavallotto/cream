@@ -1,3 +1,4 @@
+import { buildCatalog } from './classificationCatalog.js';
 import { createTransactionFilters } from './transactionFilters.js';
 import { createAnalyticsExclusions } from './analyticsScope.js';
 import {
@@ -14,6 +15,8 @@ export function createAppState(viewOnlyMode = false) {
     originalTransactions: [],
     hasUnsavedChanges: false,
     categories: {},
+    suggestedCategories: {},
+    catalogAdditions: {},
     ready: false,
     viewOnlyMode,
     sort: { column: 'Date', direction: 'desc' },
@@ -32,6 +35,7 @@ export function createAppState(viewOnlyMode = false) {
 const changed = (state, transactions) => ({
   ...state,
   transactions,
+  categories: buildCatalog(state.suggestedCategories, transactions, state.catalogAdditions),
   hasUnsavedChanges: true,
   isSelectionMode: false,
   selectedIds: [],
@@ -40,12 +44,17 @@ const changed = (state, transactions) => ({
 export function appReducer(state, action) {
   switch (action.type) {
     case 'categories':
-      return { ...state, categories: action.categories, ready: true };
+      return { ...state, suggestedCategories: action.categories, categories: buildCatalog(action.categories, state.transactions, state.catalogAdditions), ready: true };
+    case 'addClassification': {
+      const catalogAdditions = buildCatalog(state.catalogAdditions, [], { [action.category]: action.subcategory ? [action.subcategory] : [] });
+      return { ...state, catalogAdditions, categories: buildCatalog(state.suggestedCategories, state.transactions, catalogAdditions) };
+    }
     case 'open':
       return {
         ...createAppState(state.viewOnlyMode),
         ...action.session,
-        categories: state.categories,
+        suggestedCategories: state.suggestedCategories,
+        categories: buildCatalog(state.suggestedCategories, action.session.transactions),
         ready: state.ready,
         originalTransactions: structuredClone(action.session.transactions),
         sessionId: state.sessionId + 1,
@@ -53,7 +62,8 @@ export function appReducer(state, action) {
     case 'close':
       return {
         ...createAppState(state.viewOnlyMode),
-        categories: state.categories,
+        suggestedCategories: state.suggestedCategories,
+        categories: buildCatalog(state.suggestedCategories),
         ready: state.ready,
         sessionId: state.sessionId + 1,
       };
@@ -71,6 +81,7 @@ export function appReducer(state, action) {
       return {
         ...state,
         transactions: structuredClone(state.originalTransactions),
+        categories: buildCatalog(state.suggestedCategories, state.originalTransactions, state.catalogAdditions),
         hasUnsavedChanges: false,
         selectedIds: [],
         isSelectionMode: false,

@@ -63,8 +63,8 @@ export default function App() {
     [state.transactions, state.analyticsExclusions],
   );
   const health = useMemo(
-    () => analyzeDataset(state.transactions, state.categories),
-    [state.transactions, state.categories],
+    () => analyzeDataset(state.transactions, state.suggestedCategories),
+    [state.transactions, state.suggestedCategories],
   );
   const picker = useRef(null),
     dragDepth = useRef(0),
@@ -565,7 +565,7 @@ export default function App() {
                   ) : (
                     <DatasetHealth
                       transactions={state.transactions}
-                      categories={state.categories}
+                      categories={state.suggestedCategories}
                       viewOnly={state.viewOnlyMode}
                       onEdit={openModal}
                     />
@@ -582,6 +582,7 @@ export default function App() {
           returnFocus={modal.returnFocus}
           categories={state.categories}
           tags={tags}
+          onAddClassification={(category, subcategory) => dispatch({ type: 'addClassification', category, subcategory })}
           viewOnly={state.viewOnlyMode}
           onClose={closeModal}
           onCommit={commit}

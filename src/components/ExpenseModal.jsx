@@ -1,3 +1,4 @@
+import { existingClassification, isUnclassified } from '../../assets/js/classificationCatalog.js';
 import { createTransactionId } from '../../assets/js/transactionId.js';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Papa from 'papaparse';
@@ -17,6 +18,7 @@ const seconds = (value) => (value.length === 5 ? value + ':00' : value);
 export default function ExpenseModal({
   transaction,
   categories,
+  onAddClassification,
   tags,
   viewOnly,
   onClose,
@@ -39,6 +41,7 @@ export default function ExpenseModal({
   }));
   const [inline, setInline] = useState(''),
     [errors, setErrors] = useState([]);
+  const [adding, setAdding] = useState(''), [newName, setNewName] = useState(''), [nameError, setNameError] = useState('');
   const parsed = useMemo(
     () =>
       inline.trim() ? parseInlineCSV(inline.trim(), categories, Papa) : null,
@@ -119,6 +122,19 @@ export default function ExpenseModal({
         ? { category: t.Category, subcategory: t.Subcategory }
         : {}),
     }));
+  }
+
+  function addClassification() {
+    const name = newName.trim().replace(/\s+/g, ' ');
+    if (!name || isUnclassified(name)) { setNameError('Enter a name other than Uncategorized.'); return; }
+    if (adding === 'subcategory' && isUnclassified(draft.category)) { setNameError('Choose a category first.'); return; }
+    const existing = existingClassification(name, adding === 'category' ? Object.keys(categories) : categories[draft.category] || []);
+    if (existing) { setNameError(`“${existing}” already exists. Select the existing entry.`); return; }
+    const category = adding === 'category' ? name : draft.category;
+    const subcategory = adding === 'subcategory' ? name : '';
+    onAddClassification(category, subcategory);
+    setDraft(d => ({ ...d, category, subcategory }));
+    setAdding(''); setNewName(''); setNameError('');
   }
 
   function submit(event) {
@@ -417,7 +433,7 @@ export default function ExpenseModal({
                         Select Subcategory
                       </option>
                       {[...groups]
-                        .filter(([category, subs]) => subs.length && (!draft.category || category === draft.category))
+                        .filter(([category, subs]) => subs.length && (isUnclassified(draft.category) || category === draft.category))
                         .map(([category, subs]) => (
                           <optgroup
                             key={category}
@@ -436,6 +452,21 @@ export default function ExpenseModal({
                     </select>
                   </div>
                 </div>
+                {!viewOnly && <div className="mb-3 classification-create">
+                  <div className="d-flex flex-wrap gap-2">
+                    {['category', 'subcategory'].map(kind => <button key={kind} type="button" className="btn btn-outline-secondary btn-sm" onClick={() => { setAdding(kind); setNewName(''); setNameError(''); }}>Add {kind}</button>)}
+                  </div>
+                  {adding && <div className="mt-2">
+                    <label htmlFor="newClassification" className="form-label">New {adding}</label>
+                    <div className="d-flex gap-2">
+                      <input id="newClassification" className="form-control" value={newName} onChange={e => setNewName(e.target.value)} />
+                      <button type="button" className="btn btn-primary" onClick={addClassification}>Add</button>
+                      <button type="button" className="btn btn-secondary" onClick={() => setAdding('')}>Cancel</button>
+                    </div>
+                    <p className="form-text">Custom entries are kept in your CSV when used in a saved transaction.</p>
+                    {nameError && <p role="alert" className="text-danger">{nameError}</p>}
+                  </div>}
+                </div>}
                 <div className="mb-3 position-relative">
                   <label htmlFor="inputTags" className="form-label">
                     Tags

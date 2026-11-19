@@ -1,3 +1,4 @@
+import { buildCatalog, customClassifications } from './classificationCatalog.js';
 export const HEALTH_CHECKS = {
   missing_date: 'Missing date',
   invalid_date: 'Invalid date',
@@ -6,6 +7,7 @@ export const HEALTH_CHECKS = {
   missing_description: 'Missing description',
   missing_category: 'Missing category',
   unknown_category: 'Unknown category',
+  similar_classification: 'Possible duplicate classification',
   missing_subcategory: 'Missing subcategory',
   invalid_subcategory: 'Invalid subcategory',
   uncategorized: 'Uncategorized transaction'
@@ -36,18 +38,17 @@ export function getTransactionIssues(transaction, categories) {
   const add = (code, message = HEALTH_CHECKS[code]) => issues.push({ code, message });
   const empty = value => value == null || String(value).trim() === '';
   if (empty(transaction.DateTime)) add('missing_date');
-  else if (!isValidTransactionDate(transaction.DateTime)) add('invalid_date', `Invalid date: ${transaction.DateTime}`);
+  else if (!isValidTransactionDate(transaction.DateTime)) add('invalid_date', 'Invalid date; open this record to correct it.');
   if (empty(transaction.Amount)) add('missing_amount');
   else if (!Number.isFinite(transaction.Amount)) add('invalid_amount', `Invalid amount: ${transaction.Amount}`);
   if (empty(transaction.Description)) add('missing_description');
 
   const category = transaction.Category || '';
   const subcategory = transaction.Subcategory || '';
-  const knownCategory = Object.hasOwn(categories, category);
   if (empty(category)) add('missing_category');
-  else if (!knownCategory) add('unknown_category', `Category is not in the catalog: ${category}`);
+  
   if (empty(subcategory)) add('missing_subcategory');
-  else if (!knownCategory || !categories[category].includes(subcategory)) {
+  else if (empty(category)) {
     add('invalid_subcategory', `Subcategory does not belong to a known category: ${subcategory}`);
   }
   if (category.trim().toLowerCase() === 'uncategorized' || subcategory.trim().toLowerCase() === 'uncategorized') {
@@ -59,12 +60,17 @@ export function getTransactionIssues(transaction, categories) {
 export function analyzeDataset(transactions, categories) {
   const counts = Object.fromEntries(Object.keys(HEALTH_CHECKS).map(code => [code, 0]));
   const dirty = [];
+  const custom = customClassifications(transactions, categories);
+  const catalog = buildCatalog(categories, transactions);
   transactions.forEach((transaction, index) => {
-    const issues = getTransactionIssues(transaction, categories);
+    const issues = getTransactionIssues(transaction, catalog);
+    const duplicate = custom.find(entry => entry.category === transaction.Category && entry.subcategory === (transaction.Subcategory || '') && entry.suggestion);
+    if (duplicate) issues.push({ code: 'similar_classification', message: `Possible duplicate of “${duplicate.suggestion}”. Review before renaming; your data has not been changed.` });
     if (issues.length) dirty.push({ transaction, recordNumber: index + 1, issues });
     issues.forEach(issue => counts[issue.code]++);
   });
   return {
+    custom,
     total: transactions.length,
     clean: transactions.length - dirty.length,
     issueCount: Object.values(counts).reduce((sum, count) => sum + count, 0),

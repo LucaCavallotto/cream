@@ -26,14 +26,15 @@ test('valid timestamps and calendar dates reject impossible dates and times', ()
   for (const date of ['', '2025-02-29', '2026-04-31', '2026-11-02T24:00:00Z', '2026-11-02T12:60:00Z', '2026-11-02T12:00:00+25:00']) assert(!isValidTransactionDate(date));
 });
 
-test('unknown classifications and mismatched subcategories are detected without changing values', () => {
-  assert.deepEqual(codes({ Category: 'Legacy' }), ['unknown_category', 'invalid_subcategory']);
-  assert.deepEqual(codes({ Subcategory: 'Salary' }), ['invalid_subcategory']);
-  assert.deepEqual(codes({ Category: 'bar' }), ['unknown_category', 'invalid_subcategory']);
-  assert.deepEqual(codes({ Category: '__proto__' }), ['unknown_category', 'invalid_subcategory']);
-  const original = { ...transaction, Category: 'Travel', Subcategory: 'Invalid transport' };
-  assert(getTransactionIssues(original, categories).some(issue => issue.code === 'invalid_subcategory'));
-  assert.equal(original.Subcategory, 'Invalid transport');
+test('custom classifications are valid, while similar names require manual review', () => {
+  assert.deepEqual(codes({ Category: 'Legacy' }), []);
+  assert.deepEqual(codes({ Subcategory: 'Salary' }), []);
+  const original = { ...transaction, Category: 'bar' };
+  const report = analyzeDataset([original], categories);
+  assert.equal(report.custom.length, 1);
+  assert.equal(report.dirty[0].issues[0].code, 'similar_classification');
+  assert.equal(original.Category, 'bar');
+  assert.equal(analyzeDataset([{ ...transaction, Category: 'Hobbies', Subcategory: 'Crafts' }], categories).dirty.length, 0);
 });
 
 test('missing classifications, orphaned subcategories and uncategorized entries need review', () => {

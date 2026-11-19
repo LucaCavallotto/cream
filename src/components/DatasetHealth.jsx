@@ -58,8 +58,7 @@ export default function DatasetHealth({
       <details className="health-explainer">
         <summary>What gets checked?</summary>
         <p>
-          Missing fields, invalid dates or amounts, unknown categories and
-          incompatible subcategories. Tags and notes are optional. Missing
+          Missing fields, invalid dates or amounts, and possible duplicate classifications. Custom categories are valid; similar names are suggestions for manual review. Tags and notes are optional. Missing
           subcategories and explicitly uncategorized records are reminders to
           review, not blocked transactions.
         </p>
@@ -78,6 +77,11 @@ export default function DatasetHealth({
         View Only Mode is active. You can inspect transactions, but editing is
         disabled.
       </div>
+      <details className="health-explainer" id="customClassifications">
+        <summary>Custom classifications ({report.custom.length})</summary>
+        <p>These values come from your dataset and extend the suggested catalog. They are not errors simply because they are custom. To classify a sale, use Income → Sales.</p>
+        <ul>{report.custom.map(entry => <li key={JSON.stringify([entry.category, entry.subcategory])}>{entry.category}{entry.subcategory ? ` → ${entry.subcategory}` : ''} · {entry.count} transaction(s){entry.suggestion ? ` · Review similarity to “${entry.suggestion}”` : ''}</li>)}</ul>
+      </details>
       <div className="mb-3" style={{ maxWidth: 420 }}>
         <label htmlFor="cleanupFilter" className="form-label">
           Filter by issue
