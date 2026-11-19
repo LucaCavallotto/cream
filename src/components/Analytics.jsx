@@ -52,7 +52,7 @@ function ChartCard({ type, model, active, theme, reducedMotion }) {
   );
 }
 
-function ViewTransactions({ name, onDrilldown, small = false }) {
+function ViewTransactions({ name, scope, onDrilldown, small = false }) {
   return (
     <button
       type="button"
@@ -62,7 +62,7 @@ function ViewTransactions({ name, onDrilldown, small = false }) {
       data-filter={name}
       onClick={(e) => {
         e.stopPropagation();
-        onDrilldown(name);
+        onDrilldown(scope);
       }}
     >
       <i className="bi bi-search" />
@@ -160,6 +160,7 @@ function Breakdown({ kind, groups, periodLabel, onDrilldown }) {
                             </span>{' '}
                             <ViewTransactions
                               name={group.name}
+                              scope={tag ? { kind, tag: group.name, label: group.name } : { kind, category: group.name, label: group.name }}
                               onDrilldown={onDrilldown}
                             />
                             <span className="text-muted small d-block">
@@ -222,6 +223,7 @@ function Breakdown({ kind, groups, periodLabel, onDrilldown }) {
                               </span>
                               <ViewTransactions
                                 name={sub}
+                                scope={{ kind, category: group.name, subcategory: sub, label: `${group.name} → ${sub}` }}
                                 onDrilldown={onDrilldown}
                                 small
                               />
@@ -444,19 +446,19 @@ export default function Analytics({
           kind="expenses"
           groups={model.spending}
           periodLabel={model.periodLabel}
-          onDrilldown={onDrilldown}
+          onDrilldown={(scope) => onDrilldown({ ...scope, period, month: selectedMonth, now: new Date().toISOString(), label: `${scope.label} · ${model.periodLabel}` })}
         />
         <Breakdown
           kind="income"
           groups={model.incomeGroups}
           periodLabel={model.periodLabel}
-          onDrilldown={onDrilldown}
+          onDrilldown={(scope) => onDrilldown({ ...scope, period, month: selectedMonth, now: new Date().toISOString(), label: `${scope.label} · ${model.periodLabel}` })}
         />
         <Breakdown
           kind="tags"
           groups={model.tags}
           periodLabel={model.periodLabel}
-          onDrilldown={onDrilldown}
+          onDrilldown={(scope) => onDrilldown({ ...scope, period, month: selectedMonth, now: new Date().toISOString(), label: `${scope.label} · ${model.periodLabel}` })}
         />
       </div>
     </>

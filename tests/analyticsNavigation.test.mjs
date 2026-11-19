@@ -37,3 +37,19 @@ test('repeated drilldowns retain the original return point and a new round trip 
   assert.equal(finishAnalyticsDrilldown(state).searchText, 'Salary');
   assert.equal(state.searchQuery, 'salary');
 });
+
+test('structured drilldown distinguishes Other parents, signs, tags, period and exclusions', async () => {
+  const { drilldownTransactions } = await import('../assets/js/analyticsNavigation.js');
+  const rows = [
+    { id: 'one', Category: 'Shopping', Subcategory: 'Other', Amount: -5, DateTime: '2026-11-02', Tags: '#work' },
+    { id: 'two', Category: 'Other', Subcategory: 'Other', Amount: -10, DateTime: '2026-11-02', Tags: '#worker' },
+    { id: 'three', Category: 'Shopping', Subcategory: 'Other', Amount: 5, DateTime: '2026-11-02', Tags: '#work' },
+    { id: 'four', Category: 'Shopping', Subcategory: 'Other', Amount: -20, DateTime: '2025-11-02', Tags: '' },
+  ];
+  const exclusions = createAnalyticsExclusions();
+  const scope = { kind: 'expenses', category: 'Shopping', subcategory: 'Other', period: 'specific_month', month: '2026-11', now: '2026-11-18' };
+  assert.deepEqual(drilldownTransactions(rows, exclusions, scope).map(t => t.id), ['one']);
+  assert.deepEqual(drilldownTransactions(rows, exclusions, { ...scope, kind: 'tags', tag: '#work' }).map(t => t.id), ['one', 'three']);
+  exclusions.transactions.add('one');
+  assert.deepEqual(drilldownTransactions(rows, exclusions, scope), []);
+});

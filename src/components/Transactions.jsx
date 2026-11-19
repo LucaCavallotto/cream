@@ -1,3 +1,4 @@
+import { drilldownTransactions } from '../../assets/js/analyticsNavigation.js';
 import TransactionFilters from './TransactionFilters.jsx';
 import { matchesTransactionFilters } from '../../assets/js/transactionFilters.js';
 import { Fragment, useEffect, useMemo, useState } from 'react';
@@ -27,7 +28,7 @@ export default function Transactions({
   }, [state.isSelectionMode]);
   const rows = useMemo(
     () =>
-      state.transactions
+      drilldownTransactions(state.transactions, state.analyticsExclusions, state.analyticsDrilldown)
         .filter(
           (t) =>
             !state.searchQuery ||
@@ -48,6 +49,8 @@ export default function Transactions({
         .sort((a, b) => compareTransactions(a, b, state.sort)),
     [
       state.transactions,
+      state.analyticsExclusions,
+      state.analyticsDrilldown,
       state.searchQuery,
       state.sort,
       state.transactionFilters,
@@ -78,6 +81,7 @@ export default function Transactions({
       >
         <i className="bi bi-arrow-left" aria-hidden="true" /> Back to Analytics
       </button>
+      {state.analyticsDrilldown && <p className="scope-note" role="status">Analytics selection: {state.analyticsDrilldown.label}. Period and exclusions apply.</p>}
       <div className="page-heading">
         <div>
           <p className="eyebrow">THE DAILY DETAILS</p>

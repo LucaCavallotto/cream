@@ -191,7 +191,8 @@ test('View Transactions and Back preserve exclusions, period, expansions and ori
   await page.locator('#detailedCategoryList .category-header').click();
   await page.locator('#detailedCategoryList .category-header .btn-filter-tx').click();
   await expect(page.locator('#btnBackToAnalytics')).toBeVisible();
-  await expect(page.locator('#inputSearchTransaction')).toHaveValue('Bar');
+  await expect(page.locator('#inputSearchTransaction')).toHaveValue('');
+  await expect(page.locator('.scope-note')).toContainText('Bar');
   await page.locator('#btnBackToAnalytics').click();
   await expect(page.locator('#analytics-tab')).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('#inputSearchTransaction')).toHaveValue('ETF');

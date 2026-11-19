@@ -26,6 +26,7 @@ export function createAppState(viewOnlyMode = false) {
     tab: 'Overview',
     analyticsExclusions: createAnalyticsExclusions(),
     analyticsReturnContext: null,
+    analyticsDrilldown: null,
     isSelectionMode: false,
     selectedIds: [],
     sessionId: 0,
@@ -134,6 +135,7 @@ export function appReducer(state, action) {
     case 'clearTransactionFilters':
       return {
         ...state,
+        analyticsDrilldown: null,
         transactionFilters: createTransactionFilters(),
         searchText: '',
         searchQuery: '',
@@ -183,7 +185,7 @@ export function appReducer(state, action) {
       );
       return {
         ...next,
-        searchText: action.filter,
+        searchText: typeof action.filter === 'string' ? action.filter : '',
         tab: 'Transactions',
         selectedIds: [],
         isSelectionMode: false,
