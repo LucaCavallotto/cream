@@ -24,3 +24,15 @@ test('custom catalog, unclassified editing and duplicate prevention work togethe
   await expect(page.locator('#cleanupDirty')).toHaveText('0');
   await expect(page.locator('#customClassifications')).toContainText('Projects → Hardware');
 });
+
+test('possible duplicate names remain unchanged and their review suggestion follows into the editor', async ({ page }) => {
+  await launch(page);
+  await openRows(page, [row('Spelling review', -1, 'bar', 'Coffee')]);
+  await tab(page, 'Dataset Health');
+  await expect(page.locator('#cleanupRecords')).toContainText('Possible duplicate of “Bar”');
+  await page.getByRole('button', { name: 'Review / Edit transaction 1', exact: true }).click();
+  await expect(page.locator('#transactionHealthIssues')).toContainText('Possible duplicate of “Bar”');
+  await expect(page.locator('#inputCategory')).toHaveValue('bar');
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(page.locator('#btnSaveChanges')).toBeDisabled();
+});

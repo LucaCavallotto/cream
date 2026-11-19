@@ -487,7 +487,7 @@ export default function App() {
           </div>
         </aside>
         <main id="appView" className="workspace-content" tabIndex={-1}>
-          {state.isDemo && <p className="scope-note" role="status" id="demoNotice">Demo session. Try editing transactions; saving and exporting are unavailable. Open your own CSV to keep changes.</p>}
+          {state.isDemo && <p className="scope-note" role="status" id="demoNotice">{state.viewOnlyMode ? 'Demo session. Explore the sample dataset in read-only mode.' : 'Demo session. Try editing transactions; saving and exporting are unavailable. Open your own CSV to keep changes.'}</p>}
           <div
             id="unsavedWarning"
             className={`save-notice ${state.hasUnsavedChanges ? '' : 'd-none'}`}
@@ -577,6 +577,7 @@ export default function App() {
       {modal && (
         <ExpenseModal
           transaction={modal.transaction}
+          transactionIssues={health.dirty.find(row => row.transaction.id === modal.transaction?.id)?.issues}
           returnFocus={modal.returnFocus}
           categories={state.categories}
           tags={tags}

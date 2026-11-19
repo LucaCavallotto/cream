@@ -46,7 +46,7 @@ export function getTransactionIssues(transaction, categories) {
   const category = transaction.Category || '';
   const subcategory = transaction.Subcategory || '';
   if (empty(category)) add('missing_category');
-  
+
   if (empty(subcategory)) add('missing_subcategory');
   else if (empty(category)) {
     add('invalid_subcategory', `Subcategory does not belong to a known category: ${subcategory}`);

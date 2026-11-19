@@ -123,7 +123,7 @@ test('Dataset Health repairs invalid source values and undo restores the report'
   await openRows(page, [row('Broken', '12oops', 'Legacy', 'Wrong', '2026-02-30T10:00:00+01:00')]);
   await tab(page, 'Dataset Health');
   await expect(page.locator('#cleanupDirty')).toHaveText('1');
-  await expect(page.locator('#cleanupIssueCount')).toHaveText('4');
+  await expect(page.locator('#cleanupIssueCount')).toHaveText('2');
   await page.getByRole('button', { name: 'Review / Edit transaction 1', exact: true }).click();
   await expect(page.locator('#expenseModal')).toHaveCSS('opacity', '1');
   await expect(page.locator('#transactionHealthIssues')).toContainText('12oops');
@@ -192,7 +192,7 @@ test('View Transactions and Back preserve exclusions, period, expansions and ori
   await page.locator('#detailedCategoryList .category-header .btn-filter-tx').click();
   await expect(page.locator('#btnBackToAnalytics')).toBeVisible();
   await expect(page.locator('#inputSearchTransaction')).toHaveValue('');
-  await expect(page.locator('.scope-note')).toContainText('Bar');
+  await expect(page.locator('#list-tab-pane .scope-note')).toContainText('Bar');
   await page.locator('#btnBackToAnalytics').click();
   await expect(page.locator('#analytics-tab')).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('#inputSearchTransaction')).toHaveValue('ETF');
@@ -282,12 +282,12 @@ test('drag/drop imports a real File and refuses to discard pending changes when 
 
 test('health pagination and issue filtering keep all records available', async ({ page }) => {
   await launch(page);
-  await openRows(page, Array.from({ length: 55 }, (_, i) => row(`Review ${i}`, -1, i < 2 ? 'Legacy' : 'Bar', '')));
+  await openRows(page, Array.from({ length: 55 }, (_, i) => row(`Review ${i}`, -1, i < 2 ? 'bar' : 'Bar', '')));
   await tab(page, 'Dataset Health');
   await expect(page.locator('#cleanupRecords article')).toHaveCount(50);
   await page.locator('#cleanupShowMore').click();
   await expect(page.locator('#cleanupRecords article')).toHaveCount(55);
-  await page.locator('#cleanupFilter').selectOption('unknown_category');
+  await page.locator('#cleanupFilter').selectOption('similar_classification');
   await expect(page.locator('#cleanupRecords article')).toHaveCount(2);
   await expect(page.locator('#cleanupDirty')).toHaveText('55');
 });

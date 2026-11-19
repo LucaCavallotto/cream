@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import Papa from 'papaparse';
+import { parseTransactionsCSV, serializeTransactionsCSV } from '../../assets/js/csv.js';
+import { buildCatalog } from '../../assets/js/classificationCatalog.js';
+import { analyzeDataset } from '../../assets/js/datasetHealth.js';
+import { parseInlineCSV } from '../../assets/js/inlineInput.js';
+test('CSV roundtrip retains custom classifications and makes them available to quick entry', () => {
+  const original = [{ DateTime: '2026-11-02T14:28:36.123+01:00', Amount: -10, Description: 'Custom work', Category: 'Projects', Subcategory: 'Hardware', Tags: '#work', Notes: '' }];
+  const reopened = parseTransactionsCSV(serializeTransactionsCSV(original, Papa), Papa);
+  assert.deepEqual(reopened.errors, []);
+  assert.deepEqual(reopened.transactions, original);
+  const catalog = buildCatalog({ Bar: ['Coffee'] }, reopened.transactions);
+  const report = analyzeDataset(reopened.transactions, { Bar: ['Coffee'] });
+  assert.equal(report.dirty.length, 0);
+  assert.equal(report.custom[0].category, 'Projects');
+  const input = parseInlineCSV('2026-11-03, -2, More work, projects, hardware', catalog, Papa);
+  assert.deepEqual(input.warnings, []);
+  assert.equal(input.rows[0].transaction.Subcategory, 'Hardware');
+});

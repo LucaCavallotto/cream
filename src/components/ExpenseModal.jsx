@@ -17,6 +17,7 @@ const seconds = (value) => (value.length === 5 ? value + ':00' : value);
 
 export default function ExpenseModal({
   transaction,
+  transactionIssues,
   categories,
   onAddClassification,
   tags,
@@ -48,7 +49,7 @@ export default function ExpenseModal({
     [inline, categories],
   );
   const issues = transaction
-    ? getTransactionIssues(transaction, categories)
+    ? transactionIssues || getTransactionIssues(transaction, categories)
     : [];
   const groups = new Map(
     Object.entries(categories).map(([category, subs]) => [category, [...subs]]),
