@@ -342,3 +342,22 @@ test('transaction search uses one custom clear control without the native search
   await expect(page.locator('#btnClearSearch')).toBeHidden();
   await expect(page.locator('#transactionsTbody .mobile-row-click')).toHaveCount(2);
 });
+
+test('working text is comfortably sized and the overview balance separates sign currency and value', async ({ page }) => {
+  await launch(page); await openRows(page, [row('Legible coffee', -10)]);
+  await expect(page.locator('.transaction-table')).toHaveCSS('font-size', '16px');
+  await expect(page.locator('#inputSearchTransaction')).toHaveCSS('font-size', '17px');
+  await expect(page.locator('#transactionsTbody')).toContainText('02-11-2026 14:28');
+  await expect(page.locator('#transactionsTbody')).not.toContainText('14:28:36');
+  await tab(page, 'Overview');
+  const parts = page.locator('#overviewNet > span');
+  await expect(parts).toHaveText(['−', '€', '10.00']);
+  const sign = await parts.nth(0).boundingBox(), currency = await parts.nth(1).boundingBox(), value = await parts.nth(2).boundingBox();
+  expect(currency.x - (sign.x + sign.width)).toBeGreaterThan(3);
+  expect(value.x - (currency.x + currency.width)).toBeGreaterThan(3);
+  await expect(page.locator('.page-description').first()).toHaveCSS('font-size', '18px');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await tab(page, 'Transactions');
+  await expect(page.locator('.mobile-visible .fw-bold.text-truncate')).toHaveCSS('font-size', '16px');
+  await expect(page.locator('.mobile-visible .text-muted.small').first()).toHaveCSS('font-size', '14px');
+});

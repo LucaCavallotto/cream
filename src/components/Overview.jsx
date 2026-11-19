@@ -137,7 +137,9 @@ export default function Overview({
             </span>
           </div>
           <p className="net-amount" id="overviewNet">
-            {formatMoney(model.net, true)}
+            {model.net !== 0 && <span>{model.net > 0 ? '+' : '−'}</span>}
+            <span>€</span>
+            <span>{formatMoney(Math.abs(model.net)).replace('€', '')}</span>
           </p>
           <span className="net-caption">
             The difference between your income and expenses.

@@ -32,7 +32,7 @@ The magnifying glasses in analytics show the exact category/subcategory or tag, 
 
 The ticker and Overview totals use all-time data with the same exclusions as Analytics. Recent activity and Dataset Health include every record. Invalid dates and amounts remain outside calculations until corrected. Exclusions do not delete or alter CSV rows. Filters, navigation, exclusions and unsaved edits last only for the open browser session and reset when a different file is opened or the page reloads.
 
-Appearance follows the system light/dark setting automatically. Pause the ticker using its button; reduced-motion preferences make it static and horizontally scrollable. Transaction dates are displayed in the device timezone as **DD-MM-YYYY HH:MM:SS**. CSV timestamps retain their original offsets and precision when the date/time is not edited.
+Appearance follows the system light/dark setting automatically. Pause the ticker using its button; reduced-motion preferences make it static and horizontally scrollable. Transaction dates use the device timezone: **DD-MM-YYYY HH:MM** in the transaction list, with seconds available in the detail view. CSV timestamps retain their original offsets and precision when the date/time is not edited.
 
 ## Add, edit and save
 
@@ -87,7 +87,7 @@ Three-field rows use the form's classification. Supplying a category without a s
 
 ## Smartphones and Home Screen
 
-Smartphones, including Android, and iPad open files in protected **read-only** mode. Explore transactions, filters, analytics and Dataset Health; tap **Read only** for an explanation. Use a computer to create files, add, edit or save transactions. A narrow desktop window remains editable, and desktop users can enable a manual read-only lock.
+Smartphones, including Android, and iPad open files in protected **read-only** mode. On phones, the header keeps cream, the filename, **Read only** and the close button in one row; long filenames are abbreviated to keep the controls accessible. Explore transactions, filters, analytics and Dataset Health; tap **Read only** for an explanation. Use a computer to create files, add, edit or save transactions. A narrow desktop window remains editable, and desktop users can enable a manual read-only lock.
 
 To add the app to an iPhone Home Screen, open it in Safari and use **Share → Add to Home Screen**. The site provides Apple and manifest icons. Remove and re-add an old shortcut if its icon is cached. This shortcut does not add offline data storage; continue keeping your CSV files separately.
 

@@ -1,4 +1,4 @@
-import { test, expect, launch, openRows, row, tab } from './fixtures.mjs';
+import { test, expect, launch, openRows, openRawCSV, row, tab } from './fixtures.mjs';
 
 test('mobile layout inspects transactions and health records without allowing edits', async ({
   page,
@@ -117,8 +117,35 @@ test('smartphone inspection hides write-only entry controls and shows local huma
   await openRows(page, [row('Timezone sample', -1, 'Bar', 'Coffee', '2026-11-02T23:30:36-05:00')]);
   await expect(page.locator('#btnToggleViewOnly')).toBeHidden();
   await expect(page.locator('#btnSelectMode')).toBeHidden();
-  await expect(page.locator('#transactionsTbody')).toContainText('03-11-2026 05:30:36');
+  await expect(page.locator('#transactionsTbody')).toContainText('03-11-2026 05:30');
+  await expect(page.locator('#transactionsTbody')).not.toContainText('05:30:36');
   await page.locator('#transactionsTbody .mobile-row-click').click();
   await expect(page.locator('#inlineInput')).toBeHidden();
   await expect(page.locator('.transaction-display-date')).toContainText('03-11-2026 05:30:36');
+});
+
+
+test('phone header keeps brand filename read-only badge and close aligned without overlap', async ({ page }) => {
+  await launch(page);
+  await openRawCSV(page, 'DateTime,Amount,Description,Category,Subcategory,Tags,Notes\n2026-11-02,-1,Coffee,Bar,Coffee,,', 'a-very-long-personal-finance-filename-for-2026.csv');
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    const header = page.locator('.cream-header.has-file');
+    await expect(header).toHaveCSS('height', '72px');
+    const boxes = await Promise.all(['.brand-lockup', '.file-context', '#textViewOnly', '#btnCloseFile'].map(selector => header.locator(selector).boundingBox()));
+    for (let i = 0; i < boxes.length; i++) {
+      expect(boxes[i].width).toBeGreaterThan(0);
+      expect(boxes[i].x).toBeGreaterThanOrEqual(0);
+      expect(boxes[i].x + boxes[i].width).toBeLessThanOrEqual(width);
+      if (i) expect(boxes[i - 1].x + boxes[i - 1].width).toBeLessThanOrEqual(boxes[i].x);
+    }
+    expect(boxes[2].height).toBeGreaterThanOrEqual(44);
+    expect(boxes[3].height).toBeGreaterThanOrEqual(44);
+    expect(await page.locator('#currentFileName').evaluate(el => el.scrollWidth > el.clientWidth)).toBe(true);
+  }
+  await page.getByRole('button', { name: 'Read only', exact: true }).tap();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('button', { name: 'Got it', exact: true }).tap();
+  await page.locator('#btnCloseFile').tap();
+  await expect(page.locator('#landingView')).toBeVisible();
 });

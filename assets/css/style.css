@@ -3292,3 +3292,131 @@ button.cream-wordmark:hover { color: var(--green); }
   .modal-content { max-width: 100%; }
   .classification-create .d-flex { flex-wrap: wrap; }
 }
+
+/* Comfortable reading at normal zoom, including Full HD displays and phones. */
+:root,
+[data-bs-theme='light'] {
+  --muted: #595f59;
+}
+[data-bs-theme='dark'] {
+  --muted: #b5bcb3;
+}
+body {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.6;
+  -webkit-font-smoothing: auto;
+}
+.page-description,
+.landing-description { font-size: 18px; line-height: 1.65; }
+.btn, .form-label, .workspace-tab { font-size: 16px; font-weight: 600; }
+.form-control, .form-select { font-size: 17px; font-weight: 500; }
+.form-text, .alert, .small, small { font-size: 14px; }
+.eyebrow, .page-heading .eyebrow, .panel-heading .eyebrow { font-size: 12px; font-weight: 650; }
+.text-action, .panel-heading > .text-action, .health-spotlight .text-action,
+.transaction-filters summary { font-size: 15px; font-weight: 600; }
+.transaction-table, .transaction-table .amount-cell,
+.transaction-table .description-cell { font-size: 16px; }
+.transaction-table .description-meta, .transaction-table .notes-cell,
+.transaction-table .badge, .transaction-table .btn { font-size: 14px; }
+.recent-description > strong, .recent-amount { font-size: 16px; font-weight: 650; }
+.recent-description > span, .recent-date, .net-caption,
+.health-spotlight p, .month-spotlight > .muted, .month-baseline,
+.date-shortcuts > span, .date-stamp, .ledger-count, .scope-note,
+.file-status, .drop-zone-note, .demo-caption { font-size: 14px; }
+.ticker-label, .ticker-value, .ticker-caption { font-size: 13px; font-weight: 600; }
+.category-header .small { font-size: 14px; }
+.category-header .fw-bold, .category-header .category-amount-badge { font-size: 17px !important; }
+.net-amount {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: .14em;
+  letter-spacing: -.035em;
+  font-weight: 600;
+}
+.net-amount > span { min-width: 0; }
+@media (max-width: 767.98px) {
+  body { font-size: 16px; }
+  .page-description, .landing-description { font-size: 16px; }
+  .workspace-tab > span { font-size: 12px; font-weight: 650; }
+  .file-actions .global-add, .file-actions .save-file-button { font-size: 14px; }
+  .recent-description > span, .recent-date { font-size: 14px; }
+  .ticker-label, .ticker-value, .ticker-caption { font-size: 12px; }
+}
+.transaction-table .badge, .transaction-table .amount-cell { font-weight: 600 !important; }
+.description-cell .description-meta { font-weight: 500; }
+.date-stamp > span, .scope-note .text-action, .health-ring small,
+.chart-legend, .preview-axis, .ledger-footer, .save-notice,
+.health-summary h6, .health-explainer, .analytics-exclusions-summary,
+.landing-principles p, .drop-zone p, .cream-footer { font-size: 14px; }
+.scope-note { flex-wrap: wrap; }
+@media (max-width: 767.98px) {
+  .mobile-visible .fw-bold.text-truncate { font-size: 16px !important; font-weight: 650 !important; }
+  .mobile-visible .text-muted.small { font-size: 14px; }
+  .mobile-visible .text-end > div:first-child { font-size: 16px !important; font-weight: 650 !important; }
+  .mobile-visible .text-end > div:last-child { font-size: 13px; white-space: normal !important; }
+  .transaction-table tr.month-divider-row td { font-size: 13px !important; }
+}
+
+.subcategory-item, .analytics-comparison > div, .analytics-comparison strong,
+#currentFileName, .read-only-badge, .file-context,
+.ledger-footer > span, .save-notice > span:last-child { font-size: 14px; }
+.category-header .fw-bold, .category-header .category-amount-badge { font-weight: 650 !important; }
+.analytics-breakdown .btn-filter-tx { font-size: 14px; min-width: 32px; min-height: 32px; }
+.ledger-search .form-control { font-size: 17px; }
+.transaction-table thead th { font-size: 13px; font-weight: 650; }
+.transaction-table .year-divider-row td,
+.transaction-table .month-divider-row td { font-size: 13px; }
+
+/* Keep the phone header in one deliberate row, even with long filenames. */
+@media (max-width: 767.98px) {
+  .cream-header.has-file.is-read-only {
+    grid-template-columns: max-content minmax(0, 1fr) max-content 44px;
+    grid-template-rows: 44px;
+    height: 72px;
+    padding: 14px 12px;
+    gap: 0 8px;
+    align-items: center;
+  }
+  .cream-header.has-file .brand-lockup {
+    width: auto;
+    min-width: 0;
+  }
+  .cream-header.has-file.is-read-only .cream-wordmark {
+    font-size: 30px;
+    letter-spacing: -2px;
+  }
+  .cream-header.has-file.is-read-only .file-context {
+    min-width: 0;
+    width: auto;
+    flex-basis: auto;
+    overflow: hidden;
+    margin: 0;
+    gap: 0;
+  }
+  .cream-header.has-file.is-read-only #currentFileName {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: right;
+  }
+  .cream-header.has-file.is-read-only .read-only-badge {
+    margin: 0;
+    padding: 6px 8px;
+    min-height: 44px;
+    white-space: nowrap;
+    font-size: 13px;
+    line-height: 1.2;
+    justify-self: stretch;
+  }
+  .cream-header.has-file.is-read-only #btnCloseFile {
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    justify-self: end;
+    font-size: 17px;
+  }
+}

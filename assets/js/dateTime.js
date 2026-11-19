@@ -12,9 +12,9 @@ export function inlineDateTime(value) {
   return `${value}T00:00:00${timezoneOffset(new Date(`${value}T00:00:00`))}`;
 }
 
-export function formatDate(value) {
+export function formatDate(value, { seconds = true } = {}) {
   const date = new Date(value);
   if (!value) return 'Missing date';
   if (!isValidTransactionDate(value)) return 'Invalid date';
-  return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+  return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}${seconds ? `:${String(date.getSeconds()).padStart(2, '0')}` : ''}`;
 }

@@ -467,7 +467,7 @@ export default function Transactions({
                       </div>
                     </td>
                     <td className="d-none d-md-table-cell text-muted">
-                      {formatDate(t.DateTime)}
+                      {formatDate(t.DateTime, { seconds: false })}
                     </td>
                     <td className="d-none d-lg-table-cell">
                       <span className="badge bg-secondary">
@@ -560,7 +560,7 @@ export default function Transactions({
                             {amount}
                           </div>
                           <div className="text-muted small mt-1 text-nowrap">
-                            {formatDate(t.DateTime)}
+                            {formatDate(t.DateTime, { seconds: false })}
                           </div>
                         </div>
                       </div>

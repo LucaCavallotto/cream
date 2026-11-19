@@ -44,3 +44,9 @@ test('display dates use local DD-MM-YYYY HH:MM:SS and mark invalid or missing da
   assert.equal(formatDate(''), 'Missing date');
   assert.equal(formatDate('2026-02-30'), 'Invalid date');
 });
+
+test('ledger dates can omit seconds without changing detail precision or validation', () => {
+  assert.equal(formatDate('2026-11-02T14:28:36', { seconds: false }), '02-11-2026 14:28');
+  assert.equal(formatDate('2026-11-02T14:28:36'), '02-11-2026 14:28:36');
+  assert.equal(formatDate('invalid', { seconds: false }), 'Invalid date');
+});
