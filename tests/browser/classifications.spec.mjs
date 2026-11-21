@@ -4,7 +4,7 @@ test('custom catalog, unclassified editing and duplicate prevention work togethe
   await launch(page);
   await openRows(page, [row('Crafts', -20, 'Hobbies', 'Painting'), row('Unclassified', -2, 'Uncategorized', '')]);
   await tab(page, 'Dataset Health');
-  await page.locator('#customClassifications summary').click();
+  await page.locator('.health-explainer summary').click();
   await expect(page.locator('#customClassifications')).toContainText('Hobbies → Painting');
   await expect(page.locator('#cleanupDirty')).toHaveText('1');
   await page.getByRole('button', { name: 'Review / Edit transaction 2', exact: true }).click();

@@ -1973,7 +1973,8 @@ button:disabled {
   background: var(--paper);
 }
 #transactionHealthIssues {
-  font-size: 11px;
+  font-size: 16px;
+  line-height: 1.65;
 }
 #tagsSuggestionBox,
 #bulkTagsSuggestionBox {
@@ -3544,7 +3545,6 @@ body {
   .health-spotlight .health-ring > span { font-size: clamp(38px, 3.5vw, 52px); font-weight: 600; }
 }
 
-
 /* Keep desktop navigation anchored through the end of the document. */
 @media (min-width: 768px) {
   .workspace-sidebar {
@@ -3594,6 +3594,11 @@ body {
 .breakdown-income .card-title { color: var(--green); }
 .breakdown-tags .card-title, .analytics-breakdown .category-header .fw-bold { color: var(--blue); }
 .analytics-controls .form-label, label[for="analyticsTimePeriod"], .form-label.small { font-size: 16px; }
+#cleanupStatus { font-size: 17px; line-height: 1.6; }
+.health-explainer { font-size: 16px; }
+#customClassifications h3 { font-size: 17px; margin-top: 20px; }
+#cleanupRecords .health-record-content { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: start; }
+#cleanupRecords .health-record-content > button { min-width: 70px; min-height: 44px; }
 @media (max-width: 767.98px) {
   .shared-chart.chart-line { aspect-ratio: auto !important; height: 280px; }
   .shared-chart.chart-pie { aspect-ratio: 1 / 1 !important; max-height: 320px; }
@@ -3601,6 +3606,8 @@ body {
   .landing-hero { gap: 24px; }
   .landing-file-area { order: initial; }
   .landing-secondary-actions { flex-direction: column; gap: 18px; }
+  #cleanupRecords article { padding: 16px !important; }
+  #cleanupRecords .small { font-size: 13px; }
 }
 
 .chart-category-legend button { display: flex; gap: 8px; align-items: baseline; border: 0; background: transparent; color: inherit; padding: 4px; text-align: left; overflow-wrap: anywhere; min-width: 0; }
@@ -3609,6 +3616,7 @@ body {
 
 .analytics-breakdown .subcategory-item > .text-muted { color: var(--blue) !important; }
 .analytics-period-controls .form-select { font-size: 16px; }
+@media (max-width: 767.98px) { #cleanupRecords .btn { font-size: 14px; } }
 
 /* Entry choices stay beside the existing-file panel, and precede it on phones. */
 .landing-hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); max-width: 1120px; gap: clamp(32px, 6vw, 80px); }
@@ -3647,12 +3655,18 @@ body {
 
 /* Supporting text must remain readable in both themes and at phone widths. */
 .breakdown-tags .category-progress-bar { background: var(--blue) !important; }
+#inlineInput { font-size: 16px; }
+#inlineInputFeedback, .modal-body .form-text { font-size: 15px; line-height: 1.65; }
 #analyticsExclusionsPanel > summary { font-size: 16px; }
 #analyticsExclusionSummary, #analyticsExclusionsPanel .small { font-size: 14px; line-height: 1.65; }
 .analytics-breakdown .card-header .badge { font-size: 14px; white-space: normal; line-height: 1.5; }
 #bulkActionsMenu .form-select, #bulkActionsMenu .form-control { font-size: 16px; min-height: 44px; }
-#emptyState { font-size: 16px; }
+#emptyState, #cleanupEmpty, #cleanupNoMatches { font-size: 16px; }
+#cleanupRecords h6 { font-size: 16px; }
+#cleanupRecords .small, #tagsSuggestionBox, #tagsSuggestionBox .list-group-item { font-size: 14px; }
 .sidebar-label { font-size: 14px; }
+.modal-body .form-label { font-size: 16px; }
+#bulkTagsSuggestionBox, #bulkTagsSuggestionBox .list-group-item { font-size: 14px; }
 .transaction-table thead th,
 .transaction-table .year-divider-row td,
 .transaction-table .month-divider-row td,
@@ -3670,6 +3684,8 @@ body {
 .analytics-summary .analytics-in-out h2, .analytics-summary .analytics-comparison strong { font-size: 23px; font-weight: 600; line-height: 1.4; white-space: normal; }
 .analytics-summary .analytics-comparison > div { font-size: 15px; flex-wrap: wrap; align-items: baseline; }
 .analytics-summary #metricComparisonPercent { font-size: 15px; display: inline-block; }
+.health-heading { margin-bottom: 8px; }
+.health-heading + .health-explainer { margin-top: 0; }
 @media (max-width: 767.98px) {
   .ledger-toolbar { flex-direction: column; align-items: flex-start; gap: 16px; }
   .ledger-search-group { width: 100%; max-width: none; flex: auto; }

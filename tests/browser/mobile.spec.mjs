@@ -203,3 +203,66 @@ test('monthly spending follows desktop information order on small phones while e
     await expect(page.locator('#btnAddExpense')).toBeHidden();
   }
 });
+
+test('mobile chart legends stay readable and health review controls keep a fixed column', async ({ page }) => {
+  await launch(page);
+  await openRows(page, Array.from({ length: 14 }, (_, i) => row(i ? `Description ${i} with more content than the first one` : 'Short', -10, `Custom category ${i}`, '')));
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
+    await tab(page, 'Analytics');
+    const legend = page.locator('.chart-category-legend');
+    await expect(legend.locator('li')).toHaveCount(5);
+    expect(await legend.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+    const first = legend.getByRole('button').first();
+    await first.click();
+    await expect(first).toHaveAttribute('aria-pressed', 'false');
+    await first.click();
+    await expect(first).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('label[for="analyticsTimePeriod"]')).toHaveCSS('font-size', '16px');
+    await tab(page, 'Dataset Health');
+    const explanation = await page.locator('.health-explainer').boundingBox();
+    const summary = await page.locator('.health-summary').boundingBox();
+    expect(explanation.y).toBeLessThan(summary.y);
+    await page.locator('.health-explainer summary').click();
+    await expect(page.locator('#customClassifications')).toBeVisible();
+    await page.locator('.health-explainer summary').click();
+    const controls = page.locator('#cleanupRecords button');
+    const firstBox = await controls.nth(0).boundingBox();
+    const secondBox = await controls.nth(1).boundingBox();
+    expect(firstBox.x).toBe(secondBox.x);
+    expect(firstBox.width).toBe(secondBox.width);
+    await expect(page.locator('#cleanupStatus')).toHaveCSS('font-size', '17px');
+  }
+});
+
+test('phone controls stack left and every section clears the bottom dock', async ({ page }) => {
+  await launch(page);
+  await openRows(page, [row('Missing category', -1, '', '')]);
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const [name, id] of [['Overview', 'overview'], ['Transactions', 'list'], ['Analytics', 'analytics'], ['Dataset Health', 'cleanup']]) {
+      await tab(page, name);
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      const content = await page.locator(`#${id}-tab-pane`).boundingBox();
+      const dock = await page.locator('.workspace-sidebar').boundingBox();
+      expect(content.y + content.height).toBeLessThanOrEqual(dock.y - 24);
+    }
+    const subtitle = await page.locator('.health-heading .page-description').boundingBox();
+    const explanation = await page.locator('.health-explainer').boundingBox();
+    expect(explanation.y - subtitle.y - subtitle.height).toBeLessThanOrEqual(10);
+    await tab(page, 'Analytics');
+    const fields = await page.locator('.analytics-period-controls').boundingBox();
+    const clear = await page.locator('#clearAnalyticsFilters').boundingBox();
+    expect(clear.y).toBeGreaterThanOrEqual(fields.y + fields.height);
+    const exclusions = await page.locator('#analyticsExclusionsPanel').boundingBox();
+    expect(clear.x).toBe(exclusions.x);
+    expect(clear.y).toBeGreaterThanOrEqual(exclusions.y + exclusions.height);
+    await tab(page, 'Transactions');
+    const search = await page.locator('.ledger-search').boundingBox();
+    const count = await page.locator('#transactionResultCount').boundingBox();
+    const sort = await page.locator('.ledger-sort').boundingBox();
+    expect(count.x).toBe(search.x);
+    expect(sort.x).toBe(search.x);
+    expect(count.y).toBeGreaterThanOrEqual(sort.y + sort.height);
+  }
+});

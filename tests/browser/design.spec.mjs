@@ -563,6 +563,58 @@ test('sort stays visible and readable while breakdown bars and expansion control
   }
 });
 
+test('supporting text and tag bars remain readable in light and dark themes', async ({ page }, testInfo) => {
+  await launch(page);
+  await openRows(page, [{ ...row('Tagged purchase', -10), Tags: 'work' }, row('Missing category', -2, '', '')]);
+  for (const width of [320, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const theme of ['light', 'dark']) {
+      await page.emulateMedia({ colorScheme: theme });
+      await expect(page.locator('html')).toHaveAttribute('data-bs-theme', theme);
+      await tab(page, 'Analytics');
+      const title = page.locator('.breakdown-tags .card-title');
+      const blue = await title.evaluate(el => getComputedStyle(el).color);
+      await expect(page.locator('.breakdown-tags .category-progress-bar').first()).toHaveCSS('background-color', blue);
+      await page.locator('#analyticsExclusionsPanel > summary').click();
+      await expect(page.locator('#analyticsExclusionsPanel > summary')).toHaveCSS('font-size', '16px');
+      await expect(page.locator('#analyticsExclusionSummary')).toHaveCSS('font-size', '14px');
+      await page.locator('#analyticsExclusionsPanel > summary').click();
+      await tab(page, 'Dataset Health');
+      await expect(page.locator('#cleanupRecords h6').first()).toHaveCSS('font-size', '16px');
+      await page.getByRole('button', { name: 'Review / Edit transaction 2', exact: true }).click();
+      const warning = page.locator('#transactionHealthIssues');
+      await expect(warning).toBeVisible();
+      await expect(warning).toHaveCSS('font-size', '16px');
+      await expect(page.locator('#inlineInput')).toHaveCSS('font-size', '16px');
+      await expect(page.locator('label[for="inputDescription"]')).toHaveCSS('font-size', '16px');
+      await expect(page.locator('#expenseModal .form-text').first()).toHaveCSS('font-size', '15px');
+      const contrast = await warning.evaluate(el => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const luminance = color => {
+          context.fillStyle = color;
+          context.fillRect(0, 0, 1, 1);
+          const channels = [...context.getImageData(0, 0, 1, 1).data].slice(0, 3).map(value => {
+            const n = value / 255;
+            return n <= .04045 ? n / 12.92 : ((n + .055) / 1.055) ** 2.4;
+          });
+          return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+        };
+        const style = getComputedStyle(el), text = luminance(style.color), background = luminance(style.backgroundColor);
+        return (Math.max(text, background) + .05) / (Math.min(text, background) + .05);
+      });
+      expect(contrast).toBeGreaterThanOrEqual(4.5);
+      if (width === 320) await page.screenshot({ path: testInfo.outputPath(`editor-${theme}.png`) });
+      expect(await page.locator('#expenseModal').evaluate(el => el.scrollWidth <= innerWidth)).toBe(true);
+      await page.keyboard.press('Escape');
+      for (const section of ['Overview', 'Transactions', 'Analytics', 'Dataset Health']) {
+        await tab(page, section);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      }
+    }
+  }
+});
+
 test('result count sits above the ledger and exclusions precede the plain period row', async ({ page }) => {
   await launch(page);
   await openRows(page, [row('Coffee'), row('Second', -5)]);

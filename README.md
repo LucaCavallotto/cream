@@ -66,7 +66,7 @@ Use the desktop sidebar or smartphone bottom navigation to switch sections. Keyb
 | **Overview** | See all-time included net flow, income, expenses, this month's spending, recent activity and dataset health. Net flow is income minus expenses, not a bank-account balance. |
 | **Transactions** | Search descriptions, amounts, classifications, tags and notes; sort records; filter by category, parent-qualified subcategory, income/expense/zero amounts and inclusive local date bounds. On desktop, unlock the file to edit or use bulk actions. |
 | **Analytics** | Choose a period and explore cash flow, spending, income and tags. Expand **Analytics exclusions** to omit categories, subcategories or individual records from calculations. |
-| **Dataset Health** | Find missing fields, invalid dates/amounts, unclassified records and possible duplicate classification names. Open an affected record to inspect it or, when unlocked, correct it. Custom classifications are listed separately for information. |
+| **Dataset Health** | Find missing fields, invalid dates/amounts, unclassified records and possible duplicate classification names. Open an affected record to inspect it or, when unlocked, correct it. Expand “What gets checked?” for the checks and the custom classifications found in your file. |
 
 Use the category legend below the expenses pie chart to hide or show individual slices. This changes the chart only; use analytics exclusions to change which transactions contribute to totals.
 

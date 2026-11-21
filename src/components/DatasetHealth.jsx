@@ -23,12 +23,6 @@ export default function DatasetHealth({
   );
   return (
     <>
-      <div className="page-heading">
-        <div>
-          <h1>Dataset Health</h1>
-          <p className="page-description">Find missing values and records that need attention.</p>
-        </div>
-      </div>
       <div
         id="cleanupReadOnly"
         className={`alert alert-info ${viewOnly ? '' : 'd-none'}`}
@@ -37,6 +31,31 @@ export default function DatasetHealth({
         View Only Mode is active. You can inspect transactions, but editing is
         disabled.
       </div>
+      <div className="page-heading health-heading">
+        <div>
+          <h1>Dataset Health</h1>
+          <p className="page-description">Find missing values and records that need attention.</p>
+        </div>
+      </div>
+      <details className="health-explainer">
+        <summary>What gets checked?</summary>
+        <p>
+          Missing fields, invalid dates or amounts, and possible duplicate classifications. Custom categories are valid; similar names are suggestions for manual review. Tags and notes are optional. Missing
+          subcategories and explicitly uncategorized records are reminders to
+          review, not blocked transactions.
+        </p>
+        <p>
+          Checks cover the entire open dataset, independently of search and
+          analytics filters. Invalid dates and amounts stay outside analytics
+          until corrected. Corrections stay in memory until Save Changes; Undo
+          Changes restores your last saved data.
+        </p>
+        <div id="customClassifications">
+          <h3>Custom classifications ({report.custom.length})</h3>
+          <p>These values come from your dataset and extend the suggested catalog. They are not errors simply because they are custom. To classify a sale, use Income → Sales.</p>
+          <ul>{report.custom.map(entry => <li key={JSON.stringify([entry.category, entry.subcategory])}>{entry.category}{entry.subcategory ? ` → ${entry.subcategory}` : ''} · {entry.count} transaction(s){entry.suggestion ? ` · Review similarity to “${entry.suggestion}”` : ''}</li>)}</ul>
+        </div>
+      </details>
       <div className="health-summary" aria-live="polite">
         {[
           ['cleanupTotal', 'Total transactions', report.total, ''],
@@ -62,25 +81,6 @@ export default function DatasetHealth({
           ? `${Math.round((report.clean / report.total) * 100)}% of transactions have no detected issues.`
           : 'No transactions to check. Open a CSV or add transactions to get started.'}
       </p>
-      <details className="health-explainer">
-        <summary>What gets checked?</summary>
-        <p>
-          Missing fields, invalid dates or amounts, and possible duplicate classifications. Custom categories are valid; similar names are suggestions for manual review. Tags and notes are optional. Missing
-          subcategories and explicitly uncategorized records are reminders to
-          review, not blocked transactions.
-        </p>
-        <p>
-          Checks cover the entire open dataset, independently of search and
-          analytics filters. Invalid dates and amounts stay outside analytics
-          until corrected. Corrections stay in memory until Save Changes; Undo
-          Changes restores your last saved data.
-        </p>
-      </details>
-      <details className="health-explainer" id="customClassifications">
-        <summary>Custom classifications ({report.custom.length})</summary>
-        <p>These values come from your dataset and extend the suggested catalog. They are not errors simply because they are custom. To classify a sale, use Income → Sales.</p>
-        <ul>{report.custom.map(entry => <li key={JSON.stringify([entry.category, entry.subcategory])}>{entry.category}{entry.subcategory ? ` → ${entry.subcategory}` : ''} · {entry.count} transaction(s){entry.suggestion ? ` · Review similarity to “${entry.suggestion}”` : ''}</li>)}</ul>
-      </details>
       <div className="mb-3" style={{ maxWidth: 420 }}>
         <label htmlFor="cleanupFilter" className="form-label">
           Filter by issue
@@ -109,7 +109,7 @@ export default function DatasetHealth({
           .slice(0, limit)
           .map(({ transaction: t, recordNumber, issues }) => (
             <article className="list-group-item p-3" key={t.id}>
-              <div className="d-flex justify-content-between align-items-start gap-3">
+              <div className="health-record-content">
                 <div className="overflow-hidden">
                   <h6 className="fw-bold text-break mb-1">
                     #{recordNumber} ·{' '}
