@@ -167,10 +167,8 @@ export default function ExpenseModal({
         ...shared,
         ...row.transaction,
         DateTime: inlineDateTime(row.transaction.DateTime),
-        Category: row.hasCategory ? row.transaction.Category : shared.Category,
-        Subcategory: row.hasCategory
-          ? row.transaction.Subcategory
-          : shared.Subcategory,
+        Category: row.hasCategory ? row.transaction.Category : 'Uncategorized',
+        Subcategory: row.transaction.Subcategory,
       }));
     } else {
       const time = seconds(draft.time || '00:00:00');
@@ -286,7 +284,7 @@ export default function ExpenseModal({
                   <div className="form-text">
                     Format: Date or ISO timestamp, Amount (+/-), Description[,
                     Category[, Subcategory]]. Category and subcategory are
-                    optional. Multiple lines supported. Put descriptions
+                    optional. Multiple lines supported: each line uses its own classification; category fields below apply only to single entries. Put descriptions
                     containing commas in double quotes. Unknown classifications
                     are omitted with a warning.
                   </div>

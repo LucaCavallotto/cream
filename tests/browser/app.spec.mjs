@@ -301,3 +301,32 @@ test('date sorting respects actual instants rather than the text of timezone off
     row('Later', -1, 'Bar', 'Coffee', '2026-11-02T09:00:00Z')]);
   await expect(page.locator('#transactionsTbody .mobile-row-click').first()).toContainText('Later');
 });
+
+test('multiline input never inherits classifications from other rows or the form', async ({ page }) => {
+  await launch(page);
+  await openRows(page, []);
+  const classified = '2026-11-20T20:11:11+01:00, €-7.5, Pizza da Fede, Food & Dining, Restaurant';
+  const plain = '2026-11-21T10:29:42+01:00, €10, Test';
+  const batches = [
+    [classified, plain, '2026-11-21, -1, Category only, Bar', '2026-11-21, -2, Explicit empty, ,', '2026-11-21, -3, Unknown, Not A Category, Coffee'],
+    [plain.replace(', Test', ', Plain first'), classified.replace('Pizza da Fede', 'Classified second')],
+  ];
+  for (const batch of batches) {
+    await addModal(page);
+    await page.locator('#inputSubcategory').selectOption(JSON.stringify(['Tools', 'Software & Licenses']));
+    await page.locator('#inputNotes').fill('Shared note');
+    await page.locator('#inlineInput').fill(batch.join('\n'));
+    await saveModal(page);
+  }
+  const { rows } = await downloadRows(page);
+  const find = description => rows.find(row => row.Description === description);
+  expect(find('Pizza da Fede')).toMatchObject({ Category: 'Food & Dining', Subcategory: 'Restaurant', DateTime: '2026-11-20T20:11:11+01:00', Amount: '-7.5' });
+  expect(find('Test')).toMatchObject({ Category: 'Uncategorized', Subcategory: '', DateTime: '2026-11-21T10:29:42+01:00', Amount: '10' });
+  expect(find('Category only')).toMatchObject({ Category: 'Bar', Subcategory: '' });
+  expect(find('Explicit empty')).toMatchObject({ Category: '', Subcategory: '' });
+  expect(find('Unknown')).toMatchObject({ Category: '', Subcategory: '' });
+  expect(find('Plain first')).toMatchObject({ Category: 'Uncategorized', Subcategory: '' });
+  expect(find('Classified second')).toMatchObject({ Category: 'Food & Dining', Subcategory: 'Restaurant' });
+  expect(rows).toHaveLength(7);
+  expect(rows.every(row => row.Notes === 'Shared note')).toBe(true);
+});

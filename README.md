@@ -83,7 +83,7 @@ Optional classification names match the current hybrid catalog, ignoring letter 
 2026-11-03, -5, Unknown example, Not A Category, Coffee
 ```
 
-Three-field rows use the form's classification. Supplying a category without a subcategory leaves the subcategory empty; empty trailing fields explicitly leave classification blank. Invalid dates, amounts, missing descriptions, malformed quoting or extra fields block the insertion, so a multiline batch is not partially added. Editing an existing record accepts one inline row.
+For a single three-field entry, you can choose its classification in the form. In a multiline batch, every row uses only its own category and subcategory: a three-field row becomes Uncategorized with no subcategory, regardless of other rows or the form's selection. Supplying a category without a subcategory leaves the subcategory empty; empty trailing fields explicitly leave classification blank. Invalid dates, amounts, missing descriptions, malformed quoting or extra fields block the insertion, so a multiline batch is not partially added. Editing an existing record accepts one inline row.
 
 ## Smartphones and Home Screen
 
