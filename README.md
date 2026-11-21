@@ -23,7 +23,7 @@ Choose **Browse Files**, drop a compatible CSV anywhere in the window, or use **
 
 Opening a file starts in **Overview**, in read-only mode. On a computer, use the lock button in the header to enable editing; each newly opened file starts locked again. New files created on a computer start editable. Switch sections using the sidebar or the bottom navigation on phones:
 
-- **Overview:** all-time included income, expenses and net flow, monthly spending, recent transactions and dataset health. Net flow is not a bank-account balance. Use the explicit navigation buttons to explore each view; recent transaction rows open their details.
+- **Overview:** all-time included income, expenses and net flow, monthly spending, recent transactions and dataset health. Net flow is not a bank-account balance. Use the centered callouts at the bottom of each card to explore each view; This month opens Analytics on Current Month, and IN & OUT shares the Last 12 Months cash-flow chart with Analytics; recent transaction rows open their details.
 - **Transactions:** search descriptions, amounts, classifications, tags and notes. Combine search with the expandable category, subcategory, amount-type and inclusive date filters. **Clear** resets the ledger filters and search. Sort from the column headings or the mobile sort selector. On a computer, **Select** enables bulk classification, tagging and deletion; Select all affects only visible matches.
 - **Analytics:** choose a period and explore spending, income, tags and charts. Expand **Analytics exclusions** to ignore categories, parent-qualified subcategories or individual transactions. **Exclude all** lets you start empty and remove exclusions for the few categories you want to inspect. **Clear** restores Last 12 Months and removes exclusions. Monthly comparison always compares the current and previous calendar months with the same exclusions.
 - **Dataset Health:** review missing fields, invalid amounts or dates, unclassified transactions and possible classification duplicates. Open a record with **Review / Edit** to correct it. Custom classifications appear in a separate information panel.
@@ -52,7 +52,7 @@ Custom classifications are valid. Dataset Health lists them for information and 
 | Transport during a trip | Travel → Trip Transport (Travel → Transport also remains valid) |
 | Everyday transport | Transportation → the relevant subcategory |
 
-**Save Transaction** updates the working dataset in memory. **Save Changes** writes the CSV using a supported native file handle, or downloads a replacement file in other desktop browsers. Keep that downloaded file as your updated copy. The undo button restores the last successfully saved dataset. Closing an edited file or leaving the page asks before discarding pending changes. Click **cream** to close the file and return to the landing page.
+**Save Transaction** updates the working dataset in memory. **Save Changes** writes the CSV using a supported native file handle, or downloads a replacement file in other desktop browsers. Keep that downloaded file as your updated copy. The undo button restores the last successfully saved dataset. Closing an edited file or leaving the page asks before discarding pending changes. Click **cream** to return to Overview while keeping the file, edits and filters. Use the close button to close the file and return to the landing page.
 
 ### Quick Inline Entry
 

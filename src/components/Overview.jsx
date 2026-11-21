@@ -1,85 +1,29 @@
+import { useMemo } from 'react';
+import { analyticsModel } from '../../assets/js/analyticsModel.js';
+import AnalyticsChart from './AnalyticsChart.jsx';
 import Star from './Star.jsx';
 import { compareTransactions } from '../../assets/js/transactions.js';
 import { formatDate } from '../../assets/js/dateTime.js';
 import { formatMoney } from '../../assets/js/presentation.js';
 import { getCategoryMeta } from '../../assets/js/categoryMeta.js';
 
-function FlowPreview({ months }) {
-  const series = months.slice(-6),
-    max = Math.max(
-      1,
-      ...series.flatMap((month) => [month.income, month.expenses]),
-    );
-  const x = (index) => 50 + index * (590 / Math.max(1, series.length - 1));
-  const y = (value) => 164 - (value / max) * 132;
-  const path = (key) =>
-    series
-      .map((month, i) => `${i ? 'L' : 'M'}${x(i)},${y(month[key])}`)
-      .join(' ');
-  if (!series.length)
-    return (
-      <div className="chart-empty">
-        <i className="bi bi-activity" aria-hidden="true" />
-        <p>Your first transaction starts the picture.</p>
-      </div>
-    );
-  return (
-    <svg
-      viewBox="0 0 680 206"
-      className="flow-preview"
-      role="img"
-      aria-label={`Recent monthly cash flow: ${series.map((month) => `${month.label}, income ${formatMoney(month.income)}, expenses ${formatMoney(month.expenses)}`).join('; ')}`}
-    >
-      {[0, 0.5, 1].map((fraction) => (
-        <g key={fraction}>
-          <line
-            x1="50"
-            x2="650"
-            y1={y(max * fraction)}
-            y2={y(max * fraction)}
-            className="preview-grid"
-          />
-          <text x="0" y={y(max * fraction) + 4} className="preview-axis">
-            {new Intl.NumberFormat('en-GB', {
-              notation: 'compact',
-              maximumFractionDigits: 1,
-            }).format(max * fraction)}
-          </text>
-        </g>
-      ))}
-      <path d={path('income')} className="preview-income" />
-      <path d={path('expenses')} className="preview-expenses" />
-      {series.map((month, i) => (
-        <g key={month.key}>
-          <circle
-            cx={x(i)}
-            cy={y(month.income)}
-            r="3.5"
-            className="preview-income-point"
-          />
-          <circle
-            cx={x(i)}
-            cy={y(month.expenses)}
-            r="3.5"
-            className="preview-expense-point"
-          />
-          <text x={x(i)} y="197" textAnchor="middle" className="preview-axis">
-            {month.label}
-          </text>
-        </g>
-      ))}
-    </svg>
-  );
+function CardCallout({ children, onClick }) {
+  return <div className="card-callout"><button type="button" onClick={onClick}>{children}<span aria-hidden="true">↗</span></button></div>;
 }
 
 export default function Overview({
   state,
+  theme,
+  reducedMotion,
+  active,
+  onAnalytics,
   model,
   health,
   onTab,
   onEdit,
   onViewAll,
 }) {
+  const flowModel = useMemo(() => analyticsModel(state.transactions, state.analyticsExclusions, 'last_12_months', ''), [state.transactions, state.analyticsExclusions]);
   const recent = [...state.transactions]
     .sort((a, b) =>
       compareTransactions(a, b, { column: 'Date', direction: 'desc' }),
@@ -161,21 +105,16 @@ export default function Overview({
                 {formatMoney(model.expenses)}
               </strong>
             </div>
-            <button
-              className="net-explore"
-              onClick={() => onTab('Analytics')}
-              aria-label="Explore analytics"
-            >
-              <i className="bi bi-arrow-up-right" aria-hidden="true" />
-            </button>
+
           </div>
+          <CardCallout onClick={() => onAnalytics('overall')}>Explore analytics</CardCallout>
         </section>
         <section className="month-spotlight">
           <div className="panel-kicker">
             <span className="eyebrow">IN THE MOMENT</span>
             <i className="bi bi-calendar3" aria-hidden="true" />
           </div>
-          <h2>This month.</h2>
+          <h2><button type="button" className="month-heading-link" onClick={() => onAnalytics('current_month')}>This month.</button></h2>
           <p className="spotlight-amount">{formatMoney(model.current)}</p>
           <p className="muted">
             spent in {new Date().toLocaleString('en-GB', { month: 'long' })}
@@ -198,6 +137,7 @@ export default function Overview({
             <span>Last month</span>
             <strong>{formatMoney(model.previous)}</strong>
           </div>
+          <CardCallout onClick={() => onAnalytics('current_month')}>Explore this month</CardCallout>
         </section>
       </div>
       <div className="overview-detail-grid">
@@ -207,22 +147,10 @@ export default function Overview({
               <p className="eyebrow">IN & OUT</p>
               <h2>A little perspective.</h2>
             </div>
-            <button className="text-action" onClick={() => onTab('Analytics')}>
-              Explore analytics <span aria-hidden="true">↗</span>
-            </button>
           </div>
-          <div className="chart-legend">
-            <span>
-              <i className="legend-dot income" />
-              Income
-            </span>
-            <span>
-              <i className="legend-dot expense" />
-              Expenses
-            </span>
-            <span className="legend-context">Recent months</span>
-          </div>
-          <FlowPreview months={model.monthly} />
+          <p className="muted">Monthly Cash Flow Trend (Last 12 Months)</p>
+          <AnalyticsChart type="line" model={flowModel} active={active} theme={theme} reducedMotion={reducedMotion} id="overviewCashFlowChart" />
+          <CardCallout onClick={() => onAnalytics('last_12_months')}>Explore cash flow</CardCallout>
         </section>
         <section className="cream-panel health-spotlight">
           <div className="panel-kicker">
@@ -235,9 +163,10 @@ export default function Overview({
           >
             <span>
               {health.total ? `${cleanPercent}%` : '—'}
-              <small>no issues</small>
+
             </span>
           </div>
+          <p className="health-ring-caption">Transactions with no detected issues</p>
           <h2>
             {!health.total
               ? 'A clean start.'
@@ -252,12 +181,7 @@ export default function Overview({
                 ? `${health.dirty.length} ${health.dirty.length === 1 ? 'transaction needs' : 'transactions need'} a closer look.`
                 : 'No missing fields or classification issues detected.'}
           </p>
-          <button
-            className="text-action"
-            onClick={() => onTab('Dataset Health')}
-          >
-            Review dataset <span aria-hidden="true">↗</span>
-          </button>
+          <CardCallout onClick={() => onTab('Dataset Health')}>Review dataset</CardCallout>
         </section>
       </div>
       <section className="cream-panel recent-panel">
@@ -266,9 +190,6 @@ export default function Overview({
             <p className="eyebrow">RECENT ACTIVITY · ALL RECORDS</p>
             <h2>The latest.</h2>
           </div>
-          <button className="text-action" onClick={onViewAll}>
-            View all transactions <span aria-hidden="true">↗</span>
-          </button>
         </div>
         <div className="recent-list">
           {recent.length ? (
@@ -317,6 +238,7 @@ export default function Overview({
             </p>
           )}
         </div>
+        <CardCallout onClick={onViewAll}>View all transactions</CardCallout>
       </section>
     </div>
   );

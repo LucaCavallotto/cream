@@ -3421,4 +3421,50 @@ body {
   }
 }
 
+/* A consistent destination callout closes each Overview card. */
+.overview :is(.net-hero, .month-spotlight, .flow-panel, .health-spotlight, .recent-panel) {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.card-callout {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 22px;
+  text-align: center;
+}
+.card-callout > button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 10px 18px;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.card-callout > button:hover { border-color: var(--green); color: var(--green); }
+.net-hero .card-callout > button {
+  background: #ffffff10;
+  color: #f3f5f1;
+  border-color: #ffffff40;
+}
+.month-heading-link { padding: 0; border: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; text-align: inherit; }
+.month-heading-link:hover { color: var(--green); }
+.health-spotlight .health-ring { flex-shrink: 0; margin: 16px auto 10px; }
+.health-spotlight .health-ring-caption { margin: 0 0 18px; font-size: 14px; text-align: center; }
+.health-spotlight .card-callout { grid-column: 1 / -1; }
+.flow-panel .shared-chart { width: 100%; margin-bottom: 6px; }
+.recent-panel .card-callout { padding-bottom: 18px; }
+@media (max-width: 767.98px) {
+  .overview .health-spotlight { text-align: center; }
+  .health-spotlight .panel-kicker { align-self: stretch; }
+}
+.shared-chart { min-width: 0; max-width: 100%; overflow: hidden; }
+.shared-chart canvas { max-width: 100%; }
+
 #cleanupReadOnly { margin: -10px 0 24px; }

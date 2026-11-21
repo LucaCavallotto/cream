@@ -33,10 +33,6 @@ export default function Ticker({ model, loaded }) {
       className={`money-ticker ${paused ? 'is-paused' : ''}`}
       aria-label="Dataset ticker"
     >
-      <div className="ticker-caption">
-        <span className="status-dot" />
-        <span>{loaded ? 'All-time flow' : 'A fresh perspective'}</span>
-      </div>
       <div
         className="ticker-viewport"
         tabIndex={0}

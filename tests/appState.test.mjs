@@ -159,5 +159,7 @@ test('opening an existing file always resets to read only and desktop can explic
   assert.equal(state.viewOnlyMode, false);
   state = appReducer(state, { type: 'open', session: { fileName: 'next.csv', transactions: [] } });
   assert.equal(state.viewOnlyMode, true);
+  state = appReducer(state, { type: 'analyticsPeriod', value: 'current_month' });
+  assert.equal(state.analyticsPeriod, 'current_month');
   assert.equal(state.hasUnsavedChanges, false);
 });

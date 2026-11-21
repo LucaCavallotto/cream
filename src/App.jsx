@@ -303,7 +303,7 @@ export default function App() {
           className={`cream-header ${loaded ? 'has-file' : ''} ${state.viewOnlyMode ? 'is-read-only' : ''}`}
         >
           <div className="brand-lockup">
-            <button type="button" className="cream-wordmark" aria-label="cream home" disabled={saving} onClick={() => { if (loaded) closeFile(); else window.scrollTo(0, 0); }}>
+            <button type="button" className="cream-wordmark" aria-label="cream home" disabled={saving} onClick={() => { if (loaded) changeTab('Overview'); else window.scrollTo(0, 0); }}>
               cream
               <span aria-hidden="true">
                 <Star />
@@ -522,6 +522,10 @@ export default function App() {
                   {name === 'Overview' ? (
                     <Overview
                       state={state}
+                      theme={theme}
+                      reducedMotion={reducedMotion}
+                      active={state.tab === 'Overview'}
+                      onAnalytics={(period) => { if (period) dispatch({ type: 'analyticsPeriod', value: period }); changeTab('Analytics'); pendingScroll.current = 0; }}
                       model={model}
                       health={health}
                       onTab={changeTab}
@@ -607,7 +611,7 @@ export default function App() {
         <span className="footer-brand">cream.</span>
         <span>Cash Rules Everything Around Me.</span>
         <span className="footer-note">
-          A little clarity goes a long way. <span aria-hidden="true">↗</span>
+          A little clarity goes a long way.
         </span>
       </footer>
     </>

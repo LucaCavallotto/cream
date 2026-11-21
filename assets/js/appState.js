@@ -26,6 +26,7 @@ export function createAppState(viewOnlyMode = false, deviceReadOnly = false) {
     searchText: '',
     transactionFilters: createTransactionFilters(),
     tab: 'Overview',
+    analyticsPeriod: 'last_12_months',
     analyticsExclusions: createAnalyticsExclusions(),
     analyticsReturnContext: null,
     analyticsDrilldown: null,
@@ -178,6 +179,8 @@ export function appReducer(state, action) {
         isSelectionMode: false,
         selectedIds: [],
       };
+    case 'analyticsPeriod':
+      return { ...state, analyticsPeriod: action.value };
     case 'exclusions':
       return { ...state, analyticsExclusions: action.value };
     case 'drilldown': {

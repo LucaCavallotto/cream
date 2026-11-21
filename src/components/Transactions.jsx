@@ -584,7 +584,6 @@ export default function Transactions({
         </span>
         <span>
           Click a transaction for the full picture.{' '}
-          <span aria-hidden="true">↗</span>
         </span>
       </div>
     </>

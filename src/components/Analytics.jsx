@@ -1,7 +1,7 @@
 import { createAnalyticsExclusions } from '../../assets/js/analyticsScope.js';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import Chart from 'chart.js/auto';
-import { analyticsModel, chartConfig } from '../../assets/js/analyticsModel.js';
+import { useMemo, useState } from 'react';
+import AnalyticsChart from './AnalyticsChart.jsx';
+import { analyticsModel } from '../../assets/js/analyticsModel.js';
 import { isValidTransactionDate } from '../../assets/js/datasetHealth.js';
 import AnalyticsFilters from './AnalyticsFilters.jsx';
 import { formatMoney } from '../../assets/js/presentation.js';
@@ -9,23 +9,7 @@ import { formatMoney } from '../../assets/js/presentation.js';
 const euro = formatMoney;
 
 function ChartCard({ type, model, active, theme, reducedMotion }) {
-  const canvas = useRef(null),
-    instance = useRef(null);
   const title = `${type === 'pie' ? 'Expenses by Category' : 'Monthly Cash Flow Trend'} (${model.periodLabel})`;
-  useEffect(() => {
-    const chart = new Chart(
-      canvas.current,
-      chartConfig(type, model, { dark: theme === 'dark', reducedMotion }),
-    );
-    instance.current = chart;
-    return () => {
-      instance.current = null;
-      chart.destroy();
-    };
-  }, [type, model, theme, reducedMotion]);
-  useEffect(() => {
-    if (active) instance.current?.resize();
-  }, [active]);
   return (
     <div className="analytics-chart">
       <div className="card shadow-sm h-100">
@@ -33,19 +17,7 @@ function ChartCard({ type, model, active, theme, reducedMotion }) {
           <h5 className="card-title mb-0">{title}</h5>
         </div>
         <div className="card-body">
-          <div style={{ aspectRatio: '2 / 1', position: 'relative' }}>
-            <canvas
-              style={{ position: 'absolute', inset: 0 }}
-              ref={canvas}
-              id={type === 'pie' ? 'categoryPieChart' : 'cashFlowLineChart'}
-              role="img"
-              aria-label={
-                type === 'pie'
-                  ? `Expenses by category: ${model.pie.map(([name]) => name).join(', ')}`
-                  : `Monthly cash flow: ${model.monthly.map((m) => m.label).join(', ')}`
-              }
-            />
-          </div>
+          <AnalyticsChart type={type} model={model} active={active} theme={theme} reducedMotion={reducedMotion} id={type === 'pie' ? 'categoryPieChart' : 'cashFlowLineChart'} />
         </div>
       </div>
     </div>
@@ -268,8 +240,9 @@ export default function Analytics({
   theme,
   reducedMotion,
 }) {
-  const [period, setPeriod] = useState('last_12_months'),
-    [month, setMonth] = useState(''),
+  const period = state.analyticsPeriod;
+  const setPeriod = value => dispatch({ type: 'analyticsPeriod', value });
+  const [month, setMonth] = useState(''),
     [resetToken, setResetToken] = useState(0);
   const months = useMemo(
     () =>

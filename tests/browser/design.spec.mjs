@@ -269,7 +269,7 @@ test('LAN-compatible IDs support CSV import, manual and multiline entry, and dow
   await expect(page.locator('#btnSaveChanges')).toBeDisabled();
 });
 
-test('issue counts highlight problems and the cream logo returns home without discarding edits silently', async ({ page }) => {
+test('issue counts highlight problems and the cream logo returns to Overview without discarding edits', async ({ page }) => {
   await launch(page);
   await openRows(page, [row('Needs review', -1, 'Unknown', '')]);
   await tab(page, 'Dataset Health');
@@ -278,13 +278,12 @@ test('issue counts highlight problems and the cream logo returns home without di
   await addModal(page);
   await page.locator('#inlineInput').fill('2026-11-18, -1, Pending');
   await page.getByRole('button', { name: 'Save Transaction', exact: true }).click();
-  page.once('dialog', dialog => dialog.dismiss());
   await page.getByRole('button', { name: 'cream home', exact: true }).click();
-  await expect(page.locator('#appView')).toBeVisible();
+  await expect(page.locator('#overview-tab-pane')).toBeVisible();
+  await expect(page.locator('#currentFileName')).toHaveText('test.csv');
   await expect(page.locator('#unsavedWarning')).toBeVisible();
-  page.once('dialog', dialog => dialog.accept());
-  await page.getByRole('button', { name: 'cream home', exact: true }).click();
-  await expect(page.locator('#landingView')).toBeVisible();
+  await page.locator('#btnCloseFile').click({ trial: true });
+
 });
 
 test('subcategory choices narrow by category and clearing the category restores all groups', async ({ page }) => {
