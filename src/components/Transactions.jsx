@@ -90,6 +90,7 @@ export default function Transactions({
         </div>
       </div>
       <div className="ledger-toolbar">
+        <div className="ledger-search-group">
         <div className="ledger-search">
           <i className="bi bi-search" aria-hidden="true" />
           <input
@@ -99,6 +100,7 @@ export default function Transactions({
             inputMode="search"
             className="form-control"
             aria-label="Search transactions"
+            aria-describedby="transactionResultCount"
             placeholder="Search transactions…"
             value={state.searchText}
             onChange={(event) =>
@@ -115,6 +117,8 @@ export default function Transactions({
             <i className="bi bi-x-circle" aria-hidden="true" />
           </button>
         </div>
+
+        </div>
         {!state.viewOnlyMode && (
           <button
             id="btnSelectMode"
@@ -127,9 +131,6 @@ export default function Transactions({
             {state.isSelectionMode ? 'Cancel' : 'Select'}
           </button>
         )}
-        <span className="ledger-count">
-          {rows.length} {rows.length === 1 ? 'transaction' : 'transactions'}
-        </span>
         <div className="ledger-sort">
           <label htmlFor="transactionSort">Sort</label>
           <select
@@ -278,6 +279,9 @@ export default function Transactions({
           </div>
         </div>
       </div>
+        <span id="transactionResultCount" className="ledger-count" role="status">
+          {rows.length} {rows.length === 1 ? 'transaction' : 'transactions'}
+        </span>
       <div
         className={`table-responsive bg-body rounded shadow-sm ${rows.length ? '' : 'd-none'}`}
       >

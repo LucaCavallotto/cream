@@ -182,18 +182,22 @@ test('phone labels, all sections and protected navigation remain usable across s
   await expect(page.locator('#unsavedWarning')).toBeHidden();
 });
 
-test('monthly spending comparison stacks left on small phones while editing stays protected', async ({ page }) => {
+test('monthly spending follows desktop information order on small phones while editing stays protected', async ({ page }) => {
   await launch(page);
   await openRows(page, [row('Current', -20), row('Previous', -10, 'Bar', 'Coffee', '2026-10-02T12:00:00+02:00')]);
   await tab(page, 'Overview');
   for (const width of [320, 390, 430]) {
     await page.setViewportSize({ width, height: 844 });
-    await expect(page.locator('.month-comparison')).toHaveCSS('font-size', '14px');
+    const heading = await page.locator('.month-title-row').boundingBox();
+    const amount = await page.locator('.spotlight-amount').boundingBox();
+    const comparison = await page.locator('.month-comparison').boundingBox();
+    expect(amount.y).toBeGreaterThanOrEqual(heading.y + heading.height);
+    expect(comparison.y).toBeGreaterThanOrEqual(amount.y + amount.height);
     for (const selector of ['.month-comparison', '.month-baseline']) {
       const parts = page.locator(`${selector} > *`);
       const first = await parts.nth(0).boundingBox(), second = await parts.nth(1).boundingBox();
-      expect(Math.abs(first.x - second.x)).toBeLessThan(1);
-      expect(second.y).toBeGreaterThanOrEqual(first.y + first.height);
+      expect(second.x).toBeGreaterThanOrEqual(first.x + first.width);
+      expect(Math.abs(first.y + first.height / 2 - second.y - second.height / 2)).toBeLessThan(8);
     }
     await expect(page.locator('#btnToggleViewOnly')).toBeHidden();
     await expect(page.locator('#btnAddExpense')).toBeHidden();

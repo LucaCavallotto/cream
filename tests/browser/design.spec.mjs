@@ -308,7 +308,7 @@ test('analytics clear filters restores the period and all exclusions', async ({ 
   await page.getByText('Analytics exclusions', { exact: true }).click();
   await page.locator('#analyticsExcludeAll').click();
   await page.locator('#analyticsTimePeriod').selectOption('overall');
-  await page.getByRole('button', { name: 'Clear', exact: true }).click();
+  await page.getByRole('button', { name: 'Clear filters', exact: true }).click();
   await expect(page.locator('#analyticsTimePeriod')).toHaveValue('last_12_months');
   await expect(page.locator('#metricExpenses')).toHaveText('€1.00');
   await expect(page.locator('#analyticsExclusionSummary')).toContainText('0 categories');
@@ -374,7 +374,7 @@ test('section and metric labels stay readable on desktop', async ({ page }) => {
     await expect(page.locator(selector).first()).toHaveCSS('font-size', '14px');
   }
   await tab(page, 'Analytics');
-  await expect(page.locator('.analytics-net .eyebrow')).toHaveCSS('font-size', '14px');
+  await expect(page.locator('.analytics-net .eyebrow')).toHaveCSS('font-size', '15px');
 });
 
 test('Dataset Health count stays inside narrow desktop navigation without clipping the label', async ({ page }) => {
@@ -506,5 +506,117 @@ test('landing places new-file and demo choices before the existing-file panel on
     const demo = await page.locator('.landing-demo-area').boundingBox();
     const hero = await page.locator('.landing-hero').boundingBox();
     expect(demo.y).toBeGreaterThanOrEqual(hero.y + hero.height);
+  }
+});
+
+test('analytics uses consistent headings and section colors with readable monthly comparison', async ({ page }) => {
+  await launch(page);
+  await openRows(page, [row('Investment', -1000, 'Investments', 'ETFs'), row('Salary', 2000, 'Income', 'Salary')]);
+  await tab(page, 'Analytics');
+  for (const width of [320, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const theme of ['light', 'dark']) {
+      await page.emulateMedia({ colorScheme: theme });
+      await expect(page.locator('html')).toHaveAttribute('data-bs-theme', theme);
+      const titles = page.locator('.analytics-chart .card-title, .analytics-breakdown .card-title');
+      for (const title of await titles.all()) await expect(title).toHaveCSS('font-size', '22px');
+      for (const kind of ['expenses', 'income']) {
+        const section = page.locator(`.breakdown-${kind}`);
+        const color = await section.locator('.card-title').evaluate(el => getComputedStyle(el).color);
+        await expect(section.locator('.category-header .fw-bold').first()).toHaveCSS('color', color);
+        await expect(section.locator('.category-amount-badge').first()).toHaveCSS('color', color);
+      }
+      await expect(page.locator('.analytics-comparison > div').first()).toHaveCSS('font-size', '15px');
+      await expect(page.locator('#metricCurrentMonth')).toHaveCSS('font-size', '23px');
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
+  }
+});
+
+test('sort stays visible and readable while breakdown bars and expansion controls follow their sections', async ({ page }) => {
+  await launch(page);
+  await openRows(page, Array.from({ length: 7 }, (_, i) => [row(`Expense ${i}`, -10, `Expense category ${i}`), row(`Income ${i}`, 20, `Income category ${i}`)]).flat());
+  for (const width of [320, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await tab(page, 'Transactions');
+    const sort = page.locator('#transactionSort');
+    await expect(sort).toBeVisible();
+    await expect(sort).toHaveCSS('font-size', '16px');
+    await expect(page.locator('label[for="transactionSort"]')).toHaveCSS('font-size', '16px');
+    await sort.selectOption('Amount:desc');
+    await expect(sort).toHaveValue('Amount:desc');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await tab(page, 'Analytics');
+    for (const kind of ['expenses', 'income']) {
+      const section = page.locator(`.breakdown-${kind}`);
+      const titleColor = await section.locator('.card-title').evaluate(el => getComputedStyle(el).color);
+      await expect(section.locator('.category-progress-bar').first()).toHaveCSS('background-color', titleColor);
+      const more = section.getByRole('button', { name: /Show More/ });
+      await expect(more).toHaveCSS('font-size', '16px');
+      await more.click();
+      await expect(section.locator('.category-item')).toHaveCount(7);
+      const less = section.getByRole('button', { name: /Show Less/ });
+      await expect(less).toHaveCSS('font-size', '16px');
+      await less.click();
+      await expect(section.locator('.category-item')).toHaveCount(5);
+    }
+  }
+});
+
+test('result count sits above the ledger and exclusions precede the plain period row', async ({ page }) => {
+  await launch(page);
+  await openRows(page, [row('Coffee'), row('Second', -5)]);
+  for (const width of [320, 768, 1200, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await tab(page, 'Transactions');
+    const search = await page.locator('.ledger-search').boundingBox();
+    const count = await page.locator('#transactionResultCount').boundingBox();
+    expect(count.y).toBeGreaterThanOrEqual(search.y + search.height);
+    expect(count.x).toBe(search.x);
+    const table = await page.locator('#transactionsTable').boundingBox();
+    expect(table.y - count.y - count.height).toBeLessThanOrEqual(12);
+    if (width < 768) {
+      const sort = await page.locator('.ledger-sort').boundingBox();
+      expect(count.y).toBeGreaterThanOrEqual(sort.y + sort.height);
+      expect(sort.x).toBe(search.x);
+    }
+    await tab(page, 'Analytics');
+    await expect(page.locator('.analytics-reset-actions #clearAnalyticsFilters')).toBeVisible();
+    await expect(page.locator('.page-heading #clearAnalyticsFilters')).toHaveCount(0);
+    await page.locator('#analyticsTimePeriod').selectOption('current_month');
+    await page.locator('#clearAnalyticsFilters').click();
+    await expect(page.locator('#analyticsTimePeriod')).toHaveValue('last_12_months');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});
+
+test('cash flow fills its analytics card and period shares a plain row with reset below exclusions', async ({ page }) => {
+  await launch(page);
+  await openRows(page, Array.from({ length: 5 }, (_, i) => row(`Expense ${i}`, -10, `Category ${i}`)));
+  await tab(page, 'Analytics');
+  for (const width of [320, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    const reset = page.getByRole('button', { name: 'Clear filters', exact: true });
+    const clear = await reset.boundingBox();
+    const period = await page.locator('.analytics-toolbar').boundingBox();
+    const exclusions = await page.locator('#analyticsExclusionsPanel').boundingBox();
+    const fields = await page.locator('.analytics-period-controls').boundingBox();
+    if (width >= 768) expect(Math.abs(clear.y + clear.height / 2 - fields.y - fields.height / 2)).toBeLessThan(2);
+    else expect(clear.y).toBeGreaterThanOrEqual(fields.y + fields.height);
+    expect(period.y).toBeGreaterThanOrEqual(exclusions.y + exclusions.height);
+    await expect(page.locator('.analytics-toolbar')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    const label = await page.locator('label[for="analyticsTimePeriod"]').boundingBox();
+    const select = await page.locator('#analyticsTimePeriod').boundingBox();
+    expect(select.x).toBeGreaterThanOrEqual(label.x + label.width);
+    expect(Math.abs(select.y + select.height / 2 - label.y - label.height / 2)).toBeLessThan(2);
+    expect(clear.y).toBeGreaterThanOrEqual(exclusions.y + exclusions.height);
+    await expect.poll(async () => page.locator('.chart-card-line').evaluate(card => {
+      const body = card.querySelector('.card-body');
+      const chart = card.querySelector('.shared-chart');
+      const style = getComputedStyle(body);
+      return Math.abs(chart.getBoundingClientRect().height - body.getBoundingClientRect().height + parseFloat(style.paddingTop) + parseFloat(style.paddingBottom));
+    })).toBeLessThan(2);
+    await expect(page.locator('#cashFlowLineChart')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
 });

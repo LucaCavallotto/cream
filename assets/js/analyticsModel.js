@@ -128,7 +128,7 @@ export function analyticsModel(
 export function chartConfig(
   type,
   model,
-  { dark = false, reducedMotion = false } = {},
+  { dark = false, reducedMotion = false, compact = false } = {},
 ) {
   const ink = dark ? '#f3f5f1' : '#161817';
   const muted = dark ? '#a1a69f' : '#717570';
@@ -189,7 +189,8 @@ export function chartConfig(
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          position: type === 'pie' ? 'right' : 'top',
+          display: type !== 'pie',
+          position: 'top',
           labels: {
             color: muted,
             boxWidth: 8,
@@ -198,7 +199,7 @@ export function chartConfig(
             pointStyle: 'circle',
             padding: 17,
             font: {
-              size: 10,
+              size: 14,
               family: '-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
             },
           },
@@ -207,6 +208,8 @@ export function chartConfig(
           backgroundColor: ink,
           titleColor: paper,
           bodyColor: paper,
+          titleFont: { size: 14 },
+          bodyFont: { size: 14 },
           padding: 12,
           cornerRadius: 7,
           callbacks: {
@@ -225,12 +228,12 @@ export function chartConfig(
                 beginAtZero: true,
                 grid: { color: grid },
                 border: { display: false },
-                ticks: { color: muted, font: { size: 9 } },
+                ticks: { color: muted, font: { size: 12 } },
               },
               x: {
                 grid: { display: false },
                 border: { display: false },
-                ticks: { color: muted, font: { size: 9 }, maxTicksLimit: 6 },
+                ticks: { color: muted, font: { size: 12 }, maxTicksLimit: compact ? 12 : 6, minRotation: compact ? 90 : 0, maxRotation: compact ? 90 : 50 },
               },
             },
           }

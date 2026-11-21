@@ -109,7 +109,7 @@ export default function Overview({
             <span className="eyebrow">EXPENSES</span>
             <i className="bi bi-calendar3" aria-hidden="true" />
           </div>
-          <h2><button type="button" className="month-heading-link" onClick={() => onAnalytics('current_month')}>This month.</button></h2>
+          <div className="month-title-row"><h2><button type="button" className="month-heading-link" onClick={() => onAnalytics('current_month')}>This month.</button></h2></div>
           <p className="spotlight-amount"><Money value={model.current} /></p>
           <div className="month-comparison">
             {comparison ? (

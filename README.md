@@ -68,13 +68,15 @@ Use the desktop sidebar or smartphone bottom navigation to switch sections. Keyb
 | **Analytics** | Choose a period and explore cash flow, spending, income and tags. Expand **Analytics exclusions** to omit categories, subcategories or individual records from calculations. |
 | **Dataset Health** | Find missing fields, invalid dates/amounts, unclassified records and possible duplicate classification names. Open an affected record to inspect it or, when unlocked, correct it. Custom classifications are listed separately for information. |
 
+Use the category legend below the expenses pie chart to hide or show individual slices. This changes the chart only; use analytics exclusions to change which transactions contribute to totals.
+
 Overview cards use centered callouts at the bottom. **This month** opens Analytics with **Current Month** selected. **IN & OUT** uses the same **Last 12 Months** cash-flow chart as Analytics. Recent transaction rows open their details.
 
 ### Filters and analytics exclusions
 
 Transaction filters combine with search. **Clear** resets the ledger's search and selectors. **Select all** in desktop bulk-edit mode selects only visible matching records.
 
-In Analytics, **Exclude all** lets you begin with everything excluded, then remove exclusions for the categories you want to inspect. You cannot add the same category exclusion twice. **Clear** restores **Last 12 Months** and removes exclusions. The monthly comparison always compares the current and previous calendar months using the same exclusions.
+In Analytics, **Exclude all** lets you begin with everything excluded, then remove exclusions for the categories you want to inspect. You cannot add the same category exclusion twice. **Clear filters** restores **Last 12 Months** and removes exclusions. The monthly comparison always compares the current and previous calendar months using the same exclusions.
 
 The magnifying glasses in breakdowns open the exact category/subcategory or tag, matching the source period, amount sign and exclusions. **Back to Analytics** restores the analysis and the previous ledger search, sorting and filters. Ledger filters can further narrow a drilldown; Clear removes that temporary scope too.
 

@@ -103,4 +103,17 @@ test('charts follow the system palette and reduced-motion setting without changi
     dark.data.datasets.map((dataset) => dataset.data),
   );
   assert.equal(dark.options.locale, 'en-GB');
+  assert.equal(light.options.plugins.legend.labels.font.size, 14);
+  assert.equal(light.options.scales.x.ticks.font.size, 12);
+  assert.equal(light.options.scales.y.ticks.font.size, 12);
+  assert.equal(light.options.plugins.tooltip.bodyFont.size, 14);
+});
+
+
+test('compact charts rotate month labels and use a separate pie legend', () => {
+  const model = overviewModel([row('Coffee', -10)], createAnalyticsExclusions(), now);
+  const config = chartConfig('line', model, { compact: true });
+  assert.equal(config.options.scales.x.ticks.minRotation, 90);
+  assert.equal(config.options.scales.x.ticks.maxRotation, 90);
+  assert.equal(chartConfig('pie', model).options.plugins.legend.display, false);
 });

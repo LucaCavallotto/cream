@@ -9,7 +9,7 @@ import Money from './Money.jsx';
 function ChartCard({ type, model, active, theme, reducedMotion }) {
   const title = `${type === 'pie' ? 'Expenses by Category' : 'Monthly Cash Flow Trend'} (${model.periodLabel})`;
   return (
-    <div className="analytics-chart">
+    <div className={`analytics-chart chart-card-${type}`}>
       <div className="card shadow-sm h-100">
         <div className="card-header bg-transparent border-bottom-0">
           <h5 className="card-title mb-0">{title}</h5>
@@ -72,7 +72,7 @@ function Breakdown({ kind, groups, periodLabel, onDrilldown }) {
       return next;
     });
   return (
-    <div className="analytics-breakdown">
+    <div className={`analytics-breakdown breakdown-${kind}`}>
       <div className="card shadow-sm h-100">
         <div className="card-header bg-transparent border-bottom-0 d-flex justify-content-between align-items-center">
           <h5 className="card-title mb-0">
@@ -277,6 +277,15 @@ export default function Analytics({
           <h1>Analytics</h1>
           <p className="page-description">Explore cash flow and spending over time.</p>
         </div>
+      </div>
+      <AnalyticsFilters
+        resetToken={resetToken}
+        transactions={state.transactions}
+        exclusions={state.analyticsExclusions}
+        onChange={(value) => dispatch({ type: 'exclusions', value })}
+        model={model}
+      />
+      <div className="analytics-toolbar">
         <div className="analytics-period-controls">
           <label
             htmlFor="analyticsTimePeriod"
@@ -326,16 +335,11 @@ export default function Analytics({
               ))}
             </select>
           </div>
-          <button className="btn btn-outline-secondary" onClick={() => { setPeriod('last_12_months'); setMonth(''); dispatch({ type: 'exclusions', value: createAnalyticsExclusions() }); setResetToken(value => value + 1); }}>Clear</button>
         </div>
+      <div className="analytics-reset-actions">
+        <button id="clearAnalyticsFilters" title="Reset period and exclusions" className="btn btn-outline-secondary" onClick={() => { setPeriod('last_12_months'); setMonth(''); dispatch({ type: 'exclusions', value: createAnalyticsExclusions() }); setResetToken(value => value + 1); }}>Clear filters</button>
       </div>
-      <AnalyticsFilters
-        resetToken={resetToken}
-        transactions={state.transactions}
-        exclusions={state.analyticsExclusions}
-        onChange={(value) => dispatch({ type: 'exclusions', value })}
-        model={model}
-      />
+      </div>
       <div
         id="analyticsNoData"
         className={`alert alert-secondary ${model.rows.length ? 'd-none' : ''}`}
