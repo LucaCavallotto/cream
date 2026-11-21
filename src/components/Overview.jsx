@@ -40,11 +40,7 @@ export default function Overview({
     <div className="overview">
       <div className="page-heading">
         <div>
-          <p className="eyebrow">YOUR MONEY, IN PERSPECTIVE</p>
-          <h1>The bigger picture.</h1>
-          <p className="page-description">
-            A clear view of what comes in, what goes out, and what’s next.
-          </p>
+          <h1>Overview</h1>
         </div>
         <span className="date-stamp">
           {new Date().toLocaleDateString('en-GB', {
@@ -84,7 +80,7 @@ export default function Overview({
             <Money value={model.net} signed />
           </p>
           <span className="net-caption">
-            The difference between your income and expenses.
+            Income minus expenses.
           </span>
           <div className="net-details">
             <div>
@@ -109,14 +105,11 @@ export default function Overview({
         </section>
         <section className="month-spotlight">
           <div className="panel-kicker">
-            <span className="eyebrow">IN THE MOMENT</span>
+            <span className="eyebrow">EXPENSES</span>
             <i className="bi bi-calendar3" aria-hidden="true" />
           </div>
           <h2><button type="button" className="month-heading-link" onClick={() => onAnalytics('current_month')}>This month.</button></h2>
           <p className="spotlight-amount"><Money value={model.current} /></p>
-          <p className="muted">
-            spent in {new Date().toLocaleString('en-GB', { month: 'long' })}
-          </p>
           <div className="month-comparison">
             {comparison ? (
               <>
@@ -128,7 +121,7 @@ export default function Overview({
                 <span>vs. last month</span>
               </>
             ) : (
-              <span>No previous-month spending to compare.</span>
+              <span>No spending last month.</span>
             )}
           </div>
           <div className="month-baseline">
@@ -143,10 +136,10 @@ export default function Overview({
           <div className="panel-heading">
             <div>
               <p className="eyebrow">IN & OUT</p>
-              <h2>A little perspective.</h2>
+              <h2>Cash flow</h2>
             </div>
           </div>
-          <p className="muted">Monthly Cash Flow Trend (Last 12 Months)</p>
+          <p className="muted">Last 12 months</p>
           <AnalyticsChart type="line" model={flowModel} active={active} theme={theme} reducedMotion={reducedMotion} id="overviewCashFlowChart" />
           <CardCallout onClick={() => onAnalytics('last_12_months')}>Explore cash flow</CardCallout>
         </section>
@@ -164,20 +157,13 @@ export default function Overview({
 
             </span>
           </div>
-          <p className="health-ring-caption">Transactions with no detected issues</p>
-          <h2>
-            {!health.total
-              ? 'A clean start.'
-              : health.dirty.length
-                ? 'A few loose ends.'
-                : 'Looking good.'}
-          </h2>
+          <p className="health-ring-caption">No detected issues</p>
           <p>
             {!health.total
-              ? 'Add a transaction to start checking your dataset.'
+              ? 'No transactions.'
               : health.dirty.length
-                ? `${health.dirty.length} ${health.dirty.length === 1 ? 'transaction needs' : 'transactions need'} a closer look.`
-                : 'No missing fields or classification issues detected.'}
+                ? `${health.dirty.length} ${health.dirty.length === 1 ? 'transaction' : 'transactions'} to review.`
+                : 'No records to review.'}
           </p>
           <CardCallout onClick={() => onTab('Dataset Health')}>Review dataset</CardCallout>
         </section>
@@ -185,8 +171,7 @@ export default function Overview({
       <section className="cream-panel recent-panel">
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">RECENT ACTIVITY · ALL RECORDS</p>
-            <h2>The latest.</h2>
+            <h2>Recent transactions</h2>
           </div>
         </div>
         <div className="recent-list">
@@ -232,7 +217,7 @@ export default function Overview({
             ))
           ) : (
             <p className="empty-copy">
-              A fresh page. Add your first transaction to make it yours.
+              No transactions.
             </p>
           )}
         </div>

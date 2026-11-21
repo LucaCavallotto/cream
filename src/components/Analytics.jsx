@@ -274,11 +274,7 @@ export default function Analytics({
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">THE WHY BEHIND THE NUMBERS</p>
-          <h1>Follow the flow.</h1>
-          <p className="page-description">
-            Patterns, perspective, and a little more peace of mind.
-          </p>
+          <h1>Analytics</h1>
         </div>
         <div className="analytics-period-controls">
           <label

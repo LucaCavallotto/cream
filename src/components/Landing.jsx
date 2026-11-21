@@ -11,22 +11,8 @@ export default function Landing({
     <main id="landingView" className="landing-view" tabIndex={-1}>
       <section className="landing-hero">
         <div className="landing-story">
-          <p className="eyebrow">
-            <span className="status-dot" /> PERSONAL FINANCE. PERSONALLY YOURS.
-          </p>
-          <h1>
-            Good with
-            <br />
-            money.
-            <br />
-            <span className="hero-soft">On your terms.</span>
-          </h1>
-          <p className="landing-description">
-            A little less noise. A lot more clarity.
-            <br />
-            Bring your transactions together and see
-            <br className="desktop-break" /> the bigger picture.
-          </p>
+          <h1>Your transactions.</h1>
+          <p className="landing-description">{readOnly ? 'Open a CSV to view transactions and analytics.' : 'Open a CSV or create a new file.'}</p>
           {!readOnly && <button
             id="btnCreateNewFile"
             className="btn btn-primary landing-create"
@@ -49,7 +35,7 @@ export default function Landing({
         <div className="landing-file-area">
           <div id="dropZone" className="drop-zone">
             <div className="drop-zone-top">
-              <span className="eyebrow">YOUR FILE, YOUR PERSPECTIVE</span>
+              <span className="eyebrow">CSV FILES</span>
               <span className="file-corner" aria-hidden="true">
                 ↗
               </span>
@@ -67,18 +53,12 @@ export default function Landing({
                 </span>
               </div>
               <span className="file-ready">
-                <span className="status-dot" /> Yours to open.
+                <span className="status-dot" /> Local file
               </span>
             </div>
             <div>
-              <h2>
-                One file.
-                <br />
-                The whole picture.
-              </h2>
-              <p>
-                {readOnly ? 'Open your CSV to explore it. Editing is available on a computer.' : 'Drop your CSV here to open it, or create a new file to start fresh.'}
-              </p>
+              <h2>Open a CSV</h2>
+              {readOnly && <p>Editing is available on a computer.</p>}
             </div>
             <button
               id="btnOpenFile"
@@ -94,35 +74,7 @@ export default function Landing({
               your device.
             </span>
           </div>
-          <span className="landing-side-note">A CLEARER VIEW STARTS HERE.</span>
         </div>
-      </section>
-      <section className="landing-principles" aria-label="Why cream">
-        {[
-          [
-            '01',
-            'Keep it yours.',
-            'Your data, your CSV. No accounts or uploads.',
-          ],
-          [
-            '02',
-            'See what adds up.',
-            'Every transaction, category and little habit.',
-          ],
-          [
-            '03',
-            'Make room for clarity.',
-            'Clean up the details. Focus on what matters.',
-          ],
-        ].map(([number, title, copy]) => (
-          <div key={number}>
-            <span className="principle-number">{number} /</span>
-            <div>
-              <h3>{title}</h3>
-              <p>{copy}</p>
-            </div>
-          </div>
-        ))}
       </section>
     </main>
   );

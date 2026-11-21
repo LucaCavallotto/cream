@@ -85,11 +85,7 @@ export default function Transactions({
       {state.analyticsDrilldown && <p className="scope-note" role="status">Analytics selection: {state.analyticsDrilldown.label}. Period and exclusions apply.</p>}
       <div className="page-heading">
         <div>
-          <p className="eyebrow">THE DAILY DETAILS</p>
-          <h1>Your money, line by line.</h1>
-          <p className="page-description">
-            Every little thing, all in one place.
-          </p>
+          <h1>Transactions</h1>
         </div>
       </div>
       <div className="ledger-toolbar">
@@ -583,7 +579,7 @@ export default function Transactions({
           {rows.length} of {state.transactions.length} records
         </span>
         <span>
-          Click a transaction for the full picture.{' '}
+          Select a transaction for details.{' '}
         </span>
       </div>
     </>

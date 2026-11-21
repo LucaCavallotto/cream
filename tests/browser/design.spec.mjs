@@ -6,6 +6,7 @@ import {
   row,
   tab,
   addModal,
+  saveModal,
 } from './fixtures.mjs';
 
 test('cream opens the bundled demo in Overview and the shortcuts reach real data and records', async ({
@@ -358,7 +359,8 @@ test('working text is comfortably sized and the overview balance separates sign 
   const sign = await parts.nth(0).boundingBox(), currency = await parts.nth(1).boundingBox(), value = await parts.nth(2).boundingBox();
   expect(currency.x - (sign.x + sign.width)).toBeGreaterThan(3);
   expect(value.x - (currency.x + currency.width)).toBeGreaterThan(3);
-  await expect(page.locator('.page-description').first()).toHaveCSS('font-size', '18px');
+  await expect(page.locator('#overview-tab-pane h1')).toHaveText('Overview');
+  await expect(page.locator('#overview-tab-pane .page-description')).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
   await tab(page, 'Transactions');
   await expect(page.locator('.mobile-visible .fw-bold.text-truncate')).toHaveCSS('font-size', '16px');
@@ -398,5 +400,37 @@ test('Dataset Health count stays inside narrow desktop navigation without clippi
       expect(labelBox.x + labelBox.width).toBeLessThanOrEqual(badgeBox.x);
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});
+
+test('a narrow desktop can unlock, edit and relock without header overlaps', async ({ page }) => {
+  await page.setViewportSize({ width: 500, height: 900 });
+  await launch(page);
+  await openRows(page, [row()]);
+  await expect(page.locator('#btnToggleViewOnly')).toBeVisible();
+  for (const width of [320, 500, 767]) {
+    await page.setViewportSize({ width, height: 900 });
+    const controls = ['.brand-lockup', '#btnToggleViewOnly', '#btnAddExpense'];
+    const boxes = await Promise.all(controls.map(selector => page.locator(selector).boundingBox()));
+    expect(boxes[0].x + boxes[0].width).toBeLessThanOrEqual(boxes[1].x);
+    expect(boxes[1].x + boxes[1].width).toBeLessThanOrEqual(boxes[2].x);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.locator('#btnToggleViewOnly').click();
+    await expect(page.locator('#btnAddExpense')).toBeHidden();
+    await expect(page.locator('#btnToggleViewOnly')).toBeVisible();
+    await page.locator('#btnToggleViewOnly').click();
+    await expect(page.locator('#btnAddExpense')).toBeVisible();
+  }
+  await addModal(page); await page.locator('#inlineInput').fill('2026-11-21, -2, Narrow desktop'); await saveModal(page);
+  await expect(page.locator('#unsavedWarning')).toBeVisible();
+});
+
+test('workspace headings use section names without decorative introductory text', async ({ page }) => {
+  await launch(page); await openRows(page, [row()]);
+  for (const [name, id] of [['Overview','overview'], ['Transactions','list'], ['Analytics','analytics'], ['Dataset Health','cleanup']]) {
+    await tab(page, name);
+    await expect(page.locator(`#${id}-tab-pane h1`)).toHaveText(name);
+    await expect(page.locator(`#${id}-tab-pane .page-heading .eyebrow`)).toHaveCount(0);
+    await expect(page.locator(`#${id}-tab-pane .page-heading .page-description`)).toHaveCount(0);
   }
 });

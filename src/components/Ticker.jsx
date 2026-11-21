@@ -4,25 +4,9 @@ import { useRef, useState } from 'react';
 import { datasetTicker } from '../../assets/js/presentation.js';
 
 const welcome = [
-  {
-    key: 'private',
-    label: 'PRIVATE BY DEFAULT',
-    value: 'Always yours',
-    tone: 'positive',
-  },
-  { key: 'local', label: 'LOCAL FILES', value: 'No uploads', tone: 'neutral' },
-  {
-    key: 'perspective',
-    label: 'LESS NOISE',
-    value: 'More perspective',
-    tone: 'neutral',
-  },
-  {
-    key: 'accounts',
-    label: 'NO SIGN-UP',
-    value: 'Just your money',
-    tone: 'neutral',
-  },
+  { key: 'local', label: 'LOCAL CSV', value: 'No uploads', tone: 'neutral' },
+  { key: 'desktop', label: 'EDIT & SAVE', value: 'On a computer', tone: 'neutral' },
+  { key: 'phone', label: 'SMARTPHONES', value: 'Read only', tone: 'neutral' },
 ];
 
 export default function Ticker({ model, loaded }) {

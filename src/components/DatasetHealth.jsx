@@ -25,11 +25,7 @@ export default function DatasetHealth({
     <>
       <div className="page-heading">
         <div>
-          <p className="eyebrow">A LITTLE HOUSEKEEPING</p>
-          <h1>Clarity starts here.</h1>
-          <p className="page-description health-description">
-            Find the missing pieces. Make every transaction count.
-          </p>
+          <h1>Dataset Health</h1>
         </div>
       </div>
       <div

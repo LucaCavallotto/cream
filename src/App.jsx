@@ -314,7 +314,7 @@ export default function App() {
       </div>
       <div className="app-chrome">
         <header
-          className={`cream-header ${loaded ? 'has-file' : ''} ${state.viewOnlyMode ? 'is-read-only' : ''}`}
+          className={`cream-header ${loaded ? 'has-file' : ''} ${state.viewOnlyMode ? 'is-read-only' : ''} ${state.deviceReadOnly ? '' : 'supports-editing'}`}
         >
           <div className="brand-lockup">
             <button type="button" className="cream-wordmark" aria-label="cream home" disabled={saving} onClick={() => { if (loaded) changeTab('Overview'); else window.scrollTo(0, 0); }}>
@@ -325,7 +325,7 @@ export default function App() {
             </button>
             {!loaded && (
               <span className="brand-descriptor">
-                A clearer view of your money.
+                Local CSV finances.
               </span>
             )}
           </div>
@@ -446,7 +446,6 @@ export default function App() {
       <div className={`workspace ${loaded ? '' : 'd-none'}`}>
         <aside className="workspace-sidebar" aria-label="Workspace navigation">
           <div className="sidebar-top">
-            <p className="eyebrow sidebar-label">YOUR WORKSPACE</p>
             <nav
               id="appTabs"
               className="workspace-nav"
@@ -630,9 +629,9 @@ export default function App() {
       </dialog>
       <footer className="cream-footer">
         <span className="footer-brand">cream.</span>
-        <span>Cash Rules Everything Around Me.</span>
+        <span>Local CSV files.</span>
         <span className="footer-note">
-          A little clarity goes a long way.
+          No uploads.
         </span>
       </footer>
     </>
