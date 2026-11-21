@@ -242,7 +242,9 @@ test('unload warnings protect pending edits, but clean sessions and CSV download
   });
   const download = page.waitForEvent('download');
   await page.locator('#btnSaveChanges').click();
-  await download;
+  await (await download).path();
+  await expect(page.locator('#unsavedWarning')).toBeVisible();
+  await page.locator('#btnConfirmDownload').click();
   await expect(page.locator('#btnSaveChanges')).toBeDisabled();
   expect(dialogs).toEqual([]);
   expect(await wouldWarn()).toBe(false);
@@ -265,7 +267,9 @@ test('LAN-compatible IDs support CSV import, manual and multiline entry, and dow
   expect(new Set(ids).size).toBe(4);
   const download = page.waitForEvent('download');
   await page.locator('#btnSaveChanges').click();
-  await download;
+  await (await download).path();
+  await expect(page.locator('#unsavedWarning')).toBeVisible();
+  await page.locator('#btnConfirmDownload').click();
   await expect(page.locator('#btnSaveChanges')).toBeDisabled();
 });
 

@@ -159,7 +159,8 @@ for (const sharing of [false, true]) {
       downloaded = content;
       assert.equal(name, 'original.csv');
     });
-    assert.equal(result.saved, true);
+    assert.equal(result.saved, false);
+    assert.equal(state.hasUnsavedChanges, true);
     assert.equal(result.method, 'download');
     assert.equal(
       parseTransactionsCSV(downloaded, Papa).transactions[0].Amount,

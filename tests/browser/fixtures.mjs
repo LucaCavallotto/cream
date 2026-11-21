@@ -94,6 +94,7 @@ export async function downloadRows(page) {
   const result = Papa.parse(text, { header: true, skipEmptyLines: true });
   expect(result.errors).toEqual([]);
   expect(result.meta.fields).toEqual(headers);
+  await page.locator('#btnConfirmDownload').click();
   return { text, rows: result.data };
 }
 

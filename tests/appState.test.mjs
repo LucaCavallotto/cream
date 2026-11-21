@@ -163,3 +163,17 @@ test('opening an existing file always resets to read only and desktop can explic
   assert.equal(state.analyticsPeriod, 'current_month');
   assert.equal(state.hasUnsavedChanges, false);
 });
+
+test('download confirmation acknowledges only its snapshot and does not clear subsequent edits', () => {
+  const snapshot = edit(open());
+  let state = appReducer(snapshot, { type: 'downloadPending', transactions: snapshot.transactions, sessionId: snapshot.sessionId });
+  assert.equal(state.hasUnsavedChanges, true);
+  state = appReducer(state, { type: 'upsert', rows: [{ ...original, id: 'later' }] });
+  state = appReducer(state, { type: 'save', ...state.pendingDownload });
+  assert.equal(state.hasUnsavedChanges, true);
+  assert.equal(state.originalTransactions.length, 1);
+  assert.equal(state.pendingDownload, null);
+  const replaced = appReducer(state, { type: 'open', session: { fileName: 'next.csv', transactions: [] } });
+  assert.equal(replaced.pendingDownload, null);
+  assert.equal(appReducer(replaced, { type: 'downloadPending', transactions: [], sessionId: snapshot.sessionId }), replaced);
+});

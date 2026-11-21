@@ -66,6 +66,8 @@ export default function App() {
     saveTimer = useRef(null),
     pendingScroll = useRef(null),
     readOnlyInfo = useRef(null);
+  const currentState = useRef(state);
+  currentState.current = state;
   const closeModal = useCallback(() => setModal(null), []);
   const tags = useMemo(
     () =>
@@ -201,7 +203,10 @@ export default function App() {
     setSaving(true);
     try {
       const result = await saveCSVSession(snapshot);
-      if (result.saved) {
+      if (snapshot.sessionId !== currentState.current.sessionId) return;
+      if (result.method === 'download') {
+        dispatch({ type: 'downloadPending', transactions: snapshot.transactions, sessionId: snapshot.sessionId });
+      } else if (result.saved) {
         dispatch({
           type: 'save',
           transactions: snapshot.transactions,
@@ -497,6 +502,13 @@ export default function App() {
             {state.isDemo ? 'Temporary demo edits.' : 'You have unsaved changes.'}
             <span>{state.isDemo ? 'Edits are discarded when you leave the demo.' : 'Save Changes to keep them in your CSV.'}</span>
           </div>
+          {state.pendingDownload && <div id="downloadConfirmation" className="alert alert-info" role="status">
+            <p>Check that the CSV download finished, then confirm it is saved.</p>
+            <div className="d-flex flex-wrap gap-2">
+              <button id="btnConfirmDownload" className="btn btn-primary" onClick={() => dispatch({ type: 'save', ...state.pendingDownload })}>Confirm saved</button>
+              <button className="btn btn-outline-secondary" onClick={() => dispatch({ type: 'downloadDismiss' })}>Keep unsaved</button>
+            </div>
+          </div>}
           <div
             id="inlineImportNotice"
             className={`alert alert-warning ${notice ? '' : 'd-none'}`}

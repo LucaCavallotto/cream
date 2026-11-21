@@ -106,5 +106,5 @@ export async function saveCSVSession(
     }
   }
   download(content, session.fileName || 'expenses.csv', environment);
-  return { saved: true, method: 'download' };
+  return { saved: false, method: 'download' };
 }

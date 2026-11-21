@@ -15,6 +15,7 @@ export function createAppState(viewOnlyMode = false, deviceReadOnly = false) {
     transactions: [],
     originalTransactions: [],
     hasUnsavedChanges: false,
+    pendingDownload: null,
     categories: {},
     suggestedCategories: {},
     catalogAdditions: {},
@@ -72,12 +73,19 @@ export function appReducer(state, action) {
         ready: state.ready,
         sessionId: state.sessionId + 1,
       };
+    case 'downloadPending':
+      return action.sessionId === state.sessionId && !state.isDemo
+        ? { ...state, pendingDownload: { transactions: structuredClone(action.transactions), sessionId: action.sessionId } }
+        : state;
+    case 'downloadDismiss':
+      return { ...state, pendingDownload: null };
     case 'save':
       if (state.isDemo) return state;
       return action.sessionId != null && action.sessionId !== state.sessionId
         ? state
         : {
             ...state,
+            pendingDownload: null,
             originalTransactions: structuredClone(action.transactions),
             hasUnsavedChanges:
               JSON.stringify(state.transactions) !==
@@ -86,6 +94,7 @@ export function appReducer(state, action) {
     case 'undo':
       return {
         ...state,
+        pendingDownload: null,
         transactions: structuredClone(state.originalTransactions),
         categories: buildCatalog(state.suggestedCategories, state.originalTransactions, state.catalogAdditions),
         hasUnsavedChanges: false,
