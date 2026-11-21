@@ -508,10 +508,11 @@ test('welcome and demo guidance show a warning box without an orphan editor divi
   await expect(page.locator('#inlineInput')).toBeVisible();
 });
 
-test('landing uses a wide row, an intermediate welcome row with two choices, and a phone stack', async ({ page }) => {
+test('landing uses a wide row, an intermediate welcome row with two choices, and a phone stack', async ({ page }, testInfo) => {
   await launch(page);
   for (const width of [320, 390, 767, 768, 1024, 1279, 1280, 1440, 1920]) {
     await page.setViewportSize({ width, height: 900 });
+    await page.emulateMedia({ colorScheme: width === 390 ? 'dark' : 'light' });
     const welcome = await page.locator('.landing-welcome').boundingBox();
     const fresh = await page.locator('.landing-new-file').boundingBox();
     const open = await page.locator('#dropZone').boundingBox();
@@ -531,6 +532,10 @@ test('landing uses a wide row, an intermediate welcome row with two choices, and
     await expect(page.locator('.landing-demo-area .landing-demo')).toBeVisible();
     const demo = await page.locator('.landing-demo-area').boundingBox();
     expect(demo.y).toBeGreaterThanOrEqual(Math.max(open.y + open.height, fresh.y + fresh.height));
+    if ([390, 1440].includes(width)) {
+      await expect(page.locator('body')).toHaveCSS('background-color', width === 390 ? 'rgb(11, 12, 11)' : 'rgb(255, 255, 255)');
+      await page.screenshot({ path: testInfo.outputPath(`landing-distinct-${width}.png`), fullPage: true });
+    }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
 });

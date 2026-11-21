@@ -45,7 +45,7 @@ npm run preview
 
 ## Open your first file
 
-Use **Create a new file** to start from scratch, or **Open an existing file** to continue with a CSV. The demo link below the cards lets you explore without a personal file:
+Use **Create a new file** to start from scratch, or **Open an existing file** to continue with a CSV. The demo link below these options lets you explore without a personal file:
 
 | Action | What happens |
 | --- | --- |
