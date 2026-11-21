@@ -24,10 +24,12 @@ export default defineConfig({
     reuseExistingServer: false
   },
   projects: [
-    { name: 'chromium', testIgnore: /mobile\.spec\.mjs/, use: { browserName: 'chromium' } },
-    { name: 'firefox', testIgnore: /mobile\.spec\.mjs/, use: { browserName: 'firefox' } },
-    { name: 'webkit', testIgnore: /mobile\.spec\.mjs/, use: { browserName: 'webkit' } },
+    { name: 'chromium', testIgnore: /(mobile|tablet)\.spec\.mjs/, use: { browserName: 'chromium' } },
+    { name: 'firefox', testIgnore: /(mobile|tablet)\.spec\.mjs/, use: { browserName: 'firefox' } },
+    { name: 'webkit', testIgnore: /(mobile|tablet)\.spec\.mjs/, use: { browserName: 'webkit' } },
     { name: 'mobile-android', testMatch: /mobile\.spec\.mjs/, use: { ...devices['Pixel 7'], browserName: 'chromium' } },
-    { name: 'mobile-webkit', testMatch: /mobile\.spec\.mjs/, use: { ...devices['iPhone 13'], browserName: 'webkit' } }
+    { name: 'mobile-webkit', testMatch: /mobile\.spec\.mjs/, use: { ...devices['iPhone 13'], browserName: 'webkit' } },
+    { name: 'tablet-ipad', testMatch: /tablet\.spec\.mjs/, use: { ...devices['iPad (gen 7)'], browserName: 'webkit' } },
+    { name: 'tablet-android', testMatch: /tablet\.spec\.mjs/, use: { ...devices['Galaxy Tab S4'], browserName: 'chromium' } }
   ]
 });

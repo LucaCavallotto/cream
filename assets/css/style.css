@@ -3868,3 +3868,8 @@ body {
   .analytics-summary .analytics-in-out { flex-wrap: wrap; }
   .analytics-summary .analytics-in-out > div { flex: 1 1 auto; }
 }
+/* Touch tablets retain desktop navigation with comfortable header targets. */
+@media (pointer: coarse) {
+  .file-actions > .icon-button { width: 44px; height: 44px; min-width: 44px; flex-shrink: 0; }
+  .file-actions > .read-only-badge { min-height: 44px; }
+}

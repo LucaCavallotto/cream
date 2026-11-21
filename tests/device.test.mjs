@@ -9,6 +9,8 @@ test('smartphones and iPad are read only while desktop browsers and Android tabl
   assert(isReadOnlyDevice({ userAgentData: { mobile: true } }));
   assert(!isReadOnlyDevice({ userAgent: 'Macintosh Chrome', platform: 'MacIntel' }));
   assert(!isReadOnlyDevice({ userAgent: 'Android 14 Tablet Chrome' }));
+  assert(!isReadOnlyDevice({ userAgent: 'Android 14 Tablet Chrome', userAgentData: { mobile: true } }));
+  assert(isReadOnlyDevice({ userAgent: 'Android 14 Mobile Chrome', userAgentData: { mobile: true } }));
 });
 test('device protection cannot be unlocked and survives file sessions', () => {
   let state = createAppState(true, true);

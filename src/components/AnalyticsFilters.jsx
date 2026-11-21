@@ -286,7 +286,7 @@ export default function AnalyticsFilters({
                   : 'No matching transactions.'}
               </div>
               <p id="analyticsExclusionCount" className="small text-muted">
-                {exclusions.transactions.size} individual selections. Showing{' '}
+                {counted(exclusions.transactions.size, 'individual selection')}. Showing{' '}
                 {Math.min(matching.length, limit)} of {matching.length} matching
                 records.
               </p>
