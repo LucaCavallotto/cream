@@ -65,7 +65,8 @@ export default function App() {
     dragDepth = useRef(0),
     saveTimer = useRef(null),
     pendingScroll = useRef(null),
-    readOnlyInfo = useRef(null);
+    readOnlyInfo = useRef(null),
+    fileRequest = useRef(0);
   const currentState = useRef(state);
   currentState.current = state;
   const closeModal = useCallback(() => setModal(null), []);
@@ -109,27 +110,30 @@ export default function App() {
     return () => window.removeEventListener('beforeunload', beforeUnload);
   }, [state.fileName, state.hasUnsavedChanges]);
   useEffect(() => () => clearTimeout(saveTimer.current), []);
-  const canReplace = useCallback(
-    () =>
-      !state.hasUnsavedChanges ||
-      confirm(state.isDemo ? 'Discard temporary demo edits and open another file?' : 'You have unsaved changes. Discard them and open another file?'),
-    [state.hasUnsavedChanges, state.isDemo],
-  );
-  const open = useCallback(
-    async (source, options) => {
-      if (!source || !canReplace()) return;
-      try {
-        const session = await readCSVSession(source, options);
-        pendingScroll.current = 0;
-        dispatch({ type: 'open', session });
-        setNotice('');
-        closeModal();
-      } catch (error) {
-        if (error.name !== 'AbortError') alert(error.message);
-      }
-    },
-    [canReplace, closeModal],
-  );
+  const canReplace = useCallback(() => {
+    const current = currentState.current;
+    return !current.hasUnsavedChanges || confirm(current.isDemo
+      ? 'Discard temporary demo edits and open another file?'
+      : 'You have unsaved changes. Discard them and open another file?');
+  }, []);
+  const open = useCallback(async (source, options, requestId) => {
+    if (!source) return;
+    const request = requestId ?? ++fileRequest.current;
+    if (request !== fileRequest.current) return;
+    try {
+      const session = await readCSVSession(source, options);
+      // Validate first, then ask about the latest working data, not the state
+      // captured before a potentially slow disk read. Only the latest request wins.
+      if (request !== fileRequest.current || !canReplace()) return;
+      pendingScroll.current = 0;
+      dispatch({ type: 'open', session });
+      setNotice('');
+      setSaved(false);
+      closeModal();
+    } catch (error) {
+      if (request === fileRequest.current && error.name !== 'AbortError') alert(error.message);
+    }
+  }, [canReplace, closeModal]);
   useEffect(() => {
     const enter = (event) => {
       if (event.dataTransfer?.types.includes('Files')) {
@@ -185,13 +189,15 @@ export default function App() {
     }
   }
   async function create() {
-    if (state.deviceReadOnly || !canReplace()) return;
+    if (state.deviceReadOnly) return;
+    const request = ++fileRequest.current;
     try {
       const session = await createCSVSession();
-      if (session) {
+      if (session && request === fileRequest.current && canReplace()) {
         pendingScroll.current = 0;
         dispatch({ type: 'open', session, editable: true });
         setNotice('');
+        setSaved(false);
       }
     } catch (error) {
       if (error.name !== 'AbortError') alert(error.message);
@@ -246,6 +252,7 @@ export default function App() {
     closeModal();
   }
   async function openDemo() {
+    const request = ++fileRequest.current;
     setDemoLoading(true);
     try {
       const response = await fetch(`${import.meta.env.BASE_URL}demo.csv`);
@@ -253,9 +260,10 @@ export default function App() {
       await open(
         new File([await response.text()], 'demo.csv', { type: 'text/csv' }),
         { isDemo: true },
+        request,
       );
     } catch (error) {
-      alert(error.message);
+      if (request === fileRequest.current) alert(error.message);
     } finally {
       setDemoLoading(false);
     }
@@ -265,6 +273,7 @@ export default function App() {
       !state.hasUnsavedChanges ||
       confirm(state.isDemo ? 'Close the demo and discard temporary edits?' : 'You have unsaved changes. Close without saving?')
     ) {
+      fileRequest.current++;
       pendingScroll.current = 0;
       dispatch({ type: 'close' });
       setNotice('');

@@ -53,7 +53,7 @@ Choose one of the landing-page actions:
 | **Create New File** | Starts an empty dataset on a computer. Choose a filename; the required CSV headers are handled for you. |
 | **Take a look around** | Opens the synthetic sample dataset. Desktop users can unlock and edit it temporarily, but saving and exporting the built-in demo are disabled. |
 
-Existing files open in **Overview**, in **read-only mode**. On desktop, click the lock button in the header to unlock editing; click it again to lock the file. Each newly opened file starts locked. New files created on a computer start editable. Smartphones and iPad remain read only.
+Existing files open in **Overview**, in **read-only mode**. On desktop, click the lock button in the header to unlock editing; click it again to lock the file. Each newly opened file starts locked. You can keep working while another file loads; if there are pending edits when it is ready, confirm before replacing the current dataset. New files created on a computer start editable. Smartphones and iPad remain read only.
 
 The filename stays in the header. Click **cream** to return to Overview without closing the file or losing edits and filters. Use the **×** close control to close the file and return to the landing page.
 
