@@ -506,7 +506,8 @@ button:disabled {
 .ticker-track {
   display: flex;
   width: max-content;
-  animation: ticker-scroll 60s linear infinite;
+  animation: ticker-scroll var(--ticker-duration, 60s) linear infinite;
+  animation-delay: var(--ticker-delay, 0s);
 }
 .ticker-group {
   display: flex;
@@ -547,20 +548,10 @@ button:disabled {
   font-size: 10px;
   padding-left: 18px;
 }
-.ticker-pause {
-  width: 40px;
-  height: 38px;
-  border: 0;
-  border-left: 1px solid #ffffff26;
-  background: inherit;
-  color: #d4dbd5;
-  flex-shrink: 0;
-  font-size: 13px;
-}
-.ticker-viewport:hover .ticker-track,
-.ticker-viewport:focus-within .ticker-track,
-.money-ticker.is-paused .ticker-track {
-  animation-play-state: paused;
+.ticker-viewport { cursor: pointer; }
+.money-ticker.is-paused .ticker-track { animation-play-state: paused; }
+@media (hover: hover) and (pointer: fine) {
+  .ticker-viewport:hover .ticker-track { animation-play-state: paused; }
 }
 @keyframes ticker-scroll {
   to {
@@ -2284,9 +2275,6 @@ button:disabled {
   .ticker-label {
     font-size: 8px;
   }
-  .ticker-pause {
-    width: 32px;
-  }
   .landing-view {
     padding: 42px 24px 34px;
   }
@@ -3764,6 +3752,10 @@ body {
 .transaction-filters > summary { min-height: 46px; padding: 11px 14px; font-size: 17px; line-height: 24px; }
 .transaction-filters > summary:hover { background: var(--surface); border-radius: 10px; }
 .transaction-filters > .row { margin: 0; padding: 0 8px 16px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-group > li[aria-hidden='true'] { display: none; }
+}
 
 /* Compare monthly spending after the combined net/in/out summary. */
 .analytics-summary .analytics-in-out > div { justify-content: flex-start; gap: 8px; }

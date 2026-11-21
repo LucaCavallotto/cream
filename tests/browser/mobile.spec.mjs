@@ -85,10 +85,13 @@ test('mobile bottom navigation, dataset ticker and ledger sorting remain usable 
   await expect(
     page.getByRole('button', { name: 'Resume ticker', exact: true }),
   ).toBeVisible();
+  await expect(page.locator('.ticker-track')).toHaveCSS('animation-play-state', 'paused');
   await page.getByRole('button', { name: 'Resume ticker', exact: true }).tap();
   await expect(
     page.getByRole('button', { name: 'Pause ticker', exact: true }),
   ).toBeVisible();
+  await expect(page.locator('.ticker-track')).toHaveCSS('animation-play-state', 'running');
+  await expect(page.locator('.money-ticker button')).toHaveCount(0);
 });
 
 test('read-only mobile header stays on one row and explains how to edit on a computer', async ({

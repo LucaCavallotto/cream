@@ -74,7 +74,13 @@ test('ticker can pause and resume and respects reduced motion with keyboard-scro
 }) => {
   await launch(page);
   await openRows(page, [row()]);
+  await expect(page.locator('.money-ticker button')).toHaveCount(0);
+  await page.locator('.ticker-viewport').hover();
+  await expect(page.locator('.ticker-track')).toHaveCSS('animation-play-state', 'paused');
+  await page.mouse.move(0, 300);
+  await expect(page.locator('.ticker-track')).toHaveCSS('animation-play-state', 'running');
   await page.getByRole('button', { name: 'Pause ticker', exact: true }).click();
+  await page.mouse.move(0, 300);
   await expect(page.locator('.ticker-track')).toHaveCSS(
     'animation-play-state',
     'paused',
@@ -82,10 +88,16 @@ test('ticker can pause and resume and respects reduced motion with keyboard-scro
   await page
     .getByRole('button', { name: 'Resume ticker', exact: true })
     .click();
+  await page.mouse.move(0, 300);
   await expect(page.locator('.ticker-track')).toHaveCSS(
     'animation-play-state',
     'running',
   );
+  await page.locator('.ticker-viewport').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.ticker-track')).toHaveCSS('animation-play-state', 'paused');
+  await page.keyboard.press('Space');
+  await expect(page.locator('.ticker-track')).toHaveCSS('animation-play-state', 'running');
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(page.locator('.ticker-track')).toHaveCSS(
     'animation-name',
@@ -744,6 +756,36 @@ test('ledger search sorting and filter rectangles share dimensions and theme sty
 });
 
 
+test('ticker fills wide screens from launch and keeps constant speed across content and resizing', async ({ page }) => {
+  await launch(page);
+  for (const loaded of [false, true]) {
+    if (loaded) await openRows(page, [row('Purchase', -10), row('Income', 100, 'Income', 'Salary')]);
+    for (const width of [320, 1440, 2560]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect.poll(async () => page.locator('.ticker-viewport').evaluate(view => {
+        const group = view.querySelector('.ticker-group');
+        const track = view.querySelector('.ticker-track');
+        const distance = group.getBoundingClientRect().width;
+        const seconds = parseFloat(getComputedStyle(track).animationDuration);
+        return distance >= view.clientWidth && Math.abs(distance / seconds - 40) < .1;
+      })).toBe(true);
+      const covered = await page.locator('.ticker-viewport').evaluate(view => {
+        const track = view.querySelector('.ticker-track');
+        const animation = track.getAnimations()[0];
+        animation.pause();
+        animation.currentTime = parseFloat(getComputedStyle(track).animationDuration) * 1000 * .99;
+        const groups = [...view.querySelectorAll('.ticker-group')].map(el => el.getBoundingClientRect());
+        const bounds = view.getBoundingClientRect();
+        const result = groups[0].left <= bounds.left + .5 && groups[1].right >= bounds.right - .5 && Math.abs(groups[0].right - groups[1].left) < .5;
+        animation.currentTime = 0;
+        animation.play();
+        return result;
+      });
+      expect(covered).toBe(true);
+    }
+  }
+});
+
 test('monthly divider follows in-out totals and labels sit close to their values', async ({ page }) => {
   await launch(page);
   await openRows(page, [row('Salary', 2000, 'Income', 'Salary'), row('Purchase', -10)]);
@@ -761,4 +803,28 @@ test('monthly divider follows in-out totals and labels sit close to their values
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
+});
+
+test('ticker starts at a new random phase after reload while retaining its speed', async ({ page }) => {
+  // Deterministic phases make this a reload test rather than a probabilistic check.
+  await page.addInitScript(() => {
+    const generation = Number(sessionStorage.getItem('tickerTestLoad') || 0);
+    sessionStorage.setItem('tickerTestLoad', String(generation + 1));
+    Math.random = () => generation % 2 === 0 ? .2 : .7;
+  });
+  const phases = [];
+  for (let load = 0; load < 2; load++) {
+    await launch(page);
+    await expect.poll(async () => page.locator('.ticker-track').evaluate(el => {
+      const style = getComputedStyle(el);
+      return -parseFloat(style.animationDelay) / parseFloat(style.animationDuration);
+    })).toBeCloseTo(load === 0 ? .2 : .7, 4);
+    phases.push(await page.locator('.ticker-track').evaluate(el => getComputedStyle(el).animationDelay));
+    await page.setViewportSize({ width: load ? 1440 : 2560, height: 900 });
+    await expect.poll(async () => page.locator('.ticker-track').evaluate(el => {
+      const style = getComputedStyle(el);
+      return el.querySelector('.ticker-group').getBoundingClientRect().width / parseFloat(style.animationDuration);
+    })).toBeCloseTo(40, 1);
+  }
+  expect(phases[0]).not.toBe(phases[1]);
 });

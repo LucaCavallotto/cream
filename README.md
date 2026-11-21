@@ -84,7 +84,7 @@ Exclusions do not delete or modify CSV rows. Overview and the ticker use all-tim
 
 ### Appearance and dates
 
-Appearance follows the system's light/dark setting. Pause or resume the ticker with its button; reduced-motion preferences make it static and horizontally scrollable. Currency amounts use consistent spacing between the sign, euro symbol and value, including chart tooltips.
+Appearance follows the system's light/dark setting. The ticker fills the strip continuously, starts at a random position on each page reload and scrolls at the same speed as its contents change. Click or tap it to pause or resume it, or use Enter/Space when it has keyboard focus. Hovering with a mouse pauses it temporarily; reduced-motion preferences make it static and horizontally scrollable. Currency amounts use consistent spacing between the sign, euro symbol and value, including chart tooltips.
 
 Transaction dates use the device timezone: **DD-MM-YYYY HH:MM** in the ledger, with seconds shown in details. The editor uses that same local timezone. Times that do not exist during a daylight-saving change must be corrected before saving. The CSV and Quick Input use ISO timestamps; original offsets and fractional seconds are preserved when the date/time is not edited.
 
