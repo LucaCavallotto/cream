@@ -501,8 +501,9 @@ test('welcome and demo guidance show a warning box without an orphan editor divi
   await expect(page.locator('#expenseForm hr')).toHaveCount(0);
   await expect(page.locator('#inlineInput')).toHaveCount(0);
   await page.keyboard.press('Escape');
-  await page.locator('#btnToggleViewOnly').click();
-  await page.locator('.recent-transaction').first().click();
+  await page.locator('#btnCloseFile').click();
+  await openRows(page, [row('Editable personal record')]);
+  await page.locator('#transactionsTbody .mobile-row-click').first().click();
   await expect(page.locator('#expenseForm hr')).toHaveCount(1);
   await expect(page.locator('#inlineInput')).toBeVisible();
 });

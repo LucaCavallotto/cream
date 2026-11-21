@@ -81,7 +81,7 @@ export async function saveCSVSession(
   environment = globalThis,
   download = downloadCSV,
 ) {
-  if (session.isDemo) throw new Error('Demo edits are temporary. Saving or exporting the built-in demo is unavailable. Open your own CSV to keep changes.');
+  if (session.isDemo) throw new Error('The built-in demo is read only. Saving or exporting the built-in demo is unavailable. Open your own CSV to keep changes.');
   if (!session.fileName && !session.fileHandle)
     throw new Error('No file available to save.');
   const content = serializeTransactionsCSV(session.transactions, Papa);

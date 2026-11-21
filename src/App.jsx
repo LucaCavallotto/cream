@@ -42,6 +42,7 @@ export default function App() {
   const [state, dispatch] = useReducer(appReducer, undefined, () =>
     createAppState(true, isReadOnlyDevice(navigator, document)),
   );
+  const viewOnly = state.viewOnlyMode || state.isDemo;
   const [modal, setModal] = useState(null),
     [notice, setNotice] = useState(''),
     [saving, setSaving] = useState(false),
@@ -122,9 +123,7 @@ export default function App() {
   useEffect(() => () => clearTimeout(saveTimer.current), []);
   const canReplace = useCallback(() => {
     const current = currentState.current;
-    return (!current.hasUnsavedChanges && !editorDirty.current) || confirm(current.isDemo
-      ? 'Discard temporary demo edits and open another file?'
-      : 'You have unsaved changes. Discard them and open another file?');
+    return (!current.hasUnsavedChanges && !editorDirty.current) || confirm('You have unsaved changes. Discard them and open another file?');
   }, []);
   const open = useCallback(async (source, options, requestId) => {
     if (!source) return;
@@ -214,7 +213,7 @@ export default function App() {
     }
   }
   async function save() {
-    if (state.viewOnlyMode || state.isDemo || saving) return;
+    if (viewOnly || state.isDemo || saving) return;
     const snapshot = state;
     setSaving(true);
     try {
@@ -240,7 +239,7 @@ export default function App() {
   }
   function remove(ids) {
     if (
-      state.viewOnlyMode ||
+      viewOnly ||
       !confirm(
         `Delete ${ids.length === 1 ? 'this transaction' : `${ids.length} transactions`}?`,
       )
@@ -256,7 +255,7 @@ export default function App() {
     dispatch({ type: 'tab', tab });
   }
   function commit(rows, id, warnings) {
-    if (state.viewOnlyMode) return;
+    if (viewOnly) return;
     dispatch({ type: 'upsert', rows, id });
     setNotice(warnings?.length ? warnings.join(' ') : '');
     closeModal();
@@ -281,7 +280,7 @@ export default function App() {
   function closeFile() {
     if (
       (!state.hasUnsavedChanges && !editorDirty.current) ||
-      confirm(state.isDemo ? 'Close the demo and discard temporary edits?' : 'You have unsaved changes. Close without saving?')
+      confirm('You have unsaved changes. Close without saving?')
     ) {
       fileRequest.current++;
       pendingScroll.current = 0;
@@ -324,7 +323,7 @@ export default function App() {
       </div>
       <div className="app-chrome">
         <header
-          className={`cream-header ${loaded ? 'has-file' : ''} ${state.viewOnlyMode ? 'is-read-only' : ''} ${state.deviceReadOnly ? '' : 'supports-editing'}`}
+          className={`cream-header ${loaded ? 'has-file' : ''} ${viewOnly ? 'is-read-only' : ''} ${state.deviceReadOnly || state.isDemo ? '' : 'supports-editing'}`}
         >
           <div className="brand-lockup">
             <button type="button" className="cream-wordmark" aria-label="cream home" disabled={saving} onClick={() => { if (loaded) changeTab('Overview'); else window.scrollTo(0, 0); }}>
@@ -349,7 +348,7 @@ export default function App() {
                 className={`file-status ${state.hasUnsavedChanges ? 'pending' : ''}`}
               >
                 <span className="status-dot" />
-                {state.isDemo ? 'Temporary demo' : state.hasUnsavedChanges ? 'Unsaved changes' : 'Up to date'}
+                {state.isDemo ? 'Demo dataset' : state.hasUnsavedChanges ? 'Unsaved changes' : 'Up to date'}
               </span>
             </div>
           ) : (
@@ -364,14 +363,14 @@ export default function App() {
           >
             <button
               id="btnToggleViewOnly"
-              className={`icon-button view-mode-toggle ${state.deviceReadOnly ? 'd-none' : ''}`}
-              title={state.viewOnlyMode ? 'Unlock editing' : 'Lock file'}
+              className={`icon-button view-mode-toggle ${state.deviceReadOnly || state.isDemo ? 'd-none' : ''}`}
+              title={viewOnly ? 'Unlock editing' : 'Lock file'}
               aria-label="Toggle View Only Mode"
-              aria-pressed={state.viewOnlyMode}
+              aria-pressed={viewOnly}
               onClick={() => dispatch({ type: 'viewOnly' })}
             >
               <i
-                className={`bi bi-${state.viewOnlyMode ? 'lock' : 'unlock'}`}
+                className={`bi bi-${viewOnly ? 'lock' : 'unlock'}`}
                 aria-hidden="true"
               />
             </button>
@@ -383,13 +382,13 @@ export default function App() {
               }}
               aria-haspopup="dialog"
               id="textViewOnly"
-              className={`read-only-badge ${state.viewOnlyMode ? '' : 'd-none'}`}
+              className={`read-only-badge ${viewOnly ? '' : 'd-none'}`}
             >
               Read only
             </button>
             <button
               id="btnUndoChanges"
-              className={`icon-button ${state.viewOnlyMode ? 'd-none' : ''}`}
+              className={`icon-button ${viewOnly ? 'd-none' : ''}`}
               aria-label="Undo Changes"
               title="Undo Changes"
               disabled={!state.hasUnsavedChanges || saving}
@@ -405,7 +404,7 @@ export default function App() {
             <button
               id="btnSaveChanges"
               aria-label="Save Changes"
-              className={`btn btn-outline-secondary save-file-button ${state.viewOnlyMode || state.isDemo ? 'd-none' : ''}`}
+              className={`btn btn-outline-secondary save-file-button ${viewOnly || state.isDemo ? 'd-none' : ''}`}
               disabled={!state.hasUnsavedChanges || saving}
               onClick={save}
             >
@@ -418,7 +417,7 @@ export default function App() {
                     : 'Save Changes'}
               </span>
             </button>
-            {!state.viewOnlyMode && (
+            {!viewOnly && (
               <button
                 id="btnAddExpense"
                 className="btn btn-primary global-add"
@@ -510,15 +509,15 @@ export default function App() {
           </div>
         </aside>
         <main id="appView" className="workspace-content" tabIndex={-1}>
-          {state.isDemo && <p className="alert demo-notice" role="status" id="demoNotice">{state.viewOnlyMode ? 'Demo session. Explore the sample dataset in read-only mode.' : 'Demo session. Try editing transactions; saving and exporting are unavailable. Open your own CSV to keep changes.'}</p>}
+          {state.isDemo && <p className="alert demo-notice" role="status" id="demoNotice">Demo session. Explore the sample dataset in read-only mode.</p>}
           <div
             id="unsavedWarning"
             className={`save-notice ${state.hasUnsavedChanges ? '' : 'd-none'}`}
             role="status"
           >
             <span className="status-dot" />
-            {state.isDemo ? 'Temporary demo edits.' : 'You have unsaved changes.'}
-            <span>{state.isDemo ? 'Edits are discarded when you leave the demo.' : 'Save Changes to keep them in your CSV.'}</span>
+            You have unsaved changes.
+            <span>Save Changes to keep them in your CSV.</span>
           </div>
           {state.pendingDownload && <div id="downloadConfirmation" className="alert alert-info" role="status">
             <p>Check that the CSV download finished, then confirm it is saved.</p>
@@ -598,7 +597,7 @@ export default function App() {
                     <DatasetHealth
                       transactions={state.transactions}
                       categories={state.suggestedCategories}
-                      viewOnly={state.viewOnlyMode}
+                      viewOnly={viewOnly}
                       onEdit={openModal}
                     />
                   )}
@@ -616,7 +615,7 @@ export default function App() {
           categories={state.categories}
           tags={tags}
           onAddClassification={(category, subcategory) => dispatch({ type: 'addClassification', category, subcategory })}
-          viewOnly={state.viewOnlyMode}
+          viewOnly={viewOnly}
           onClose={closeModal}
           onDirtyChange={onEditorDirtyChange}
           onCommit={commit}
@@ -629,11 +628,11 @@ export default function App() {
         aria-labelledby="readOnlyTitle"
       >
         <h2 id="readOnlyTitle">Read-only mode</h2>
-        <p>
+        {state.isDemo ? <p>The sample dataset is always read only. Open your own CSV or create a file on a computer to add, edit or save transactions.</p> : <p>
           Files open in read-only mode. On a computer, use the lock button to enable editing. Smartphones and iPad stay read only. You can explore transactions,
           analytics and dataset health. To add, edit or save transactions, open
           your CSV in cream on a computer.
-        </p>
+        </p>}
         <form method="dialog">
           <button className="btn btn-primary">Got it</button>
         </form>

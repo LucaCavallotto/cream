@@ -177,3 +177,20 @@ test('download confirmation acknowledges only its snapshot and does not clear su
   assert.equal(replaced.pendingDownload, null);
   assert.equal(appReducer(replaced, { type: 'downloadPending', transactions: [], sessionId: snapshot.sessionId }), replaced);
 });
+
+test('the built-in demo stays read only and rejects unlock and write actions', () => {
+  const state = appReducer(createAppState(), { type: 'open', editable: true, session: { fileName: 'demo.csv', isDemo: true, transactions: [original] } });
+  assert.equal(state.viewOnlyMode, true);
+  for (const action of [
+    { type: 'viewOnly' },
+    { type: 'upsert', rows: [{ ...original, id: 'new' }] },
+    { type: 'delete', ids: [original.id] },
+    { type: 'bulk', field: 'Category', value: 'Other' },
+    { type: 'addClassification', category: 'Changed' },
+    { type: 'undo' },
+    { type: 'selection', value: true },
+    { type: 'select', ids: [original.id] },
+  ]) assert.equal(appReducer(state, action), state);
+  const personal = appReducer(state, { type: 'open', session: { fileName: 'demo.csv', isDemo: false, transactions: [original] } });
+  assert.equal(appReducer(personal, { type: 'viewOnly' }).viewOnlyMode, false);
+});

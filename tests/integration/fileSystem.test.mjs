@@ -278,7 +278,7 @@ test('explicit demo sessions cannot save through any service path, while persona
   let touched = false;
   const forbidden = () => { touched = true; throw new Error('Unexpected write'); };
   demo.fileHandle = { createWritable: forbidden };
-  await assert.rejects(saveCSVSession(demo, { showSaveFilePicker: forbidden, navigator: { canShare: forbidden } }, forbidden), /Demo edits are temporary/);
+  await assert.rejects(saveCSVSession(demo, { showSaveFilePicker: forbidden, navigator: { canShare: forbidden } }, forbidden), /demo is read only/);
   assert.equal(touched, false);
   const state = appReducer(createAppState(), { type: 'open', session: demo });
   assert.equal(appReducer(state, { type: 'save', transactions: [] }), state);

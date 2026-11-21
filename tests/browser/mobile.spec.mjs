@@ -267,3 +267,15 @@ test('phone controls stack left and every section clears the bottom dock', async
     expect(count.y).toBeGreaterThanOrEqual(sort.y + sort.height);
   }
 });
+
+test('the demo exposes only read-only status on smartphones', async ({ page }) => {
+  await launch(page);
+  await page.getByRole('button', { name: /Take a look around/ }).click();
+  for (const width of [320, 390, 844]) {
+    await page.setViewportSize({ width, height: 844 });
+    await expect(page.locator('#btnToggleViewOnly')).toBeHidden();
+    await expect(page.locator('#textViewOnly')).toBeVisible();
+    await expect(page.locator('#btnAddExpense')).toBeHidden();
+    await expect(page.locator('#btnSaveChanges')).toBeHidden();
+  }
+});

@@ -46,7 +46,10 @@ const changed = (state, transactions) => ({
   selectedIds: [],
 });
 
+const demoWriteActions = new Set(['addClassification', 'upsert', 'delete', 'bulk', 'undo', 'selection', 'select']);
+
 export function appReducer(state, action) {
+  if (state.isDemo && demoWriteActions.has(action.type)) return state;
   switch (action.type) {
     case 'categories':
       return { ...state, suggestedCategories: action.categories, categories: buildCatalog(action.categories, state.transactions, state.catalogAdditions), ready: true };
@@ -58,7 +61,7 @@ export function appReducer(state, action) {
       return {
         ...createAppState(state.viewOnlyMode, state.deviceReadOnly),
         ...action.session,
-        viewOnlyMode: state.deviceReadOnly || action.editable !== true,
+        viewOnlyMode: Boolean(action.session.isDemo) || state.deviceReadOnly || action.editable !== true,
         suggestedCategories: state.suggestedCategories,
         categories: buildCatalog(state.suggestedCategories, action.session.transactions),
         ready: state.ready,
@@ -181,7 +184,7 @@ export function appReducer(state, action) {
     case 'select':
       return { ...state, selectedIds: action.ids };
     case 'viewOnly':
-      if (state.deviceReadOnly) return state;
+      if (state.deviceReadOnly || state.isDemo) return state;
       return {
         ...state,
         viewOnlyMode: !state.viewOnlyMode,

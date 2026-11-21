@@ -51,7 +51,7 @@ Choose one of the landing-page actions:
 | --- | --- |
 | **Browse Files** | Opens an existing compatible CSV. You can also drop a file anywhere in the window. |
 | **Create New File** | Starts an empty dataset on a computer. Choose a filename; the required CSV headers are handled for you. |
-| **Take a look around** | Opens the synthetic sample dataset. Desktop users can unlock and edit it temporarily, but saving and exporting the built-in demo are disabled. |
+| **Take a look around** | Opens the synthetic sample dataset. It stays read only on every device, with no unlock control; saving and exporting are disabled. |
 
 Existing files open in **Overview**, in **read-only mode**. On desktop, including narrow windows, click the lock button in the header to unlock editing; click it again to lock the file. Each newly opened file starts locked. You can keep working while another file loads; if there are pending edits when it is ready, confirm before replacing the current dataset. New files created on a computer start editable. Smartphones and iPad remain read only.
 
@@ -156,7 +156,7 @@ Invalid dates, amounts, missing descriptions, malformed quoting or extra fields 
 - With a supported native file handle, cream writes to the selected file.
 - In other supported desktop contexts, it downloads an updated CSV. Keep the downloaded copy as your new version; the original file is not overwritten automatically. After checking that the download finished, choose **Confirm saved**. If it was cancelled or blocked, choose **Keep unsaved** and retry. Until confirmation, pending edits remain protected.
 
-Confirming a download acknowledges the exported snapshot; edits made afterwards still remain unsaved. The undo button restores the last successfully saved dataset. Closing an edited file, replacing it or refreshing the page asks before discarding pending changes. The refresh warning also covers unsaved fields in an open transaction editor; cancelling the editor discards that draft. The browser controls the wording of the refresh warning. Filters do not count as file edits. The built-in demo cannot be saved or exported, even when unlocked; its edits disappear when discarded. A personal file named `demo.csv` works normally.
+Confirming a download acknowledges the exported snapshot; edits made afterwards still remain unsaved. The undo button restores the last successfully saved dataset. Closing an edited file, replacing it or refreshing the page asks before discarding pending changes. The refresh warning also covers unsaved fields in an open transaction editor; cancelling the editor discards that draft. The browser controls the wording of the refresh warning. Filters do not count as file edits. The built-in demo always stays read only and cannot be saved or exported. A personal file named `demo.csv` works normally.
 
 There is no automatic session recovery after reloading or closing the page. Keep your CSV files and backups separately.
 
@@ -186,7 +186,7 @@ Financial data is processed locally in the browser. There is no account, automat
 | Symptom | What to check |
 | --- | --- |
 | Editing buttons are missing | Existing files start locked. Unlock with the header lock on desktop. Smartphones and iPad cannot be unlocked. |
-| Save Changes is missing in the demo | Demo edits are temporary. Open or create your own file to keep transactions. |
+| Save Changes is missing in the demo | The demo always stays read only. Open or create your own file to add and save transactions. |
 | Saving downloads a file | This is the fallback when direct writes are unavailable. Use the downloaded CSV as the updated version. |
 | A CSV is rejected | Check the seven unique column headers above and quote commas/newlines correctly. Rejection leaves the current file open. |
 | Totals differ from the ledger | Check analytics period and exclusions. Invalid dates/amounts are omitted from calculations; the ledger and health checks retain all records. |
