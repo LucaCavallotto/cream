@@ -1,4 +1,3 @@
-import { createAnalyticsExclusions } from '../../assets/js/analyticsScope.js';
 import { useMemo, useState } from 'react';
 import AnalyticsChart from './AnalyticsChart.jsx';
 import { analyticsModel } from '../../assets/js/analyticsModel.js';
@@ -238,8 +237,7 @@ export default function Analytics({
 }) {
   const period = state.analyticsPeriod;
   const setPeriod = value => dispatch({ type: 'analyticsPeriod', value });
-  const [month, setMonth] = useState(''),
-    [resetToken, setResetToken] = useState(0);
+  const [month, setMonth] = useState('');
   const months = useMemo(
     () =>
       [
@@ -278,13 +276,6 @@ export default function Analytics({
           <p className="page-description">Explore cash flow and spending over time.</p>
         </div>
       </div>
-      <AnalyticsFilters
-        resetToken={resetToken}
-        transactions={state.transactions}
-        exclusions={state.analyticsExclusions}
-        onChange={(value) => dispatch({ type: 'exclusions', value })}
-        model={model}
-      />
       <div className="analytics-toolbar">
         <div className="analytics-period-controls">
           <label
@@ -336,10 +327,13 @@ export default function Analytics({
             </select>
           </div>
         </div>
-      <div className="analytics-reset-actions">
-        <button id="clearAnalyticsFilters" title="Reset period and exclusions" className="btn btn-outline-secondary" onClick={() => { setPeriod('last_12_months'); setMonth(''); dispatch({ type: 'exclusions', value: createAnalyticsExclusions() }); setResetToken(value => value + 1); }}>Clear filters</button>
       </div>
-      </div>
+      <AnalyticsFilters
+        transactions={state.transactions}
+        exclusions={state.analyticsExclusions}
+        onChange={(value) => dispatch({ type: 'exclusions', value })}
+        model={model}
+      />
       <div
         id="analyticsNoData"
         className={`alert alert-secondary ${model.rows.length ? 'd-none' : ''}`}
@@ -375,8 +369,8 @@ export default function Analytics({
           <p className="eyebrow">MONTHLY SPEND COMPARISON</p>
           <div>
             <span>Current month</span>
-            <strong id="metricCurrentMonth">
-              <Money value={model.current} />{' '}
+            <div className="comparison-value">
+            <strong id="metricCurrentMonth"><Money value={model.current} /></strong>
               <span
                 id="metricComparisonPercent"
                 className={
@@ -386,11 +380,11 @@ export default function Analytics({
                 ({model.percent >= 0 ? '+' : ''}
                 {model.percent.toFixed(1)}%)
               </span>
-            </strong>
+            </div>
           </div>
           <div>
             <span>Previous month</span>
-            <strong id="metricPrevMonth"><Money value={model.previous} /></strong>
+            <div className="comparison-value"><strong id="metricPrevMonth"><Money value={model.previous} /></strong></div>
           </div>
         </div>
       </div>

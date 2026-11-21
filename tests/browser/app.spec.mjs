@@ -143,7 +143,7 @@ test('exclusions, Exclude all, dropdown deduplication and reinclusion update eve
   await openRows(page, [row('Coffee', -10), row('ETF', -500, 'Investments', 'ETFs'), row('Dividend', 20, 'Investments', 'Interests & Dividends')]);
   await tab(page, 'Analytics');
   await expect(page.locator('#metricExpenses')).toHaveText('€510.00');
-  await page.getByText('Analytics exclusions', { exact: true }).click();
+  await page.getByText('Exclude categories', { exact: true }).click();
   await page.locator('#analyticsExcludeCategory').selectOption(JSON.stringify('Investments'));
   await page.locator('#analyticsExcludeSubcategory').selectOption(JSON.stringify('ETFs'));
   await page.locator('#analyticsAddExclusion').click();
@@ -166,8 +166,8 @@ test('individual exclusions and empty periods are reversible', async ({ page }) 
   await launch(page);
   await openRows(page, [row('One', -10), row('Two', -20)]);
   await tab(page, 'Analytics');
-  await page.getByText('Analytics exclusions', { exact: true }).click();
-  await page.getByText('Exclude individual transactions', { exact: true }).click();
+  await page.getByText('Exclude categories', { exact: true }).click();
+  await page.getByText('Exclude transactions', { exact: true }).click();
   await page.locator('#analyticsExclusionSearch').fill('One');
   await page.getByRole('checkbox', { name: /Exclude transaction: One/ }).check();
   await expect(page.locator('#metricExpenses')).toHaveText('€20.00');
@@ -185,7 +185,7 @@ test('View Transactions and Back preserve exclusions, period, expansions and ori
   await page.locator('#inputSearchTransaction').fill('ETF');
   await tab(page, 'Analytics');
   await page.locator('#analyticsTimePeriod').selectOption('specific_month');
-  await page.getByText('Analytics exclusions', { exact: true }).click();
+  await page.getByText('Exclude categories', { exact: true }).click();
   await page.locator('#analyticsExcludeCategory').selectOption(JSON.stringify('Investments'));
   await page.locator('#analyticsAddExclusion').click();
   await page.locator('#detailedCategoryList .category-header').click();
@@ -329,4 +329,46 @@ test('multiline input never inherits classifications from other rows or the form
   expect(find('Classified second')).toMatchObject({ Category: 'Food & Dining', Subcategory: 'Restaurant' });
   expect(rows).toHaveLength(7);
   expect(rows.every(row => row.Notes === 'Shared note')).toBe(true);
+});
+
+test('category and transaction exclusion panels have independent bulk controls', async ({ page }) => {
+  await launch(page);
+  await openRows(page, [row('Coffee', -10), row('Salary', 1000, 'Income', 'Salary'), row('Fund', -500, 'Investments', 'ETFs')]);
+  await tab(page, 'Analytics');
+  await page.locator('#analyticsTimePeriod').selectOption('overall');
+  await page.getByText('Exclude categories', { exact: true }).click();
+  await page.getByText('Exclude transactions', { exact: true }).click();
+  for (const id of ['analyticsExclusionsPanel', 'analyticsTransactionExclusionsPanel']) {
+    const actions = page.locator(`#${id} .card-body > :first-child`);
+    await expect(actions.getByRole('button').nth(0)).toHaveText('Include all');
+    await expect(actions.getByRole('button').nth(0)).toHaveClass(/btn-outline-success/);
+    await expect(actions.getByRole('button').nth(1)).toHaveText('Exclude all');
+    await expect(actions.getByRole('button').nth(1)).toHaveClass(/btn-outline-danger/);
+  }
+  await page.locator('#analyticsExclusionSearch').fill('Coffee');
+  await page.getByRole('checkbox', { name: /Exclude transaction: Coffee/ }).check();
+  await page.locator('#analyticsExcludeAll').click();
+  await page.locator('#analyticsIncludeAll').click();
+  await expect(page.getByRole('checkbox', { name: /Exclude transaction: Coffee/ })).toBeChecked();
+  await expect(page.locator('#metricExpenses')).toHaveText('€500.00');
+  await page.locator('#analyticsExcludeAllTransactions').click();
+  await expect(page.locator('#analyticsExclusionCount')).toContainText('3 individual selections');
+  await expect(page.locator('#metricIncome')).toHaveText('€0.00');
+  await page.locator('#analyticsExcludeAll').click();
+  await page.locator('#analyticsIncludeAll').click();
+  await expect(page.locator('#metricExpenses')).toHaveText('€0.00');
+  await page.locator('#analyticsIncludeAllTransactions').click();
+  await expect(page.locator('#metricIncome')).toHaveText('€1,000.00');
+  await expect(page.locator('#metricExpenses')).toHaveText('€510.00');
+  await page.locator('#analyticsExcludeCategory').selectOption(JSON.stringify('Bar'));
+  await page.locator('#analyticsAddExclusion').click();
+  await page.locator('#analyticsExcludeAllTransactions').click();
+  await page.locator('#analyticsIncludeAllTransactions').click();
+  await expect(page.getByRole('checkbox', { name: /Exclude transaction: Coffee/ })).toBeDisabled();
+  await expect(page.locator('#metricExpenses')).toHaveText('€500.00');
+  await page.locator('#analyticsIncludeAll').click();
+  await expect(page.locator('#metricExpenses')).toHaveText('€510.00');
+  await expect(page.locator('#btnSaveChanges')).toBeDisabled();
+  await tab(page, 'Transactions');
+  await expect(page.locator('#transactionResultCount')).toHaveText('3 transactions');
 });

@@ -2,7 +2,6 @@ import Money from './Money.jsx';
 import { formatDate } from '../../assets/js/dateTime.js';
 import { useEffect, useState } from 'react';
 import {
-  createAnalyticsExclusions,
   getAnalyticsExclusionOptions,
   excludeAnalyticsCategory,
   excludeAllAnalyticsCategories,
@@ -42,13 +41,6 @@ export default function AnalyticsFilters({
     update(next);
     onChange(next);
   };
-  const reset = (next) => {
-    setSearch('');
-    setLimit(50);
-    setCategory('');
-    setSub('');
-    onChange(next);
-  };
   const matching = transactions.filter((t) =>
     [t.Description, t.Category, t.Subcategory, t.DateTime, t.Amount].some(
       (value) =>
@@ -74,11 +66,23 @@ export default function AnalyticsFilters({
   ];
   return (
     <>
-      <details className="card mb-3" id="analyticsExclusionsPanel">
-        <summary className="card-header fw-semibold">
-          Analytics exclusions
-        </summary>
+      <details className="card mb-3 analytics-exclusions" id="analyticsExclusionsPanel">
+        <summary className="card-header fw-semibold">Exclude categories</summary>
         <div className="card-body">
+          <div className="exclusion-actions d-flex flex-wrap gap-2 mb-3">
+            <button id="analyticsIncludeAll" type="button" className="btn btn-outline-success"
+              disabled={!exclusions.categories.size && !exclusions.subcategories.size}
+              onClick={() => {
+                setCategory(''); setSub('');
+                mutate(next => { next.categories.clear(); next.subcategories.clear(); });
+              }}>Include all</button>
+            <button id="analyticsExcludeAll" type="button" className="btn btn-outline-danger"
+              disabled={!transactions.length || transactions.every(t => exclusions.categories.has(t.Category || ''))}
+              onClick={() => {
+                setCategory(''); setSub('');
+                mutate(next => { next.categories = excludeAllAnalyticsCategories(transactions).categories; next.subcategories.clear(); });
+              }}>Exclude all</button>
+          </div>
       <div
         id="analyticsExclusionSummary"
         role="status"
@@ -95,37 +99,7 @@ export default function AnalyticsFilters({
           ? ` ${counted(model.selection.invalidCount, 'invalid record')} also outside analytics.`
           : ''}
       </div>
-          <div className="d-flex flex-wrap gap-2 mb-3">
-            <button
-              id="analyticsExcludeAll"
-              type="button"
-              className="btn btn-outline-primary btn-sm"
-              disabled={
-                !transactions.length ||
-                transactions.every((t) =>
-                  exclusions.categories.has(t.Category || ''),
-                )
-              }
-              onClick={() => reset(excludeAllAnalyticsCategories(transactions))}
-            >
-              Exclude all
-            </button>
-            <button
-              id="analyticsIncludeAll"
-              type="button"
-              className="btn btn-outline-secondary btn-sm"
-              disabled={!active}
-              onClick={() => reset(createAnalyticsExclusions())}
-            >
-              Include all
-            </button>
-          </div>
-          <p className="small text-muted">
-            Session-only filters. Reset on file open, close or page reload.
-            Monthly comparison always uses the current and previous calendar
-            months.
-          </p>
-          <div>
+          <p className="small text-muted">These controls affect category and subcategory rules only. Individual exclusions stay active. Selections last for this file session.</p>
             <p className="small text-muted mb-0">
               Add exclusions below, or Exclude all and remove the rules for
               categories you want to see.
@@ -229,13 +203,22 @@ export default function AnalyticsFilters({
                   ))
                 : 'No category or subcategory rules.'}
             </div>
-            <details>
-              <summary className="fw-semibold">
-                Exclude individual transactions
-              </summary>
+
+        </div>
+      </details>
+      <details className="card mb-3 analytics-exclusions" id="analyticsTransactionExclusionsPanel">
+        <summary className="card-header fw-semibold">Exclude transactions</summary>
+        <div className="card-body">
+          <div className="exclusion-actions d-flex flex-wrap gap-2 mb-3">
+            <button id="analyticsIncludeAllTransactions" type="button" className="btn btn-outline-success"
+              disabled={!exclusions.transactions.size}
+              onClick={() => mutate(next => next.transactions.clear())}>Include all</button>
+            <button id="analyticsExcludeAllTransactions" type="button" className="btn btn-outline-danger"
+              disabled={!transactions.length || transactions.every(t => exclusions.transactions.has(t.id))}
+              onClick={() => mutate(next => { next.transactions = new Set(transactions.map(t => t.id)); })}>Exclude all</button>
+          </div>
               <p className="small text-muted mt-2">
-                Checked records are excluded. This list covers the entire
-                dataset, independently of the selected period. Records excluded
+                Checked records are excluded. Include all and Exclude all affect individual selections across the entire dataset, regardless of period or search. Records excluded
                 by a category rule are locked here until that rule is removed.
               </p>
               <label htmlFor="analyticsExclusionSearch" className="form-label">
@@ -314,11 +297,9 @@ export default function AnalyticsFilters({
               >
                 Show 50 more
               </button>
-            </details>
-          </div>
+
         </div>
       </details>
-
     </>
   );
 }

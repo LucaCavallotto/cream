@@ -46,7 +46,7 @@ test('switching files resets local UI and exclusion state and does not retain hi
   await openRows(page, [row(), row('ETF', -500, 'Investments', 'ETFs')]);
   await tab(page, 'Analytics');
   await page.locator('#analyticsTimePeriod').selectOption('overall');
-  await page.getByText('Analytics exclusions', { exact: true }).click();
+  await page.getByText('Exclude categories', { exact: true }).click();
   await page.locator('#analyticsExcludeAll').click();
   await expect(page.locator('#metricExpenses')).toHaveText('€0.00');
   await page.getByRole('button', { name: 'Close File', exact: true }).click();

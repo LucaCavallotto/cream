@@ -21,9 +21,9 @@ test('currency spacing is shared across ledger overview analytics ticker health 
   await expectSpaced(page.locator('#metricExpenses .money-amount'));
   await page.locator('#detailedCategoryList .category-header').first().click();
   await expectSpaced(page.locator('#detailedCategoryList .subcategory-list.show .money-amount').first());
-  await page.getByText('Analytics exclusions', { exact: true }).click();
-  await page.getByText('Exclude individual transactions', { exact: true }).click();
-  await expectSpaced(page.locator('#analyticsExclusionsPanel label .money-amount').first());
+  await page.getByText('Exclude categories', { exact: true }).click();
+  await page.getByText('Exclude transactions', { exact: true }).click();
+  await expectSpaced(page.locator('#analyticsTransactionExclusionsPanel label .money-amount').first());
   await page.locator('#btnToggleViewOnly').click();
   await tab(page, 'Dataset Health');
   const notice = await page.locator('#cleanupReadOnly').boundingBox();

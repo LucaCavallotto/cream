@@ -52,7 +52,7 @@ test('overview and ticker use all-time included totals while activity and datase
   const ticker = page.locator('.ticker-group').first();
   await expect(ticker).toContainText('+€490.00');
   await tab(page, 'Analytics');
-  await page.getByText('Analytics exclusions', { exact: true }).click();
+  await page.getByText('Exclude categories', { exact: true }).click();
   await page
     .locator('#analyticsExcludeCategory')
     .selectOption(JSON.stringify('Investments'));
@@ -164,7 +164,7 @@ test('live system theme changes update the palette without resetting the section
   await openRows(page, [row(), row('ETF', -500, 'Investments', 'ETFs')]);
   await tab(page, 'Analytics');
   await page.locator('#analyticsTimePeriod').selectOption('overall');
-  await page.getByText('Analytics exclusions', { exact: true }).click();
+  await page.getByText('Exclude categories', { exact: true }).click();
   await page
     .locator('#analyticsExcludeCategory')
     .selectOption(JSON.stringify('Investments'));
@@ -302,13 +302,15 @@ test('subcategory choices narrow by category and clearing the category restores 
   await expect(page.locator('#inputCategory')).toHaveValue('Income');
 });
 
-test('analytics clear filters restores the period and all exclusions', async ({ page }) => {
+test('analytics period and exclusions remain adjustable without a global reset', async ({ page }) => {
   await launch(page); await openRows(page, [row()]); await tab(page, 'Analytics');
   await expect(page.locator('#analyticsExclusionSummary')).toBeHidden();
-  await page.getByText('Analytics exclusions', { exact: true }).click();
+  await page.getByText('Exclude categories', { exact: true }).click();
   await page.locator('#analyticsExcludeAll').click();
   await page.locator('#analyticsTimePeriod').selectOption('overall');
-  await page.getByRole('button', { name: 'Clear filters', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Clear filters', exact: true })).toHaveCount(0);
+  await page.locator('#analyticsTimePeriod').selectOption('last_12_months');
+  await page.locator('#analyticsIncludeAll').click();
   await expect(page.locator('#analyticsTimePeriod')).toHaveValue('last_12_months');
   await expect(page.locator('#metricExpenses')).toHaveText('€1.00');
   await expect(page.locator('#analyticsExclusionSummary')).toContainText('0 categories');
@@ -541,7 +543,7 @@ test('sort stays visible and readable while breakdown bars and expansion control
     await tab(page, 'Transactions');
     const sort = page.locator('#transactionSort');
     await expect(sort).toBeVisible();
-    await expect(sort).toHaveCSS('font-size', '16px');
+    await expect(sort).toHaveCSS('font-size', '17px');
     await expect(page.locator('label[for="transactionSort"]')).toHaveCSS('font-size', '16px');
     await sort.selectOption('Amount:desc');
     await expect(sort).toHaveValue('Amount:desc');
@@ -615,7 +617,7 @@ test('supporting text and tag bars remain readable in light and dark themes', as
   }
 });
 
-test('result count sits above the ledger and exclusions precede the plain period row', async ({ page }) => {
+test('result count sits above the ledger and period precedes the exclusion panels', async ({ page }) => {
   await launch(page);
   await openRows(page, [row('Coffee'), row('Second', -5)]);
   for (const width of [320, 768, 1200, 1440]) {
@@ -633,35 +635,29 @@ test('result count sits above the ledger and exclusions precede the plain period
       expect(sort.x).toBe(search.x);
     }
     await tab(page, 'Analytics');
-    await expect(page.locator('.analytics-reset-actions #clearAnalyticsFilters')).toBeVisible();
-    await expect(page.locator('.page-heading #clearAnalyticsFilters')).toHaveCount(0);
+    await expect(page.locator('#clearAnalyticsFilters')).toHaveCount(0);
     await page.locator('#analyticsTimePeriod').selectOption('current_month');
-    await page.locator('#clearAnalyticsFilters').click();
+    await page.locator('#analyticsTimePeriod').selectOption('last_12_months');
     await expect(page.locator('#analyticsTimePeriod')).toHaveValue('last_12_months');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
 });
 
-test('cash flow fills its analytics card and period shares a plain row with reset below exclusions', async ({ page }) => {
+test('cash flow fills its analytics card and the plain period row precedes exclusions', async ({ page }) => {
   await launch(page);
   await openRows(page, Array.from({ length: 5 }, (_, i) => row(`Expense ${i}`, -10, `Category ${i}`)));
   await tab(page, 'Analytics');
   for (const width of [320, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
-    const reset = page.getByRole('button', { name: 'Clear filters', exact: true });
-    const clear = await reset.boundingBox();
+    await expect(page.locator('#clearAnalyticsFilters')).toHaveCount(0);
     const period = await page.locator('.analytics-toolbar').boundingBox();
     const exclusions = await page.locator('#analyticsExclusionsPanel').boundingBox();
-    const fields = await page.locator('.analytics-period-controls').boundingBox();
-    if (width >= 768) expect(Math.abs(clear.y + clear.height / 2 - fields.y - fields.height / 2)).toBeLessThan(2);
-    else expect(clear.y).toBeGreaterThanOrEqual(fields.y + fields.height);
-    expect(period.y).toBeGreaterThanOrEqual(exclusions.y + exclusions.height);
+    expect(exclusions.y).toBeGreaterThanOrEqual(period.y + period.height);
     await expect(page.locator('.analytics-toolbar')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
     const label = await page.locator('label[for="analyticsTimePeriod"]').boundingBox();
     const select = await page.locator('#analyticsTimePeriod').boundingBox();
     expect(select.x).toBeGreaterThanOrEqual(label.x + label.width);
     expect(Math.abs(select.y + select.height / 2 - label.y - label.height / 2)).toBeLessThan(2);
-    expect(clear.y).toBeGreaterThanOrEqual(exclusions.y + exclusions.height);
     await expect.poll(async () => page.locator('.chart-card-line').evaluate(card => {
       const body = card.querySelector('.card-body');
       const chart = card.querySelector('.shared-chart');
@@ -669,6 +665,100 @@ test('cash flow fills its analytics card and period shares a plain row with rese
       return Math.abs(chart.getBoundingClientRect().height - body.getBoundingClientRect().height + parseFloat(style.paddingTop) + parseFloat(style.paddingBottom));
     })).toBeLessThan(2);
     await expect(page.locator('#cashFlowLineChart')).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});
+
+test('empty search and filter results explain the request instead of suggesting a new transaction', async ({ page }) => {
+  await launch(page);
+  await openRows(page, [row('Existing purchase', -10)]);
+  for (const width of [320, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.locator('#inputSearchTransaction').fill('No matching description');
+    await expect(page.locator('#emptyState')).toHaveText('No transactions match your search or filters.');
+    await expect(page.locator('#transactionResultCount')).toHaveText('0 transactions');
+    await page.locator('#btnClearSearch').click();
+    await page.locator('.transaction-filters summary').click();
+    await page.locator('#filterType').selectOption('income');
+    await expect(page.locator('#emptyState')).toHaveText('No transactions match your search or filters.');
+    await page.locator('#filterType').selectOption('');
+    await expect(page.locator('#emptyState')).toBeHidden();
+    await expect(page.locator('#transactionResultCount')).toHaveText('1 transaction');
+    await page.locator('.transaction-filters summary').click();
+  }
+});
+
+test('monthly comparison aligns amounts independently of its delta and the summary has no in-out divider', async ({ page }) => {
+  await launch(page);
+  await openRows(page, [row('Current', -1214.48), row('Previous', -305.49, 'Bar', 'Coffee', '2026-10-02T12:00:00+02:00')]);
+  await tab(page, 'Analytics');
+  await page.getByText('Exclude categories', { exact: true }).click();
+  await page.getByText('Exclude transactions', { exact: true }).click();
+  for (const width of [320, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const theme of ['light', 'dark']) {
+      await page.emulateMedia({ colorScheme: theme });
+      await expect(page.locator('html')).toHaveAttribute('data-bs-theme', theme);
+      const green = await page.locator('#metricIncome').evaluate(el => getComputedStyle(el).color);
+      const red = await page.locator('#metricExpenses').evaluate(el => getComputedStyle(el).color);
+      await expect(page.locator('.exclusion-actions .btn-outline-success').first()).toHaveCSS('color', green);
+      await expect(page.locator('.exclusion-actions .btn-outline-danger').first()).toHaveCSS('color', red);
+      const current = await page.locator('#metricCurrentMonth').boundingBox();
+      const previous = await page.locator('#metricPrevMonth').boundingBox();
+      const delta = await page.locator('#metricComparisonPercent').boundingBox();
+      expect(Math.abs(current.x + current.width - previous.x - previous.width)).toBeLessThan(1);
+      expect(delta.y).toBeGreaterThanOrEqual(current.y + current.height);
+      for (const side of ['left', 'right', 'top']) await expect(page.locator('.analytics-in-out')).toHaveCSS(`border-${side}-width`, '0px');
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
+  }
+});
+
+
+test('ledger search sorting and filter rectangles share dimensions and theme styling', async ({ page }) => {
+  await launch(page);
+  await openRows(page, [row()]);
+  for (const width of [320, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const theme of ['light', 'dark']) {
+      await page.emulateMedia({ colorScheme: theme });
+      await expect(page.locator('html')).toHaveAttribute('data-bs-theme', theme);
+      await expect(page.locator('.transaction-filters')).toHaveCSS('background-color', theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(11, 12, 11)');
+      const search = page.locator('#inputSearchTransaction');
+      const background = await search.evaluate(el => getComputedStyle(el).backgroundColor);
+      const border = await search.evaluate(el => getComputedStyle(el).borderColor);
+      for (const selector of ['#inputSearchTransaction', '#transactionSort', '.transaction-filters']) {
+        const control = page.locator(selector);
+        await expect(control).toHaveCSS('border-radius', '10px');
+        await expect(control).toHaveCSS('background-color', background);
+        await expect(control).toHaveCSS('border-color', border);
+        expect((await control.boundingBox()).height).toBe(48);
+      }
+      await page.locator('.transaction-filters summary').click();
+      await expect(page.locator('#filterCategory')).toHaveCSS('height', '48px');
+      await expect(page.locator('#filterCategory')).toHaveCSS('font-size', '17px');
+      await page.locator('.transaction-filters summary').click();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
+  }
+});
+
+
+test('monthly divider follows in-out totals and labels sit close to their values', async ({ page }) => {
+  await launch(page);
+  await openRows(page, [row('Salary', 2000, 'Income', 'Salary'), row('Purchase', -10)]);
+  await tab(page, 'Analytics');
+  for (const width of [320, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    const comparison = page.locator('.analytics-comparison');
+    await expect(comparison).toHaveCSS(width >= 992 ? 'border-left-width' : 'border-top-width', '1px');
+    await expect(page.locator('.analytics-in-out')).toHaveCSS('border-left-width', '0px');
+    for (const entry of await page.locator('.analytics-in-out > div').all()) {
+      const label = await entry.locator('.eyebrow').boundingBox();
+      const value = await entry.locator('h2').boundingBox();
+      if (width < 768) expect(value.y - label.y - label.height).toBeLessThanOrEqual(5);
+      else expect(value.x - label.x - label.width).toBeLessThanOrEqual(9);
+    }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
 });

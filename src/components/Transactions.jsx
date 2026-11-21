@@ -577,7 +577,11 @@ export default function Transactions({
         id="emptyState"
         className={`text-center py-5 text-muted ${rows.length ? 'd-none' : ''}`}
       >
-        No transactions found. Add one to get started!
+        {state.transactions.length
+          ? 'No transactions match your search or filters.'
+          : state.viewOnlyMode
+            ? 'This file contains no transactions.'
+            : 'No transactions yet. Add one to get started.'}
       </div>
       <div className="ledger-footer">
         <span>

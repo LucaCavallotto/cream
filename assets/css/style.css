@@ -3679,7 +3679,6 @@ body {
 .ledger-search-group .ledger-count { margin: 0; white-space: normal; text-align: left; }
 .analytics-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .analytics-toolbar .analytics-period-controls { justify-content: flex-start; flex-wrap: wrap; min-width: 0; }
-#clearAnalyticsFilters { flex-shrink: 0; }
 .analytics-summary .eyebrow { font-size: 15px; line-height: 1.5; }
 .analytics-summary .analytics-in-out h2, .analytics-summary .analytics-comparison strong { font-size: 23px; font-weight: 600; line-height: 1.4; white-space: normal; }
 .analytics-summary .analytics-comparison > div { font-size: 15px; flex-wrap: wrap; align-items: baseline; }
@@ -3699,21 +3698,17 @@ body {
 }
 .analytics-summary > div { min-width: 0; }
 .analytics-in-out > div { flex-wrap: wrap; }
-
-.analytics-reset-actions { display: flex; justify-content: flex-end; margin: 0 0 24px; }
 .analytics-summary .analytics-net > h2 { font-size: clamp(27px, calc(4vw - 1px), 45px); }
 .chart-card-line .card-body { display: flex; flex-direction: column; }
 .chart-card-line .shared-chart { flex: 1; width: 100%; min-height: 260px; aspect-ratio: auto !important; }
 @media (max-width: 767.98px) {
-  .analytics-reset-actions { justify-content: flex-start; }
   .analytics-summary .analytics-net > h2 { font-size: 42px; }
 }
 
-/* Exclusions first; period and reset share a plain control row below. */
+/* Keep the period label and selector inline without a surrounding panel. */
 .analytics-toolbar { align-items: flex-start; background: transparent; border: 0; border-radius: 0; padding: 0; margin-bottom: 24px; }
 .analytics-toolbar .analytics-period-controls { display: grid; grid-template-columns: max-content minmax(0, 200px); align-items: center; gap: 8px; width: auto; }
 .analytics-toolbar #monthSelectContainer { grid-column: 2; min-width: 0; }
-.analytics-toolbar .analytics-reset-actions { margin: 0; }
 .ledger-count#transactionResultCount { display: block; margin: 0 0 10px; text-align: left; }
 .landing-view { display: flex; flex-direction: column; gap: 32px; }
 .landing-hero { width: 100%; }
@@ -3721,4 +3716,61 @@ body {
 .landing-demo-area .landing-demo { margin: 0; justify-content: center; }
 @media (max-width: 767.98px) {
   .analytics-toolbar .analytics-period-controls { width: 100%; }
+}
+
+.analytics-exclusions > summary { font-size: 16px; padding: 13px 16px; background: var(--surface); cursor: pointer; }
+.analytics-exclusions .small { font-size: 14px; line-height: 1.65; }
+.analytics-summary .analytics-comparison > div { flex: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; }
+.analytics-comparison .comparison-value { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 0; }
+.analytics-comparison #metricComparisonPercent { padding-left: 0; }
+.analytics-summary .analytics-in-out { border: 0; padding-inline: 0; }
+.analytics-summary .analytics-comparison { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 10px; }
+.analytics-summary .analytics-comparison > .eyebrow { margin: 0; flex-basis: auto; align-self: flex-start; }
+.exclusion-actions .btn-outline-success {
+  --bs-btn-color: var(--green);
+  --bs-btn-border-color: var(--green);
+  --bs-btn-hover-color: var(--green);
+  --bs-btn-hover-bg: var(--green-soft);
+  --bs-btn-hover-border-color: var(--green);
+  --bs-btn-active-color: var(--green);
+  --bs-btn-active-bg: var(--green-soft);
+  --bs-btn-active-border-color: var(--green);
+  --bs-btn-disabled-color: var(--green);
+  --bs-btn-disabled-border-color: var(--green);
+}
+.exclusion-actions .btn-outline-danger {
+  --bs-btn-border-color: var(--red);
+  --bs-btn-active-color: var(--red);
+  --bs-btn-active-bg: var(--red-soft);
+  --bs-btn-active-border-color: var(--red);
+  --bs-btn-disabled-color: var(--red);
+  --bs-btn-disabled-border-color: var(--red);
+}
+/* One rectangle treatment for ledger search, sorting and filter controls. */
+.ledger-search .form-control,
+.ledger-sort .form-select,
+.transaction-filters .form-control,
+.transaction-filters .form-select {
+  height: 48px;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background-color: var(--paper);
+  font-size: 17px;
+  line-height: 24px;
+  padding-block: 11px;
+}
+.transaction-filters { padding: 0; border-radius: 10px; }
+.transaction-filters > summary { min-height: 46px; padding: 11px 14px; font-size: 17px; line-height: 24px; }
+.transaction-filters > summary:hover { background: var(--surface); border-radius: 10px; }
+.transaction-filters > .row { margin: 0; padding: 0 8px 16px; }
+
+/* Compare monthly spending after the combined net/in/out summary. */
+.analytics-summary .analytics-in-out > div { justify-content: flex-start; gap: 8px; }
+.analytics-summary .analytics-comparison { border-left: 1px solid var(--line); padding-left: 24px; }
+@media (max-width: 991.98px) {
+  .analytics-summary .analytics-comparison { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; padding-top: 20px; }
+}
+@media (max-width: 767.98px) {
+  .analytics-summary .analytics-in-out > div { gap: 4px; }
 }

@@ -38,7 +38,7 @@ test('mobile analytics exclusions are usable and do not overflow the viewport', 
   await launch(page);
   await openRows(page, [row(), row('ETF', -500, 'Investments', 'ETFs')]);
   await tab(page, 'Analytics');
-  await page.getByText('Analytics exclusions', { exact: true }).click();
+  await page.getByText('Exclude categories', { exact: true }).click();
   await page.locator('#analyticsExcludeAll').click();
   await expect(page.locator('#metricExpenses')).toHaveText('€0.00');
   await page
@@ -252,11 +252,9 @@ test('phone controls stack left and every section clears the bottom dock', async
     expect(explanation.y - subtitle.y - subtitle.height).toBeLessThanOrEqual(10);
     await tab(page, 'Analytics');
     const fields = await page.locator('.analytics-period-controls').boundingBox();
-    const clear = await page.locator('#clearAnalyticsFilters').boundingBox();
-    expect(clear.y).toBeGreaterThanOrEqual(fields.y + fields.height);
+    await expect(page.locator('#clearAnalyticsFilters')).toHaveCount(0);
     const exclusions = await page.locator('#analyticsExclusionsPanel').boundingBox();
-    expect(clear.x).toBe(exclusions.x);
-    expect(clear.y).toBeGreaterThanOrEqual(exclusions.y + exclusions.height);
+    expect(exclusions.y).toBeGreaterThanOrEqual(fields.y + fields.height);
     await tab(page, 'Transactions');
     const search = await page.locator('.ledger-search').boundingBox();
     const count = await page.locator('#transactionResultCount').boundingBox();

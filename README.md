@@ -65,7 +65,7 @@ Use the desktop sidebar or smartphone bottom navigation to switch sections. Keyb
 | --- | --- |
 | **Overview** | See all-time included net flow, income, expenses, this month's spending, recent activity and dataset health. Net flow is income minus expenses, not a bank-account balance. |
 | **Transactions** | Search descriptions, amounts, classifications, tags and notes; sort records; filter by category, parent-qualified subcategory, income/expense/zero amounts and inclusive local date bounds. On desktop, unlock the file to edit or use bulk actions. |
-| **Analytics** | Choose a period and explore cash flow, spending, income and tags. Expand **Analytics exclusions** to omit categories, subcategories or individual records from calculations. |
+| **Analytics** | Choose a period and explore cash flow, spending, income and tags. Expand **Exclude categories** for category/subcategory rules or **Exclude transactions** for individual records. |
 | **Dataset Health** | Find missing fields, invalid dates/amounts, unclassified records and possible duplicate classification names. Open an affected record to inspect it or, when unlocked, correct it. Expand “What gets checked?” for the checks and the custom classifications found in your file. |
 
 Use the category legend below the expenses pie chart to hide or show individual slices. This changes the chart only; use analytics exclusions to change which transactions contribute to totals.
@@ -76,7 +76,7 @@ Overview cards use centered callouts at the bottom. **This month** opens Analyti
 
 Transaction filters combine with search. **Clear** resets the ledger's search and selectors. **Select all** in desktop bulk-edit mode selects only visible matching records.
 
-In Analytics, **Exclude all** lets you begin with everything excluded, then remove exclusions for the categories you want to inspect. You cannot add the same category exclusion twice. **Clear filters** restores **Last 12 Months** and removes exclusions. The monthly comparison always compares the current and previous calendar months using the same exclusions.
+In Analytics, select **Time Period** above the two exclusion panels. Each panel starts with **Include all** (green) and **Exclude all** (red). These controls affect only their own type of exclusion: category controls keep individual selections, and transaction controls keep category rules. Bulk transaction actions cover the entire dataset, even when the transaction search is active. Records covered by a category rule stay excluded until that rule is removed. You cannot add the same category exclusion twice. The monthly comparison always compares the current and previous calendar months using the same exclusions.
 
 The magnifying glasses in breakdowns open the exact category/subcategory or tag, matching the source period, amount sign and exclusions. **Back to Analytics** restores the analysis and the previous ledger search, sorting and filters. Ledger filters can further narrow a drilldown; Clear removes that temporary scope too.
 
