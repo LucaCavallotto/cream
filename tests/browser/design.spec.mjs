@@ -492,7 +492,7 @@ test('desktop navigation stays anchored and file status stays beside the filenam
 
 test('welcome and demo guidance show a warning box without an orphan editor divider', async ({ page }) => {
   await launch(page);
-  await expect(page.getByRole('heading', { name: 'Welcome', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome to cream.', exact: true })).toBeVisible();
   await page.getByRole('button', { name: /Take a look around/ }).click();
   const notice = page.locator('#demoNotice');
   await expect(notice).toHaveClass(/alert demo-notice/);
@@ -508,19 +508,30 @@ test('welcome and demo guidance show a warning box without an orphan editor divi
   await expect(page.locator('#inlineInput')).toBeVisible();
 });
 
-test('landing places new-file and demo choices before the existing-file panel on phones and beside it on desktop', async ({ page }) => {
+test('landing uses a wide row, an intermediate welcome row with two choices, and a phone stack', async ({ page }) => {
   await launch(page);
-  for (const width of [320, 390, 768, 1440]) {
+  for (const width of [320, 390, 767, 768, 1024, 1279, 1280, 1440, 1920]) {
     await page.setViewportSize({ width, height: 900 });
-    const story = await page.locator('.landing-story').boundingBox();
+    const welcome = await page.locator('.landing-welcome').boundingBox();
+    const fresh = await page.locator('.landing-new-file').boundingBox();
     const open = await page.locator('#dropZone').boundingBox();
-    if (width >= 768) expect(story.x + story.width).toBeLessThanOrEqual(open.x);
-    else expect(story.y + story.height).toBeLessThanOrEqual(open.y);
-    await expect(page.locator('.landing-story #btnCreateNewFile')).toBeVisible();
+    if (width >= 1280) {
+      expect(welcome.x + welcome.width).toBeLessThanOrEqual(fresh.x);
+      expect(fresh.x + fresh.width).toBeLessThanOrEqual(open.x);
+      expect(fresh.y).toBe(open.y);
+    } else if (width >= 768) {
+      expect(welcome.y + welcome.height).toBeLessThanOrEqual(open.y);
+      expect(fresh.x + fresh.width).toBeLessThanOrEqual(open.x);
+      expect(fresh.y).toBe(open.y);
+    } else {
+      expect(welcome.y + welcome.height).toBeLessThanOrEqual(fresh.y);
+      expect(fresh.y + fresh.height).toBeLessThanOrEqual(open.y);
+    }
+    await expect(page.locator('.landing-new-file #btnCreateNewFile')).toBeVisible();
     await expect(page.locator('.landing-demo-area .landing-demo')).toBeVisible();
     const demo = await page.locator('.landing-demo-area').boundingBox();
-    const hero = await page.locator('.landing-hero').boundingBox();
-    expect(demo.y).toBeGreaterThanOrEqual(hero.y + hero.height);
+    expect(demo.y).toBeGreaterThanOrEqual(Math.max(open.y + open.height, fresh.y + fresh.height));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
 });
 
@@ -759,6 +770,7 @@ test('ledger search sorting and filter rectangles share dimensions and theme sty
 
 test('ticker fills wide screens from launch and keeps constant speed across content and resizing', async ({ page }) => {
   await launch(page);
+  await expect(page.locator('.brand-descriptor')).toHaveCount(0);
   for (const loaded of [false, true]) {
     if (loaded) await openRows(page, [row('Purchase', -10), row('Income', 100, 'Income', 'Salary')]);
     for (const width of [320, 1440, 2560]) {

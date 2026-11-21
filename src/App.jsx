@@ -332,11 +332,7 @@ export default function App() {
                 <Star />
               </span>
             </button>
-            {!loaded && (
-              <span className="brand-descriptor">
-                Local CSV finances.
-              </span>
-            )}
+
           </div>
           {loaded ? (
             <div className="file-context">

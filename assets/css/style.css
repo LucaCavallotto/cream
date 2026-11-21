@@ -3766,3 +3766,44 @@ body {
 @media (max-width: 767.98px) {
   .analytics-summary .analytics-in-out > div { gap: 4px; }
 }
+/* Welcome first, then two equally structured ways to start. */
+.landing-welcome { text-align: center; max-width: 760px; margin: 0 auto 8px; }
+.landing-welcome h1 { font-size: clamp(40px, 5vw, 72px); font-weight: 600; letter-spacing: -.06em; line-height: 1.1; margin: 0 0 18px; }
+.landing-hero { align-items: stretch; gap: 24px; margin: 0 auto; }
+.landing-choice { display: flex; flex-direction: column; min-width: 0; padding: 24px 24px 20px; }
+.landing-choice .drop-zone-top .eyebrow { font-size: 14px; letter-spacing: .06em; }
+.landing-choice .file-illustration { flex-shrink: 0; height: 140px; margin: 4px 0 10px; }
+.landing-choice .file-sheet { width: 96px; height: 118px; padding: 16px; }
+.landing-choice .btn { margin-top: auto; justify-content: space-between; }
+.landing-choice .drop-zone-note { margin-top: 12px; line-height: 1.6; }
+.landing-choice h2 { font-size: 28px; line-height: 1.2; }
+.landing-choice p { margin-bottom: 16px; line-height: 1.65; }
+@media (max-width: 767.98px) {
+  .landing-welcome { text-align: left; margin: 0; }
+  .landing-choice { padding: 20px; }
+  .landing-choice .file-illustration { height: 112px; }
+  .landing-choice .file-sheet { width: 80px; height: 98px; }
+  .landing-choice h2 { font-size: 26px; }
+  .landing-hero { gap: 20px; }
+}
+
+/* Three entry blocks use the available width, then reflow into two rows or a stack. */
+.landing-view { width: min(1680px, 100%); }
+.landing-hero {
+  max-width: none;
+  grid-template-columns: minmax(0, .85fr) repeat(2, minmax(0, 1fr));
+  grid-template-areas: 'welcome new open';
+  gap: 24px;
+}
+.landing-welcome { grid-area: welcome; align-self: center; text-align: left; max-width: none; margin: 0; }
+.landing-welcome h1 { font-size: clamp(40px, 4.5vw, 64px); }
+.landing-new-file { grid-area: new; }
+.landing-file-area { grid-area: open; }
+@media (max-width: 1279.98px) {
+  .landing-hero { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: 'welcome welcome' 'new open'; }
+  .landing-welcome { text-align: center; max-width: 760px; margin: 0 auto 16px; }
+}
+@media (max-width: 767.98px) {
+  .landing-hero { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'welcome' 'new' 'open'; }
+  .landing-welcome { text-align: left; margin: 0; }
+}

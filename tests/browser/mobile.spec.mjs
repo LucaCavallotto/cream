@@ -117,6 +117,12 @@ test('read-only mobile header stays on one row and explains how to edit on a com
 test('smartphone inspection hides write-only entry controls and shows local human dates', async ({ page }) => {
   await launch(page);
   await expect(page.locator('#btnCreateNewFile')).toBeHidden();
+  const welcome = await page.locator('.landing-welcome').boundingBox();
+  const fresh = await page.locator('.landing-new-file').boundingBox();
+  const existing = await page.locator('#dropZone').boundingBox();
+  expect(fresh.y).toBeGreaterThanOrEqual(welcome.y + welcome.height);
+  expect(existing.y).toBeGreaterThanOrEqual(fresh.y + fresh.height);
+  await expect(page.locator('.landing-new-file')).toContainText('File creation is available on a computer.');
   await openRows(page, [row('Timezone sample', -1, 'Bar', 'Coffee', '2026-11-02T23:30:36-05:00')]);
   await expect(page.locator('#btnToggleViewOnly')).toBeHidden();
   await expect(page.locator('#btnSelectMode')).toBeHidden();
