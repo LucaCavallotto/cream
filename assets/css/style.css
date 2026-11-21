@@ -3509,3 +3509,25 @@ body {
   .analytics-comparison > .eyebrow,
   .net-details > div > span { font-size: 13px; }
 }
+
+/* Let long navigation labels wrap before their count can cross the sidebar. */
+@media (min-width: 992px) {
+  .workspace-tab {
+    display: grid;
+    grid-template-columns: 17px minmax(0, 1fr) auto;
+    column-gap: 8px;
+    min-width: 0;
+  }
+  .workspace-tab > span:not(.health-nav-count) {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .workspace-tab .health-nav-count {
+    margin-left: 0;
+    justify-self: end;
+  }
+}
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .workspace-tab .health-nav-count { right: 2px; top: 2px; }
+}

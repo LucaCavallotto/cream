@@ -370,3 +370,29 @@ test('section and metric labels stay readable on desktop', async ({ page }) => {
   await tab(page, 'Analytics');
   await expect(page.locator('.analytics-net .eyebrow')).toHaveCSS('font-size', '14px');
 });
+
+test('Dataset Health count stays inside narrow desktop navigation without clipping the label', async ({ page }) => {
+  await launch(page);
+  await openRows(page, Array.from({ length: 125 }, (_, i) => row(`Review ${i}`, -1, '', '')));
+  for (const width of [768, 991, 992, 1024, 1199, 1200, 1280, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await tab(page, 'Dataset Health');
+    const badge = page.locator('#cleanup-tab .health-nav-count');
+    await expect(badge).toHaveText('125');
+    const badgeBox = await badge.boundingBox();
+    for (const selector of ['#cleanup-tab', '.workspace-sidebar']) {
+      const box = await page.locator(selector).boundingBox();
+      expect(badgeBox.x, `${selector} left at ${width}`).toBeGreaterThanOrEqual(box.x);
+      expect(badgeBox.x + badgeBox.width, `${selector} right at ${width}`).toBeLessThanOrEqual(box.x + box.width);
+      expect(badgeBox.y + badgeBox.height).toBeLessThanOrEqual(box.y + box.height);
+    }
+    if (width >= 992) {
+      const label = page.locator('#cleanup-tab > span:not(.health-nav-count)');
+      await expect(label).toBeVisible();
+      expect(await label.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+      const labelBox = await label.boundingBox();
+      expect(labelBox.x + labelBox.width).toBeLessThanOrEqual(badgeBox.x);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});
