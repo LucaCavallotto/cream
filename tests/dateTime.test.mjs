@@ -4,6 +4,8 @@ import {
   inlineDateTime,
   formatDate,
   timezoneOffset,
+  localDateTimeParts,
+  editedLocalDateTime,
 } from '../assets/js/dateTime.js';
 
 test('inline timestamps preserve explicit offsets, UTC and fractional precision', () => {
@@ -49,4 +51,22 @@ test('ledger dates can omit seconds without changing detail precision or validat
   assert.equal(formatDate('2026-11-02T14:28:36', { seconds: false }), '02-11-2026 14:28');
   assert.equal(formatDate('2026-11-02T14:28:36'), '02-11-2026 14:28:36');
   assert.equal(formatDate('invalid', { seconds: false }), 'Invalid date');
+});
+
+
+test('local editor parts retain original timestamps and edits change the intended instant', () => {
+  for (const original of ['2026-11-02T23:30:36-05:00', '2026-07-02T14:28:36.123Z', '2026-11-02']) {
+    const parts = localDateTimeParts(original);
+    assert.equal(editedLocalDateTime(parts.date, parts.time, original), original);
+  }
+  const original = '2026-11-02T23:30:36-05:00';
+  const parts = localDateTimeParts(new Date(new Date(original).getTime() + 60000).toISOString());
+  assert.equal(new Date(editedLocalDateTime(parts.date, parts.time, original)).getTime(), new Date(original).getTime() + 60000);
+});
+
+test('local editing rejects DST gaps and preserves the original repeated hour', t => {
+  if (Intl.DateTimeFormat().resolvedOptions().timeZone !== 'Europe/Rome') return t.skip('Europe/Rome DST expectations');
+  assert.equal(editedLocalDateTime('2026-03-29', '02:30:00'), null);
+  assert.equal(editedLocalDateTime('2026-03-29', '03:30:00'), '2026-03-29T03:30:00+02:00');
+  assert.equal(editedLocalDateTime('2026-10-25', '02:31:00', '2026-10-25T02:30:00+01:00'), '2026-10-25T02:31:00+01:00');
 });

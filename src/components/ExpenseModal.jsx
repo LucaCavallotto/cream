@@ -6,14 +6,11 @@ import Papa from 'papaparse';
 import { parseInlineCSV, parseInlineRow } from '../../assets/js/inlineInput.js';
 import {
   getTransactionIssues,
-  isValidTransactionDate,
 } from '../../assets/js/datasetHealth.js';
 import { normalizeTags } from '../../assets/js/transactions.js';
-import { formatDate, inlineDateTime, timezoneOffset } from '../../assets/js/dateTime.js';
+import { formatDate, inlineDateTime, localDateTimeParts, editedLocalDateTime } from '../../assets/js/dateTime.js';
 import TagInput from './TagInput.jsx';
 
-const timePart = (value) =>
-  value?.split('T')[1]?.match(/^\d{2}:\d{2}(?::\d{2})?/)?.[0] || '';
 const seconds = (value) => (value.length === 5 ? value + ':00' : value);
 
 export default function ExpenseModal({
@@ -30,8 +27,7 @@ export default function ExpenseModal({
 }) {
   const modal = useRef(null);
   const [draft, setDraft] = useState(() => ({
-    date: transaction?.DateTime?.split('T')[0] || '',
-    time: timePart(transaction?.DateTime),
+    ...localDateTimeParts(transaction?.DateTime),
     amount: Number.isFinite(transaction?.Amount)
       ? String(transaction.Amount)
       : '',
@@ -116,8 +112,7 @@ export default function ExpenseModal({
       dateTime = inlineDateTime(t.DateTime);
     setDraft((previous) => ({
       ...previous,
-      date: dateTime.split('T')[0],
-      time: timePart(dateTime),
+      ...localDateTimeParts(dateTime),
       amount: String(t.Amount),
       description: t.Description,
       ...(first.hasCategory
@@ -172,17 +167,14 @@ export default function ExpenseModal({
       }));
     } else {
       const time = seconds(draft.time || '00:00:00');
-      let DateTime = `${draft.date}T${time}${timezoneOffset(new Date(`${draft.date}T${time}`))}`;
       const original = parsed
         ? inlineDateTime(parsed.rows[0].transaction.DateTime)
         : transaction?.DateTime;
-      if (
-        original &&
-        isValidTransactionDate(original) &&
-        draft.date === original.split('T')[0] &&
-        time === seconds(timePart(original) || '00:00:00')
-      )
-        DateTime = original;
+      const DateTime = editedLocalDateTime(draft.date, time, original);
+      if (!DateTime) {
+        setErrors(['This local date or time does not exist. Choose another time.']);
+        return;
+      }
       const validated = parseInlineRow(
         [DateTime, draft.amount, draft.description.trim()],
         categories,
