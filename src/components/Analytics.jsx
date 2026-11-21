@@ -348,7 +348,7 @@ export default function Analytics({
             id="metricDelta"
             className={model.net >= 0 ? 'positive' : 'negative'}
           >
-            <Money value={model.net} signed />
+            <Money value={model.net} signed fit />
           </h2>
         </div>
         <div className="analytics-in-out">

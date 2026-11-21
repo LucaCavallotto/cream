@@ -78,7 +78,7 @@ export default function Overview({
             </span>
           </div>
           <p className="net-amount" id="overviewNet">
-            <Money value={model.net} signed />
+            <Money value={model.net} signed fit />
           </p>
           <span className="net-caption">
             Income minus expenses.
@@ -110,7 +110,7 @@ export default function Overview({
             <i className="bi bi-calendar3" aria-hidden="true" />
           </div>
           <div className="month-title-row"><h2><button type="button" className="month-heading-link" onClick={() => onAnalytics('current_month')}>This month.</button></h2></div>
-          <p className="spotlight-amount"><Money value={model.current} /></p>
+          <p className="spotlight-amount"><Money value={model.current} fit /></p>
           <div className="month-comparison">
             {comparison ? (
               <>

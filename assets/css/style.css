@@ -3848,3 +3848,24 @@ body {
   .fresh-mark { font-size: 34px; }
   .landing-new-file h2 { font-size: 28px; }
 }
+
+/* Keep large totals whole, while retaining the normal size for everyday values. */
+.money-fit { flex-shrink: 0; }
+.net-details { flex-wrap: wrap; }
+.net-details > div { flex: 1 1 auto; }
+.category-header > .flex-grow-1 { min-width: 0; }
+.category-header > .flex-grow-1 > .d-flex { gap: 12px; }
+.category-header > .flex-grow-1 > .d-flex > div:first-child { min-width: 0; overflow-wrap: anywhere; }
+.category-header .text-end { flex-shrink: 0; }
+.subcategory-item > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.subcategory-item > .d-flex { flex-shrink: 0; }
+@media (max-width: 767.98px) {
+  .recent-transaction { flex-wrap: wrap; }
+  .recent-description { flex: 1 1 120px; }
+  .recent-description > span { overflow-wrap: anywhere; }
+  .recent-amount { margin-left: auto; }
+}
+@media (max-width: 767.98px) {
+  .analytics-summary .analytics-in-out { flex-wrap: wrap; }
+  .analytics-summary .analytics-in-out > div { flex: 1 1 auto; }
+}

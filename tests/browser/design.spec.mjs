@@ -846,3 +846,60 @@ test('ticker starts at a new random phase after reload while retaining its speed
   }
   expect(phases[0]).not.toBe(phases[1]);
 });
+
+test('large summary amounts remain whole across narrow layouts and restore normal text size', async ({ page }) => {
+  await launch(page);
+  await openRows(page, [row('Annual earnings', 1234567.89, 'Income', 'Salary'), row('Investment', -234567.89, 'Investments', 'ETFs')]);
+  const contained = selector => page.locator(selector).evaluate(parent => {
+    const money = parent.querySelector('.money-amount'), number = money.querySelector('.money-number');
+    const bounds = parent.getBoundingClientRect(), value = money.getBoundingClientRect();
+    return value.right <= bounds.right + 1 && value.left >= bounds.left - 1 && number.scrollWidth <= number.clientWidth + 1;
+  });
+  for (const width of [320, 390, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const theme of ['light', 'dark']) {
+      await page.emulateMedia({ colorScheme: theme });
+      await tab(page, 'Overview');
+      for (const selector of ['#overviewNet', '#overviewIncome', '#overviewExpenses', '.spotlight-amount']) await expect.poll(() => contained(selector)).toBe(true);
+      if (width === 320) {
+        expect((await page.locator('.recent-description').first().boundingBox()).width).toBeGreaterThanOrEqual(120);
+        await expect(page.locator('.recent-description > strong').first()).toHaveText('Annual earnings');
+      }
+      await tab(page, 'Analytics');
+      await expect.poll(() => contained('#metricDelta')).toBe(true);
+      expect(await page.locator('.analytics-in-out').evaluate(parent => {
+        const bounds = parent.getBoundingClientRect();
+        return [...parent.querySelectorAll('.money-amount')].every(el => el.getBoundingClientRect().right <= bounds.right + 1);
+      })).toBe(true);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
+  }
+  await page.locator('#btnCloseFile').click();
+  await page.setViewportSize({ width: 320, height: 844 });
+  await openRows(page, [row('Small total', 100, 'Income', 'Salary')]);
+  await tab(page, 'Overview');
+  const base = await page.locator('#overviewNet').evaluate(el => getComputedStyle(el).fontSize);
+  await expect(page.locator('#overviewNet .money-amount')).toHaveCSS('font-size', base);
+});
+
+test('long classification names leave room for amounts and drilldown controls', async ({ page }) => {
+  const category = 'ProfessionalSubscriptionsAndEquipmentForIndependentConsulting';
+  await launch(page);
+  await openRows(page, [row('Equipment', -1280, category, 'EssentialEquipmentAndMaterials')]);
+  await tab(page, 'Analytics');
+  for (const width of [320, 390, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    const card = page.locator('.breakdown-expenses .card');
+    const name = await card.locator('.category-header .fw-bold').boundingBox();
+    const amount = await card.locator('.category-amount-badge').boundingBox();
+    expect(amount.x - name.x - name.width).toBeGreaterThanOrEqual(10);
+    const scope = card.locator('.category-header .btn-filter-tx');
+    const bounds = await card.boundingBox(), scopeBounds = await scope.boundingBox();
+    expect(scopeBounds.x + scopeBounds.width).toBeLessThanOrEqual(bounds.x + bounds.width);
+    await card.getByRole('button', { name: `Toggle ${category} breakdown`, exact: true }).click();
+    const sub = card.locator('.subcategory-list.show .subcategory-item');
+    expect(await sub.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+    await card.getByRole('button', { name: `Toggle ${category} breakdown`, exact: true }).click();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});

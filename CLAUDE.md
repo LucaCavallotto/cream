@@ -39,6 +39,7 @@ cream is a client-side React/Vite workspace for local finance CSV files. Financi
 - Drilldowns use exact category/subcategory pairs or tags, matching source period, sign and exclusions; Back restores ledger search, sorting, filters and analytics scroll position.
 - Overview uses centered card callouts. This month selects Current Month; IN & OUT shares the Last 12 Months chart renderer with Analytics. Clean up Chart.js instances and browser listeners in effects, including React StrictMode.
 - Use Money and the shared currency formatter for consistent sign/euro/value spacing, including chart tooltips. Display local human dates: DD-MM-YYYY HH:MM in the ledger, seconds in details. Technical CSV/Quick Input timestamps remain ISO.
+- Use Money’s optional fit mode for headline totals that can overflow; preserve their normal inherited font size when they fit. Schedule resize-driven style changes outside observer delivery, disconnect observers and cancel pending frames on cleanup. Keep large amounts and long classification names readable without hiding drilldown controls.
 - Keep the interface in English while preserving imported user text. Follow system light/dark and reduced-motion preferences. Keep captions readable and navigation counts inside their container. Test small phone widths and landscape layouts, long filenames and visible/tappable controls.
 - Preserve existing DOM IDs and accessible names used by tests unless intentionally updating both. Keep keyboard focus trapping/restoration for modals and keyboard navigation for tabs.
 
