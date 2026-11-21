@@ -455,3 +455,56 @@ test('desktop Dataset Health card uses a prominent contained percentage graphic'
   }
   await expect(page.locator('.health-spotlight h2')).toHaveText('Dataset health');
 });
+
+test('desktop navigation stays anchored and file status stays beside the filename', async ({ page }) => {
+  await launch(page);
+  await openRows(page, Array.from({ length: 45 }, (_, i) => row(`Purchase ${i}`, -10)));
+  for (const width of [768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    const sidebar = page.locator('.workspace-sidebar');
+    const before = await sidebar.boundingBox();
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    await expect.poll(async () => (await sidebar.boundingBox()).y).toBe(before.y);
+    expect(before.y + before.height).toBe(800);
+    await expect(page.locator('.cream-footer')).toHaveCount(0);
+    const name = await page.locator('#currentFileName').boundingBox();
+    const status = await page.locator('.file-status').boundingBox();
+    expect(Math.abs(status.y + status.height / 2 - name.y - name.height / 2)).toBeLessThan(2);
+    expect(status.x).toBeGreaterThanOrEqual(name.x + name.width);
+  }
+});
+
+test('welcome and demo guidance show a warning box without an orphan editor divider', async ({ page }) => {
+  await launch(page);
+  await expect(page.getByRole('heading', { name: 'Welcome', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /Take a look around/ }).click();
+  const notice = page.locator('#demoNotice');
+  await expect(notice).toHaveClass(/alert demo-notice/);
+  await expect(notice).toHaveText('Demo session. Explore the sample dataset in read-only mode.');
+  await page.locator('.recent-transaction').first().click();
+  await expect(page.locator('#expenseForm hr')).toHaveCount(0);
+  await expect(page.locator('#inlineInput')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await page.locator('#btnToggleViewOnly').click();
+  await page.locator('.recent-transaction').first().click();
+  await expect(page.locator('#expenseForm hr')).toHaveCount(1);
+  await expect(page.locator('#inlineInput')).toBeVisible();
+});
+
+test('landing places new-file and demo choices before the existing-file panel on phones and beside it on desktop', async ({ page }) => {
+  await launch(page);
+  for (const width of [320, 390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    const story = await page.locator('.landing-story').boundingBox();
+    const open = await page.locator('#dropZone').boundingBox();
+    if (width >= 768) expect(story.x + story.width).toBeLessThanOrEqual(open.x);
+    else expect(story.y + story.height).toBeLessThanOrEqual(open.y);
+    await expect(page.locator('.landing-story #btnCreateNewFile')).toBeVisible();
+    await expect(page.locator('.landing-demo-area .landing-demo')).toBeVisible();
+    const demo = await page.locator('.landing-demo-area').boundingBox();
+    const hero = await page.locator('.landing-hero').boundingBox();
+    expect(demo.y).toBeGreaterThanOrEqual(hero.y + hero.height);
+  }
+});

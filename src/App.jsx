@@ -510,7 +510,7 @@ export default function App() {
           </div>
         </aside>
         <main id="appView" className="workspace-content" tabIndex={-1}>
-          {state.isDemo && <p className="scope-note" role="status" id="demoNotice">{state.viewOnlyMode ? 'Demo session. Explore the sample dataset in read-only mode.' : 'Demo session. Try editing transactions; saving and exporting are unavailable. Open your own CSV to keep changes.'}</p>}
+          {state.isDemo && <p className="alert demo-notice" role="status" id="demoNotice">{state.viewOnlyMode ? 'Demo session. Explore the sample dataset in read-only mode.' : 'Demo session. Try editing transactions; saving and exporting are unavailable. Open your own CSV to keep changes.'}</p>}
           <div
             id="unsavedWarning"
             className={`save-notice ${state.hasUnsavedChanges ? '' : 'd-none'}`}
@@ -638,13 +638,7 @@ export default function App() {
           <button className="btn btn-primary">Got it</button>
         </form>
       </dialog>
-      <footer className="cream-footer">
-        <span className="footer-brand">cream.</span>
-        <span>Local CSV files.</span>
-        <span className="footer-note">
-          No uploads.
-        </span>
-      </footer>
+
     </>
   );
 }

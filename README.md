@@ -190,6 +190,7 @@ Financial data is processed locally in the browser. There is no account, automat
 | Totals differ from the ledger | Check analytics period and exclusions. Invalid dates/amounts are omitted from calculations; the ledger and health checks retain all records. |
 | A category is omitted from Quick Input | Use a name in the current catalog, or create it in the editor first. Check the warning for the affected row. |
 | A file was lost after refresh | Unsaved data is session-only. Reopen your last saved CSV. |
+| A development update leaves an error or a blank page | Save any pending changes before a full page reload. If the error returns after reloading, report the action and console error; also check whether browser translation or an extension is changing the page. |
 | The page does not run from disk | Use the Vite development or preview server, or a deployed build. |
 
 ## Development, tests and publishing

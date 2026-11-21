@@ -295,7 +295,7 @@ export default function ExpenseModal({
                   </div>
                 </div>
                 }
-                <hr className="mb-4" />
+                {!viewOnly && <hr className="mb-4" />}
                 {!viewOnly && (
                   <div className="date-shortcuts">
                     <span>Date &amp; time</span>

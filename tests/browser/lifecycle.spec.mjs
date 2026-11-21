@@ -139,3 +139,29 @@ test('public assets retain their runtime URLs in production and development', as
   await expect(page.locator('#overview-tab-pane')).toBeVisible();
   await expect(page.locator('#demoNotice')).toBeVisible();
 });
+
+test('development refresh keeps the root and open file usable after the footer removal', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.endsWith('-dev'), 'Fast Refresh is available only on the Vite development server.');
+  await launch(page);
+  await openRows(page, [row('Refresh record', -10)]);
+  // Re-evaluate the real boundary through Vite, without editing repository files.
+  for (let revision = 0; revision < 2; revision++) {
+    await page.evaluate(async (revision) => {
+      const runtime = await import('/@react-refresh');
+      const previous = await import('/src/App.jsx');
+      const next = await import(`/src/App.jsx?refresh-regression=${revision}`);
+      await new Promise((resolve, reject) => {
+        window.__registerBeforePerformReactRefresh(resolve);
+        const reason = runtime.validateRefreshBoundaryAndEnqueueUpdate('/src/App.jsx', previous, next);
+        if (reason) reject(new Error(reason));
+      });
+    }, revision);
+    await expect(page.locator('#currentFileName')).toHaveText('test.csv');
+    await expect(page.locator('.cream-footer')).toHaveCount(0);
+    await tab(page, 'Overview');
+    await tab(page, 'Transactions');
+  }
+  await page.locator('#transactionsTbody .mobile-row-click').first().click();
+  await expect(page.locator('#inputDescription')).toHaveValue('Refresh record');
+  await page.keyboard.press('Escape');
+});

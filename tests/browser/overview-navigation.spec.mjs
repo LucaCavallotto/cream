@@ -42,6 +42,6 @@ test('Overview callouts route to matching analytics periods and use the shared c
   await page.getByRole('button', { name: 'cream home', exact: true }).click();
   await page.getByRole('button', { name: 'Explore analytics', exact: false }).click();
   await expect(page.locator('#analyticsTimePeriod')).toHaveValue('overall');
-  await expect(page.locator('.footer-note')).not.toContainText('↗');
+  await expect(page.locator('.cream-footer')).toHaveCount(0);
   await expect(page.locator('.ledger-footer')).not.toContainText('↗');
 });
