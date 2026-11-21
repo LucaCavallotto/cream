@@ -149,3 +149,35 @@ test('phone header keeps brand filename read-only badge and close aligned withou
   await page.locator('#btnCloseFile').tap();
   await expect(page.locator('#landingView')).toBeVisible();
 });
+
+test('phone labels, all sections and protected navigation remain usable across sizes and themes', async ({ page }) => {
+  await launch(page);
+  await openRows(page, [row('Phone coffee', -10), row('Pay', 100, 'Income', 'Salary'), row('Review', -2, '', '')]);
+  for (const colorScheme of ['light', 'dark']) {
+    await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+    for (const width of [320, 390, 430, 844]) {
+      await page.setViewportSize({ width, height: width === 844 ? 390 : 844 });
+      for (const name of ['Overview', 'Transactions', 'Analytics', 'Dataset Health']) {
+        await tab(page, name);
+        await expect(page.locator('#btnAddExpense')).toBeHidden();
+        await expect(page.locator('#btnToggleViewOnly')).toBeHidden();
+        await expect(page.locator('#btnSaveChanges')).toBeHidden();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${name} ${width}px ${colorScheme}`).toBe(true);
+      }
+      await tab(page, 'Overview');
+      await expect(page.locator('.net-hero .eyebrow')).toHaveCSS('font-size', width < 768 ? '13px' : '14px');
+      await page.getByRole('button', { name: 'This month.', exact: true }).tap();
+      await expect(page.locator('#analyticsTimePeriod')).toHaveValue('current_month');
+      await page.getByRole('button', { name: 'cream home', exact: true }).tap();
+      await expect(page.locator('#overview-tab-pane')).toBeVisible();
+      await expect(page.locator('#currentFileName')).toHaveText('test.csv');
+    }
+  }
+  await tab(page, 'Dataset Health');
+  await page.getByRole('button', { name: 'View transaction 3', exact: true }).tap();
+  await expect(page.locator('#inputAmount')).toBeDisabled();
+  await expect(page.locator('#inputCategory')).toBeDisabled();
+  await expect(page.locator('#btnSaveTransaction')).toBeHidden();
+  await page.getByRole('button', { name: 'Close', exact: true }).tap();
+  await expect(page.locator('#unsavedWarning')).toBeHidden();
+});

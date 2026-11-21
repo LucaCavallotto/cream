@@ -3479,3 +3479,33 @@ body {
 .money-amount > span { min-width: 0; }
 .ticker-value .money-amount { display: inline-flex; }
 #cleanupReadOnly { margin: -10px 0 24px; }
+
+/* Section and metric labels must remain readable alongside the larger figures. */
+.eyebrow,
+.net-hero .eyebrow,
+.panel-kicker .eyebrow,
+.panel-heading .eyebrow,
+.page-heading .eyebrow,
+.landing-story > .eyebrow,
+.analytics-net .eyebrow,
+.analytics-in-out .eyebrow,
+.analytics-comparison > .eyebrow,
+.net-details > div > span {
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.45;
+  letter-spacing: .08em;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 767.98px) {
+  .eyebrow,
+  .net-hero .eyebrow,
+  .panel-kicker .eyebrow,
+  .panel-heading .eyebrow,
+  .page-heading .eyebrow,
+  .landing-story > .eyebrow,
+  .analytics-net .eyebrow,
+  .analytics-in-out .eyebrow,
+  .analytics-comparison > .eyebrow,
+  .net-details > div > span { font-size: 13px; }
+}

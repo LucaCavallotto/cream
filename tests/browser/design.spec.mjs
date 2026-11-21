@@ -360,3 +360,13 @@ test('working text is comfortably sized and the overview balance separates sign 
   await expect(page.locator('.mobile-visible .fw-bold.text-truncate')).toHaveCSS('font-size', '16px');
   await expect(page.locator('.mobile-visible .text-muted.small').first()).toHaveCSS('font-size', '14px');
 });
+
+test('section and metric labels stay readable on desktop', async ({ page }) => {
+  await launch(page); await openRows(page, [row()]);
+  await tab(page, 'Overview');
+  for (const selector of ['.net-hero .eyebrow', '.month-spotlight .eyebrow', '.flow-panel .eyebrow', '.health-spotlight .eyebrow', '.net-details > div > span']) {
+    await expect(page.locator(selector).first()).toHaveCSS('font-size', '14px');
+  }
+  await tab(page, 'Analytics');
+  await expect(page.locator('.analytics-net .eyebrow')).toHaveCSS('font-size', '14px');
+});
