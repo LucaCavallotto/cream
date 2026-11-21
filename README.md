@@ -1,62 +1,118 @@
 # cream
 
-A personal finance workspace for local CSV files. Explore your spending, record transactions and keep your data on your device. No account, database or financial-data upload is required.
+A personal finance workspace that works with your local CSV files. Record transactions, understand income and spending, and review your dataset without creating an account or uploading financial data to a backend.
 
-## Start here
+The app runs in your browser. React and Vite power the interface; PapaParse reads and writes CSV files, and Chart.js renders the charts. All runtime libraries are bundled locally.
 
-Use **Node.js 24**, then run:
+## Contents
+
+- [Run locally](#run-locally)
+- [Open your first file](#open-your-first-file)
+- [Explore the workspace](#explore-the-workspace)
+- [Add, classify and edit transactions](#add-classify-and-edit-transactions)
+- [Quick Inline Entry](#quick-inline-entry)
+- [Save, undo and close](#save-undo-and-close)
+- [Smartphones and Home Screen](#smartphones-and-home-screen)
+- [CSV compatibility and privacy](#csv-compatibility-and-privacy)
+- [Troubleshooting](#troubleshooting)
+- [Development, tests and publishing](#development-tests-and-publishing)
+
+## Run locally
+
+Install **Node.js 24** and npm, then run these commands from the repository directory:
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the URL printed in the terminal. The source HTML needs Vite; opening it directly from disk will not run the app. To try it from another device on the same network:
+Open the URL printed by Vite, normally `http://localhost:5173/`. Keep the terminal running while using the site. The source `index.html` needs Vite; opening it directly from disk will not start the app.
+
+To try the site from another device on the same network:
 
 ```sh
 npm run dev -- --host
 ```
 
-Choose **Browse Files**, drop a compatible CSV anywhere in the window, or use **Create New File** on a computer. **Take a look around** opens synthetic demo data: you can edit it temporarily on a computer, but the built-in demo cannot be saved or exported. Close it to discard your experiments. Opening your own file named `demo.csv` works normally.
+Open the printed Network URL on that device. HTTP/LAN access supports transaction IDs even when `crypto.randomUUID` is unavailable. Native file access may be unavailable there; supported desktop browsers can use file selection and download fallbacks.
 
-## Your file and workspace
+For a production preview instead of the development server:
 
-Opening a file starts in **Overview**, in read-only mode. On a computer, use the lock button in the header to enable editing; each newly opened file starts locked again. New files created on a computer start editable. Switch sections using the sidebar or the bottom navigation on phones:
+```sh
+npm run build
+npm run preview
+```
 
-- **Overview:** all-time included income, expenses and net flow, monthly spending, recent transactions and dataset health. Net flow is not a bank-account balance. Use the centered callouts at the bottom of each card to explore each view; This month opens Analytics on Current Month, and IN & OUT shares the Last 12 Months cash-flow chart with Analytics; recent transaction rows open their details.
-- **Transactions:** search descriptions, amounts, classifications, tags and notes. Combine search with the expandable category, subcategory, amount-type and inclusive date filters. **Clear** resets the ledger filters and search. Sort from the column headings or the mobile sort selector. On a computer, **Select** enables bulk classification, tagging and deletion; Select all affects only visible matches.
-- **Analytics:** choose a period and explore spending, income, tags and charts. Expand **Analytics exclusions** to ignore categories, parent-qualified subcategories or individual transactions. **Exclude all** lets you start empty and remove exclusions for the few categories you want to inspect. **Clear** restores Last 12 Months and removes exclusions. Monthly comparison always compares the current and previous calendar months with the same exclusions.
-- **Dataset Health:** review missing fields, invalid amounts or dates, unclassified transactions and possible classification duplicates. Open a record with **Review / Edit** to correct it. Custom classifications appear in a separate information panel.
+## Open your first file
 
-The magnifying glasses in analytics show the exact category/subcategory or tag, using the source period, income/expense sign and exclusions. **Back to Analytics** preserves the analysis and restores the previous ledger search, sorting and filters. Ledger filters can further narrow a drilldown; Clear removes that scope too.
+Choose one of the landing-page actions:
 
-The ticker and Overview totals use all-time data with the same exclusions as Analytics. Recent activity and Dataset Health include every record. Invalid dates and amounts remain outside calculations until corrected. Exclusions do not delete or alter CSV rows. Filters, navigation, exclusions and unsaved edits last only for the open browser session and reset when a different file is opened or the page reloads.
+| Action | What happens |
+| --- | --- |
+| **Browse Files** | Opens an existing compatible CSV. You can also drop a file anywhere in the window. |
+| **Create New File** | Starts an empty dataset on a computer. Choose a filename; the required CSV headers are handled for you. |
+| **Take a look around** | Opens the synthetic sample dataset. Desktop users can unlock and edit it temporarily, but saving and exporting the built-in demo are disabled. |
 
-Currency amounts use consistent spacing between the sign, euro symbol and value across the workspace and chart tooltips. Appearance follows the system light/dark setting automatically. Pause the ticker using its button; reduced-motion preferences make it static and horizontally scrollable. Transaction dates use the device timezone: **DD-MM-YYYY HH:MM** in the transaction list, with seconds available in the detail view. CSV timestamps retain their original offsets and precision when the date/time is not edited.
+Existing files open in **Overview**, in **read-only mode**. On desktop, click the lock button in the header to unlock editing; click it again to lock the file. Each newly opened file starts locked. New files created on a computer start editable. Smartphones and iPad remain read only.
 
-## Add, edit and save
+The filename stays in the header. Click **cream** to return to Overview without closing the file or losing edits and filters. Use the **×** close control to close the file and return to the landing page.
 
-Use **Add transaction** from any section. Enter a date, amount and description; **Now** fills the current local date and time. Negative amounts are expenses, positive amounts are income. Tags and notes are optional.
+## Explore the workspace
 
-Choose a category to narrow the subcategory list. With no category, or an `Uncategorized` record, all subcategories are grouped by parent; choosing one also sets its category. The catalog combines built-in suggestions with the classifications in your current file. Use **Add category** or **Add subcategory** for a new name. Case and whitespace duplicates are rejected. New names become portable when used in a transaction and saved in the CSV; unused additions disappear when another file is opened. Imported names are preserved, including older classifications that are no longer suggested.
+Use the desktop sidebar or smartphone bottom navigation to switch sections. Keyboard users can use arrow keys, Home and End when the tabs have focus.
 
-Custom classifications are valid. Dataset Health lists them for information and flags case/spacing variants or close spellings as possible duplicates for manual review. It never merges or renames them automatically. Missing fields still require attention. For example:
+| Section | Use it to |
+| --- | --- |
+| **Overview** | See all-time included net flow, income, expenses, this month's spending, recent activity and dataset health. Net flow is income minus expenses, not a bank-account balance. |
+| **Transactions** | Search descriptions, amounts, classifications, tags and notes; sort records; filter by category, parent-qualified subcategory, income/expense/zero amounts and inclusive local date bounds. On desktop, unlock the file to edit or use bulk actions. |
+| **Analytics** | Choose a period and explore cash flow, spending, income and tags. Expand **Analytics exclusions** to omit categories, subcategories or individual records from calculations. |
+| **Dataset Health** | Find missing fields, invalid dates/amounts, unclassified records and possible duplicate classification names. Open an affected record to inspect it or, when unlocked, correct it. Custom classifications are listed separately for information. |
 
-| Purchase or income | Suggested classification |
+Overview cards use centered callouts at the bottom. **This month** opens Analytics with **Current Month** selected. **IN & OUT** uses the same **Last 12 Months** cash-flow chart as Analytics. Recent transaction rows open their details.
+
+### Filters and analytics exclusions
+
+Transaction filters combine with search. **Clear** resets the ledger's search and selectors. **Select all** in desktop bulk-edit mode selects only visible matching records.
+
+In Analytics, **Exclude all** lets you begin with everything excluded, then remove exclusions for the categories you want to inspect. You cannot add the same category exclusion twice. **Clear** restores **Last 12 Months** and removes exclusions. The monthly comparison always compares the current and previous calendar months using the same exclusions.
+
+The magnifying glasses in breakdowns open the exact category/subcategory or tag, matching the source period, amount sign and exclusions. **Back to Analytics** restores the analysis and the previous ledger search, sorting and filters. Ledger filters can further narrow a drilldown; Clear removes that temporary scope too.
+
+Exclusions do not delete or modify CSV rows. Overview and the ticker use all-time data with the current exclusions. Recent activity and Dataset Health cover every record. Invalid dates and amounts stay outside calculations until corrected. Filters and exclusions reset when a file is opened, closed or the page reloads.
+
+### Appearance and dates
+
+Appearance follows the system's light/dark setting. Pause or resume the ticker with its button; reduced-motion preferences make it static and horizontally scrollable. Currency amounts use consistent spacing between the sign, euro symbol and value, including chart tooltips.
+
+Transaction dates use the device timezone: **DD-MM-YYYY HH:MM** in the ledger, with seconds shown in details. The CSV and Quick Input use ISO timestamps; original offsets and fractional seconds are preserved when the date/time is not edited.
+
+## Add, classify and edit transactions
+
+On a computer, unlock the file and choose **Add transaction** from any section. Enter a date, amount and description. **Now** fills the current local date and time. Negative amounts are expenses; positive amounts are income. Tags and notes are optional.
+
+Choose a category to narrow the subcategory list. With no category, or an `Uncategorized` record, all subcategories are grouped by parent; selecting a subcategory also sets its category.
+
+The catalog combines [built-in suggestions](public/data/categories.json) with classifications in the current CSV. Use **Add category** or **Add subcategory** for a new name. Case and whitespace duplicates are rejected. New names become portable when used in a transaction and saved in the CSV. Unused additions disappear when a different file is opened. Imported names remain readable and selectable even when no longer suggested.
+
+Custom classifications are valid. Dataset Health shows them for information and flags similar spellings as possible duplicates for manual review. It never automatically renames or merges records. Missing fields still need attention; tags and notes are optional.
+
+Some useful examples:
+
+| Transaction | Suggested classification |
 | --- | --- |
 | Selling a Mac mini | Income → Sales |
 | Coffee bought for a friend | Treats → Coffee |
 | A meal bought for someone | Treats → Meals |
 | Reusable water bottle | Shopping → Everyday Accessories |
 | Work software subscription, including AI services | Tools → Software & Licenses |
-| Transport during a trip | Travel → Trip Transport (Travel → Transport also remains valid) |
+| Transport during a trip | Travel → Trip Transport; the original Travel → Transport remains valid |
 | Everyday transport | Transportation → the relevant subcategory |
 
-**Save Transaction** updates the working dataset in memory. **Save Changes** writes the CSV using a supported native file handle, or downloads a replacement file in other desktop browsers. Keep that downloaded file as your updated copy. The undo button restores the last successfully saved dataset. Closing an edited file or leaving the page asks before discarding pending changes. Click **cream** to return to Overview while keeping the file, edits and filters. Use the close button to close the file and return to the landing page.
+Click a record to edit it, or inspect it while locked. Desktop **Select** mode supports changing category, subcategory and tags for selected rows, as well as deletion. Deletion and bulk changes ask for confirmation.
 
-### Quick Inline Entry
+## Quick Inline Entry
 
-Paste transaction lines into the editor without a header. Three to five fields are supported:
+Paste transaction lines into the editor **without a CSV header**. Each record accepts three to five fields:
 
 ```text
 DateTime, Amount, Description
@@ -64,60 +120,104 @@ DateTime, Amount, Description, Category
 DateTime, Amount, Description, Category, Subcategory
 ```
 
-Copy these examples to try the original format, classified input and multiple rows:
+Copy these examples individually or as a batch:
 
 ```text
-2026-11-02T14:28:36+01:00, €-1, Caffè
-2026-11-03, -25.50, Weekly groceries, Food & Dining, Groceries
-2026-11-04, -5, "Coffee, cake", Bar, Snack
-2026-11-05, +150, Freelance project, Income, Freelance
-2026-11-06, +300, Mac mini sale, Income, Sales
+2026-11-20T20:11:11+01:00, €-7.5, Pizza da Fede, Food & Dining, Restaurant
+2026-11-21T10:29:42+01:00, €10, Test
+2026-11-21, -25.50, Weekly groceries, Food & Dining, Groceries
+2026-11-21, -5, "Coffee, cake", Bar, Snack
+2026-11-21, +300, Mac mini sale, Income, Sales
 ```
 
-Dates accept `YYYY-MM-DD` or an ISO timestamp with an optional timezone. Date-only entries use local midnight. The euro symbol is optional; use a decimal point. Quote descriptions containing commas; double a quote to escape it. Tags and notes come from the form and are shared across a multiline insertion.
+- **DateTime:** `YYYY-MM-DD` or an ISO timestamp with optional timezone. Date-only entries use local midnight.
+- **Amount:** The euro symbol is optional. Use a decimal point; negative means expense and positive means income.
+- **Description:** Required. Quote text containing commas. Double a quote to escape it inside a quoted description.
+- **Category/subcategory:** Optional names from the current hybrid catalog, matched without regard to letter case or surrounding spaces. Add a new custom name through the editor first if it is not already available.
+- **Tags/notes:** Enter these in the form; they are shared across a multiline insertion.
 
-Optional classification names match the current hybrid catalog, ignoring letter case and surrounding spaces. Create a new classification in the editor first if it is not in the catalog. Unknown categories are omitted with a row-specific warning; an unknown or incompatible subcategory is omitted while a valid category is kept. For example:
+**Every row in a multiline batch is classified independently.** In the examples above, Pizza da Fede is Food & Dining → Restaurant, while Test becomes Uncategorized with no subcategory. A row never inherits classification from another row or the form. With a single three-field entry, you can choose its classification using the form.
+
+A category without a subcategory leaves the subcategory empty. Empty trailing fields (`Description, ,`) explicitly leave classification blank. Unknown classifications produce warnings and are omitted; a valid category is retained when only its subcategory is invalid. Try these warning examples separately:
 
 ```text
-2026-11-02, -1, Spelling example, Bar, Caffe
-2026-11-03, -5, Unknown example, Not A Category, Coffee
+2026-11-21, -1, Spelling example, Bar, Caffe
+2026-11-21, -5, Unknown example, Not A Category, Coffee
 ```
 
-For a single three-field entry, you can choose its classification in the form. In a multiline batch, every row uses only its own category and subcategory: a three-field row becomes Uncategorized with no subcategory, regardless of other rows or the form's selection. Supplying a category without a subcategory leaves the subcategory empty; empty trailing fields explicitly leave classification blank. Invalid dates, amounts, missing descriptions, malformed quoting or extra fields block the insertion, so a multiline batch is not partially added. Editing an existing record accepts one inline row.
+Invalid dates, amounts, missing descriptions, malformed quoting or extra fields block the insertion. A multiline batch is not partially added. Editing an existing record accepts one inline row.
+
+## Save, undo and close
+
+**Save Transaction** updates the working dataset in memory. **Save Changes** persists it:
+
+- With a supported native file handle, cream writes to the selected file.
+- In other supported desktop contexts, it downloads an updated CSV. Keep the downloaded copy as your new version; the original file is not overwritten automatically.
+
+The undo button restores the last successfully saved dataset. Closing an edited file or leaving the page asks before discarding pending changes. Filters do not count as file edits. The built-in demo cannot be saved or exported, even when unlocked; its edits disappear when discarded. A personal file named `demo.csv` works normally.
+
+There is no automatic session recovery after reloading or closing the page. Keep your CSV files and backups separately.
 
 ## Smartphones and Home Screen
 
-Smartphones, including Android, and iPad open files in protected **read-only** mode. On phones, the header keeps cream, the filename, **Read only** and the close button in one row; long filenames are abbreviated to keep the controls accessible. Explore transactions, filters, analytics and Dataset Health; tap **Read only** for an explanation. Use a computer to create files, add, edit or save transactions. Desktop users can unlock files for editing or lock them again. Smartphone and iPad protection cannot be unlocked.
+Smartphones, including Android, and iPad use protected **read-only** mode. You can browse records, search, sort, filter, change analytics exclusions and inspect Dataset Health. Creation, editing and saving require a computer. Tap **Read only** in the header for an explanation.
 
-To add the app to an iPhone Home Screen, open it in Safari and use **Share → Add to Home Screen**. The site provides Apple and manifest icons. Remove and re-add an old shortcut if its icon is cached. This shortcut does not add offline data storage; continue keeping your CSV files separately.
+The smartphone header keeps cream, the filename, Read only and the close button on one row. Long filenames are abbreviated. Bottom navigation stays available while scrolling, and narrow desktop sidebars wrap long labels without hiding their counts.
 
-## CSV format and privacy
+On iPhone, open the site in Safari and use **Share → Add to Home Screen**. The site provides Apple and manifest icons. If an existing shortcut retains an old icon, remove and re-add it. A Home Screen shortcut does not provide offline data storage or synchronize CSV files between devices.
 
-A file must contain exactly these seven unique headers; import accepts a different order and surrounding header whitespace. Export uses this order:
+## CSV compatibility and privacy
+
+A file must contain exactly these seven unique headers. Import accepts a different order and surrounding header whitespace; export uses this order:
 
 ```csv
 DateTime,Amount,Description,Category,Subcategory,Tags,Notes
 2026-11-02T14:28:36+01:00,-1,Coffee,Bar,Coffee,#friends,
 ```
 
-Use ISO dates, numeric amounts without currency symbols, and space-separated `#tags`. Descriptions, notes and other CSV values may contain quoted commas or newlines. Invalid source dates or amounts are retained for review rather than replaced with invented values. Unsupported, missing or duplicate columns are rejected before replacing the open file. Internal record IDs are not exported.
+Use ISO dates and numeric amounts without currency symbols in CSV files. Tags are space-separated `#labels`. Quoted commas and newlines are supported. Invalid dates or amounts are retained for review, not replaced with invented values. Missing, duplicate or unsupported columns are rejected before replacing the open dataset. Internal record IDs are not exported.
 
-Financial data is processed locally in the browser. There is no automatic cloud backup or cross-device sync. Personal CSV files are ignored by Git by default, except the supplied synthetic `demo.csv`; keep backups of your own files.
+Financial data is processed locally in the browser. There is no account, automatic cloud backup or cross-device sync. Personal CSV files are ignored by Git by default; only the synthetic [public/demo.csv](public/demo.csv) is exempt. Saving a file remains your responsibility.
 
-## Develop, test and publish
+## Troubleshooting
 
-The app uses React and Vite, with PapaParse for CSV and Chart.js for charts. Runtime dependencies are bundled locally.
+| Symptom | What to check |
+| --- | --- |
+| Editing buttons are missing | Existing files start locked. Unlock with the header lock on desktop. Smartphones and iPad cannot be unlocked. |
+| Save Changes is missing in the demo | Demo edits are temporary. Open or create your own file to keep transactions. |
+| Saving downloads a file | This is the fallback when direct writes are unavailable. Use the downloaded CSV as the updated version. |
+| A CSV is rejected | Check the seven unique column headers above and quote commas/newlines correctly. Rejection leaves the current file open. |
+| Totals differ from the ledger | Check analytics period and exclusions. Invalid dates/amounts are omitted from calculations; the ledger and health checks retain all records. |
+| A category is omitted from Quick Input | Use a name in the current catalog, or create it in the editor first. Check the warning for the affected row. |
+| A file was lost after refresh | Unsaved data is session-only. Reopen your last saved CSV. |
+| The page does not run from disk | Use the Vite development or preview server, or a deployed build. |
+
+## Development, tests and publishing
+
+### Repository layout
 
 ```text
-src/App.jsx             File lifecycle and shared navigation
-src/components/         Workspace, editor, charts and filters
-assets/js/              CSV, catalog, health, analytics and reducer logic
-assets/css/style.css    Responsive styling and system themes
-data/categories.json    Suggested classifications
-tests/                  Unit, integration, production and browser checks
+src/                       React app, components and hooks
+assets/js/                 CSV, catalog, validation, analytics and reducer logic
+assets/css/style.css       Responsive styling and system themes
+public/                    Static assets copied unchanged into the build
+  data/categories.json     Suggested classifications
+  demo.csv                 Synthetic sample dataset
+  manifest.json            Home Screen metadata
+  cream.svg, *.png         App icons
+config/                    Production and dev Playwright configurations
+scripts/                   Icon generation and agent-doc synchronization
+tests/                     Unit, CSV integration, build and browser checks
+.github/workflows/         GitHub checks and Pages deployment
+index.html                 Vite HTML entry point
+vite.config.js             React plugin and relative deployment paths
 ```
 
-Install browser binaries once, then run the full suite before pushing:
+The root keeps the package files, entry point, Vite config, README and agent instruction entry points. `node_modules/`, `dist/`, `test-results/` and `playwright-report/` are generated and ignored by Git; do not edit them as source files. Vite serves files from `public/` at the site's root: for example, `public/demo.csv` is requested as `demo.csv`, not `public/demo.csv`.
+
+### Testing
+
+After `npm ci`, install browser binaries once and run the full suite:
 
 ```sh
 npx playwright install chromium firefox webkit
@@ -126,22 +226,35 @@ npm test
 
 On Linux use `npx playwright install --with-deps chromium firefox webkit` if system libraries are needed.
 
-| Command | Checks |
+| Command | Purpose |
 | --- | --- |
 | `npm run test:ci` | Unit logic, real PapaParse CSV integration and production assets |
-| `npm run test:browser` | Production flows on Chromium, Firefox, WebKit, emulated iPhone and Android |
-| `npm run test:dev` | React lifecycle flows through Vite development mode and StrictMode |
-| `npm run test:report` | Last browser report, with retained failure screenshots and traces |
+| `npm run test:unit` | Pure logic, repository configuration and synchronized agent-doc checks |
+| `npm run test:integration` | CSV parsing/export, file services and copyable README examples |
+| `npm run test:build` | Build `dist/` and check bundled/static assets |
+| `npm run test:browser` | Build and exercise production flows on Chromium, Firefox, WebKit, emulated iPhone and Android |
+| `npm run test:browser -- --project=chromium` | Run only Chromium production flows |
+| `npm run test:dev` | Vite development lifecycle flows with React StrictMode |
+| `npm run test:report` | Open the last production browser report |
 
-Browser fixtures use synthetic files and a controlled clock. Native pickers, permissions and share APIs have controlled test doubles; real OS dialogs and physical devices still need manual checks. Browser tests use port 4173; development checks use 5174, configurable with `PLAYWRIGHT_DEV_PORT`, leaving the usual dev server alone.
+Use the npm scripts: the Playwright configs live in `config/` and are supplied explicitly by those scripts. Browser fixtures use synthetic files and a controlled clock. Native pickers, permissions and sharing have test doubles; physical devices and real OS dialogs still need manual checks.
 
-Build and inspect the deployable site with:
+Production browser tests use port 4173; development checks use 5174, configurable with `PLAYWRIGHT_DEV_PORT`. They leave the usual dev server on 5173 alone. Failures retain screenshots and traces in `test-results/`, with reports in `playwright-report/`; development artifacts use each folder's `dev/` subdirectory.
+
+### Agent instructions and icons
+
+[AGENTS.md](AGENTS.md) is the canonical contributor/agent guide. [CLAUDE.md](CLAUDE.md) and [GEMINI.md](GEMINI.md) contain identical instructions for their respective entry points. After editing AGENTS.md, synchronize the copies:
 
 ```sh
-npm run build
-npm run preview
+npm run sync:agents
 ```
 
-Deploy the contents of `dist/` to a static host. Relative asset paths support repository subdirectories; serve the site from a directory URL ending in `/`. HTTPS or localhost enables native file APIs; other supported desktop contexts use file input and download fallbacks.
+Tests require all three files to be byte-identical. There is no separate CODEX.md to maintain. Regenerate the PNG Home Screen icons from `public/cream.svg` with `node scripts/generate-icons.mjs` after installing Playwright Chromium.
 
-The GitHub Actions workflow runs unit, real CSV integration and production checks on every push and pull request, also checking logic/integration in UTC. Browser tests remain in the full local suite. A push to `main` deploys to GitHub Pages only after tests pass; pull requests do not deploy. Set **Settings → Pages → Source → GitHub Actions**. Direct pushes remain committed even if checks fail, while the previous successful deployment stays live. To block PR merges, configure **Node.js tests** as a required check in branch protection or a ruleset. Local commits do not trigger Actions.
+### Publish
+
+`npm run build` creates `dist/`; deploy **its contents** to a static HTTP(S) host, not the source repository. Relative asset paths support repository subdirectories. Serve the site at a directory URL ending in `/`. HTTPS or localhost enables supported native file APIs; other supported desktop contexts use file-input/download fallbacks.
+
+The [GitHub Actions workflow](.github/workflows/tests.yml) runs unit, real CSV integration and production checks on every push and pull request, also repeating logic/integration in UTC. Browser tests remain part of the full local suite. A push to `main` deploys to GitHub Pages only after checks pass; pull requests do not deploy. Select **Settings → Pages → Source → GitHub Actions**.
+
+A direct push stays committed even if checks fail, while the previous successful deployment remains live. To block PR merges, configure **Node.js tests** as a required check in branch protection or a ruleset. Local commits do not trigger Actions. Run the complete local suite before pushing.

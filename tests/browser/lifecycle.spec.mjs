@@ -120,3 +120,22 @@ test('imported descriptions and notes render as text rather than HTML', async ({
   await expect(page.locator('#transactionsTbody img')).toHaveCount(0);
   expect(await page.evaluate(() => window.injected)).toBeUndefined();
 });
+
+test('public assets retain their runtime URLs in production and development', async ({ page }) => {
+  await launch(page);
+  const [manifestResponse, catalogResponse, demoResponse] = await Promise.all([
+    page.request.get('manifest.json'),
+    page.request.get('data/categories.json'),
+    page.request.get('demo.csv'),
+  ]);
+  for (const response of [manifestResponse, catalogResponse, demoResponse]) expect(response.ok()).toBe(true);
+  const manifest = await manifestResponse.json();
+  expect(manifest.name).toBe('cream');
+  expect(manifest.start_url).toBe('./index.html');
+  expect((await catalogResponse.json())['Food & Dining']).toContain('Restaurant');
+  expect(await demoResponse.text()).toMatch(/^DateTime,Amount,Description,Category,Subcategory,Tags,Notes/);
+  await page.getByRole('button', { name: /Take a look around/ }).click();
+  await expect(page.locator('#currentFileName')).toHaveText('demo.csv');
+  await expect(page.locator('#overview-tab-pane')).toBeVisible();
+  await expect(page.locator('#demoNotice')).toBeVisible();
+});

@@ -10,14 +10,15 @@
     "test:ci": "npm run test:unit && npm run test:integration && npm run test:build",
     "test:unit": "node --test tests/*.test.mjs",
     "test:integration": "node --test tests/integration/*.test.mjs",
-    "test:browser": "playwright test",
+    "test:browser": "playwright test --config=config/playwright.config.mjs",
     "test:report": "playwright show-report",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "pretest:browser": "npm run test:build",
     "test:build": "npm run build && node --test tests/build/*.test.mjs",
-    "test:dev": "playwright test --config=playwright.dev.config.mjs"
+    "test:dev": "playwright test --config=config/playwright.dev.config.mjs",
+    "sync:agents": "node scripts/sync-agent-docs.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.65.1",

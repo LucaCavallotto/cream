@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from '@playwright/test';
 import production from './playwright.config.mjs';
 
@@ -7,14 +8,15 @@ const baseURL = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
   ...production,
-  outputDir: 'test-results/dev',
+  outputDir: fileURLToPath(new URL('../test-results/dev', import.meta.url)),
   reporter: [
     ['list'],
-    ['html', { outputFolder: 'playwright-report/dev', open: 'never' }],
+    ['html', { outputFolder: fileURLToPath(new URL('../playwright-report/dev', import.meta.url)), open: 'never' }],
   ],
   testMatch: /lifecycle\.spec\.mjs/,
   use: { ...production.use, baseURL },
   webServer: {
+    cwd: production.webServer.cwd,
     command: `npm run dev -- --port ${port} --strictPort`,
     url: baseURL,
     reuseExistingServer: false,

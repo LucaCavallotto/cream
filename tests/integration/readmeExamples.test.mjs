@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import Papa from 'papaparse';
 import { parseInlineCSV } from '../../assets/js/inlineInput.js';
 const readme = readFileSync(new URL('../../README.md', import.meta.url), 'utf8');
-const categories = JSON.parse(readFileSync(new URL('../../data/categories.json', import.meta.url)));
+const categories = JSON.parse(readFileSync(new URL('../../public/data/categories.json', import.meta.url)));
 test('README quick-entry examples remain copyable with the shipped catalog', () => {
   const examples = [...readme.matchAll(/```text\n(2026-[\s\S]*?)\n```/g)].map(match => match[1]);
   assert.equal(examples.length, 2);

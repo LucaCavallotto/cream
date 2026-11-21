@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { analyzeDataset, getTransactionIssues, isValidTransactionDate, parseImportedAmount } from '../assets/js/datasetHealth.js';
 
-const categories = JSON.parse(readFileSync(new URL('../data/categories.json', import.meta.url)));
+const categories = JSON.parse(readFileSync(new URL('../public/data/categories.json', import.meta.url)));
 const transaction = {
   id: 'test', DateTime: '2026-11-02T14:28:36+01:00', Amount: -1,
   Description: 'Coffee', Category: 'Bar', Subcategory: 'Coffee', Tags: '', Notes: ''

@@ -62,8 +62,8 @@ test('unterminated quotes and inconsistent field counts reject the entire import
 });
 
 test('demo.csv and every populated classification remain valid', () => {
-  const result = parseTransactionsCSV(readFileSync(new URL('../../demo.csv', import.meta.url), 'utf8'), Papa);
-  const categories = JSON.parse(readFileSync(new URL('../../data/categories.json', import.meta.url)));
+  const result = parseTransactionsCSV(readFileSync(new URL('../../public/demo.csv', import.meta.url), 'utf8'), Papa);
+  const categories = JSON.parse(readFileSync(new URL('../../public/data/categories.json', import.meta.url)));
   assert.deepEqual(result.errors, []);
   assert.equal(result.transactions.length, 31);
   for (const row of result.transactions) {

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import Papa from 'papaparse';
 import { parseInlineCSV } from '../../assets/js/inlineInput.js';
-const categories = JSON.parse(readFileSync(new URL('../../data/categories.json', import.meta.url)));
+const categories = JSON.parse(readFileSync(new URL('../../public/data/categories.json', import.meta.url)));
 
 test('quick input handles spaces before quoted descriptions with real PapaParse', () => {
   const parsed = parseInlineCSV('2026-11-02, €-1, "Coffee, cake", Bar, Coffee', categories, Papa);

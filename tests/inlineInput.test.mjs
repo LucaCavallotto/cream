@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { parseInlineRow } from '../assets/js/inlineInput.js';
 
-const categories = JSON.parse(readFileSync(new URL('../data/categories.json', import.meta.url)));
+const categories = JSON.parse(readFileSync(new URL('../public/data/categories.json', import.meta.url)));
 const base = ['2026-11-02T14:28:36+01:00', '€-1', 'Caffè'];
 
 test('legacy input needs no classification', () => {

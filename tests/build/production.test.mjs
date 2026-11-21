@@ -7,7 +7,7 @@ for (const file of ['data/categories.json', 'demo.csv', 'manifest.json']) {
   test(`production build preserves ${file} exactly`, async () => {
     assert.deepEqual(
       await readFile(resolve('dist', file)),
-      await readFile(resolve(file)),
+      await readFile(resolve('public', file)),
     );
   });
 }

@@ -1,14 +1,16 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests/browser',
+  testDir: fileURLToPath(new URL('../tests/browser', import.meta.url)),
+  outputDir: fileURLToPath(new URL('../test-results', import.meta.url)),
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
   workers: 1,
   globalTimeout: 10 * 60 * 1000,
   timeout: 30000,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { open: 'never', outputFolder: fileURLToPath(new URL('../playwright-report', import.meta.url)) }]],
   use: {
     baseURL: 'http://127.0.0.1:4173',
     timezoneId: 'Europe/Rome', locale: 'en-GB',
@@ -16,6 +18,7 @@ export default defineConfig({
     trace: 'retain-on-failure', screenshot: 'only-on-failure'
   },
   webServer: {
+    cwd: fileURLToPath(new URL('../', import.meta.url)),
     command: 'npm run preview -- --port 4173 --strictPort',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: false
