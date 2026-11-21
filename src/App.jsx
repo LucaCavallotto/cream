@@ -47,7 +47,8 @@ export default function App() {
     [saving, setSaving] = useState(false),
     [saved, setSaved] = useState(false),
     [dragging, setDragging] = useState(false),
-    [demoLoading, setDemoLoading] = useState(false);
+    [demoLoading, setDemoLoading] = useState(false),
+    [hasEditorChanges, setHasEditorChanges] = useState(false);
   const theme = useMediaQuery('(prefers-color-scheme: dark)')
     ? 'dark'
     : 'light';
@@ -66,10 +67,19 @@ export default function App() {
     saveTimer = useRef(null),
     pendingScroll = useRef(null),
     readOnlyInfo = useRef(null),
-    fileRequest = useRef(0);
+    fileRequest = useRef(0),
+    editorDirty = useRef(false);
   const currentState = useRef(state);
   currentState.current = state;
-  const closeModal = useCallback(() => setModal(null), []);
+  const onEditorDirtyChange = useCallback(value => {
+    editorDirty.current = value;
+    setHasEditorChanges(value);
+  }, []);
+  const closeModal = useCallback(() => {
+    setModal(null);
+    editorDirty.current = false;
+    setHasEditorChanges(false);
+  }, []);
   const tags = useMemo(
     () =>
       [
@@ -101,18 +111,18 @@ export default function App() {
   }, [theme]);
   useEffect(() => {
     const beforeUnload = (event) => {
-      if (state.hasUnsavedChanges) {
+      if (state.hasUnsavedChanges || hasEditorChanges) {
         event.preventDefault();
         event.returnValue = '';
       }
     };
     window.addEventListener('beforeunload', beforeUnload);
     return () => window.removeEventListener('beforeunload', beforeUnload);
-  }, [state.fileName, state.hasUnsavedChanges]);
+  }, [state.fileName, state.hasUnsavedChanges, hasEditorChanges]);
   useEffect(() => () => clearTimeout(saveTimer.current), []);
   const canReplace = useCallback(() => {
     const current = currentState.current;
-    return !current.hasUnsavedChanges || confirm(current.isDemo
+    return (!current.hasUnsavedChanges && !editorDirty.current) || confirm(current.isDemo
       ? 'Discard temporary demo edits and open another file?'
       : 'You have unsaved changes. Discard them and open another file?');
   }, []);
@@ -270,7 +280,7 @@ export default function App() {
   }
   function closeFile() {
     if (
-      !state.hasUnsavedChanges ||
+      (!state.hasUnsavedChanges && !editorDirty.current) ||
       confirm(state.isDemo ? 'Close the demo and discard temporary edits?' : 'You have unsaved changes. Close without saving?')
     ) {
       fileRequest.current++;
@@ -608,6 +618,7 @@ export default function App() {
           onAddClassification={(category, subcategory) => dispatch({ type: 'addClassification', category, subcategory })}
           viewOnly={state.viewOnlyMode}
           onClose={closeModal}
+          onDirtyChange={onEditorDirtyChange}
           onCommit={commit}
           onDelete={(id) => remove([id])}
         />

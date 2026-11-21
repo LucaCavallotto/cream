@@ -3575,3 +3575,18 @@ body {
 
 .month-spotlight .month-comparison,
 .month-spotlight .change-pill { font-size: 14px; line-height: 1.5; }
+
+/* One short explanation per heading; larger health graphics balance wide cards. */
+.page-heading .page-description { max-width: 55ch; margin-bottom: 0; }
+.card-description { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 6px 0 18px; }
+.health-spotlight .panel-kicker h2 { margin: 0; font-size: 20px; font-weight: 600; color: var(--ink); text-align: left; }
+.health-spotlight > .card-description { margin: 8px 0 4px; }
+@media (min-width: 768px) {
+  .health-spotlight .health-ring {
+    width: clamp(160px, 14vw, 224px);
+    height: clamp(160px, 14vw, 224px);
+    padding: 7px;
+    margin: clamp(20px, 2vw, 32px) auto 18px;
+  }
+  .health-spotlight .health-ring > span { font-size: clamp(38px, 3.5vw, 52px); font-weight: 600; }
+}

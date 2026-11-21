@@ -86,6 +86,7 @@ export default function Transactions({
       <div className="page-heading">
         <div>
           <h1>Transactions</h1>
+          <p className="page-description">Search, filter and review every record.</p>
         </div>
       </div>
       <div className="ledger-toolbar">

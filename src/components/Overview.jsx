@@ -41,6 +41,7 @@ export default function Overview({
       <div className="page-heading">
         <div>
           <h1>Overview</h1>
+          <p className="page-description">Income, spending and dataset health at a glance.</p>
         </div>
         <span className="date-stamp">
           {new Date().toLocaleDateString('en-GB', {
@@ -145,9 +146,10 @@ export default function Overview({
         </section>
         <section className="cream-panel health-spotlight">
           <div className="panel-kicker">
-            <span className="eyebrow">DATASET CHECK</span>
+            <h2>Dataset health</h2>
             <i className="bi bi-shield-check" aria-hidden="true" />
           </div>
+          <p className="card-description">Check completeness and classifications.</p>
           <div
             className="health-ring"
             style={{ '--clean-percent': `${cleanPercent}%` }}
@@ -172,6 +174,7 @@ export default function Overview({
         <div className="panel-heading">
           <div>
             <h2>Recent transactions</h2>
+            <p className="card-description">Latest activity from your file.</p>
           </div>
         </div>
         <div className="recent-list">

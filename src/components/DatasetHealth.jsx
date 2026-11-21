@@ -26,6 +26,7 @@ export default function DatasetHealth({
       <div className="page-heading">
         <div>
           <h1>Dataset Health</h1>
+          <p className="page-description">Find missing values and records that need attention.</p>
         </div>
       </div>
       <div

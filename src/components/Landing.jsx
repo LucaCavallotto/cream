@@ -58,7 +58,7 @@ export default function Landing({
             </div>
             <div>
               <h2>Open a CSV</h2>
-              {readOnly && <p>Editing is available on a computer.</p>}
+              <p>{readOnly ? 'View your file here; edit it on a computer.' : 'Drop a file here or browse your computer.'}</p>
             </div>
             <button
               id="btnOpenFile"

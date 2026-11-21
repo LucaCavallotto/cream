@@ -154,7 +154,7 @@ Invalid dates, amounts, missing descriptions, malformed quoting or extra fields 
 - With a supported native file handle, cream writes to the selected file.
 - In other supported desktop contexts, it downloads an updated CSV. Keep the downloaded copy as your new version; the original file is not overwritten automatically. After checking that the download finished, choose **Confirm saved**. If it was cancelled or blocked, choose **Keep unsaved** and retry. Until confirmation, pending edits remain protected.
 
-Confirming a download acknowledges the exported snapshot; edits made afterwards still remain unsaved. The undo button restores the last successfully saved dataset. Closing an edited file or leaving the page asks before discarding pending changes. Filters do not count as file edits. The built-in demo cannot be saved or exported, even when unlocked; its edits disappear when discarded. A personal file named `demo.csv` works normally.
+Confirming a download acknowledges the exported snapshot; edits made afterwards still remain unsaved. The undo button restores the last successfully saved dataset. Closing an edited file, replacing it or refreshing the page asks before discarding pending changes. The refresh warning also covers unsaved fields in an open transaction editor; cancelling the editor discards that draft. The browser controls the wording of the refresh warning. Filters do not count as file edits. The built-in demo cannot be saved or exported, even when unlocked; its edits disappear when discarded. A personal file named `demo.csv` works normally.
 
 There is no automatic session recovery after reloading or closing the page. Keep your CSV files and backups separately.
 

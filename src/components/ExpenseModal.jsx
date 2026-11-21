@@ -1,7 +1,7 @@
 import { spacedMoney } from '../../assets/js/money.js';
 import { existingClassification, isUnclassified } from '../../assets/js/classificationCatalog.js';
 import { createTransactionId } from '../../assets/js/transactionId.js';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import Papa from 'papaparse';
 import { parseInlineCSV, parseInlineRow } from '../../assets/js/inlineInput.js';
 import {
@@ -21,6 +21,7 @@ export default function ExpenseModal({
   tags,
   viewOnly,
   onClose,
+  onDirtyChange,
   onCommit,
   onDelete,
   returnFocus,
@@ -39,6 +40,10 @@ export default function ExpenseModal({
   }));
   const [inline, setInline] = useState(''),
     [errors, setErrors] = useState([]);
+  const initialDraft = useRef(draft);
+  useLayoutEffect(() => {
+    onDirtyChange?.(!viewOnly && (inline.trim() !== '' || JSON.stringify(draft) !== JSON.stringify(initialDraft.current)));
+  }, [draft, inline, viewOnly, onDirtyChange]);
   const [adding, setAdding] = useState(''), [newName, setNewName] = useState(''), [nameError, setNameError] = useState('');
   const parsed = useMemo(
     () =>

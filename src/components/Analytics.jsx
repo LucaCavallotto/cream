@@ -275,6 +275,7 @@ export default function Analytics({
       <div className="page-heading">
         <div>
           <h1>Analytics</h1>
+          <p className="page-description">Explore cash flow and spending over time.</p>
         </div>
         <div className="analytics-period-controls">
           <label

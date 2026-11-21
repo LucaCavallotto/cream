@@ -360,7 +360,7 @@ test('working text is comfortably sized and the overview balance separates sign 
   expect(currency.x - (sign.x + sign.width)).toBeGreaterThan(3);
   expect(value.x - (currency.x + currency.width)).toBeGreaterThan(3);
   await expect(page.locator('#overview-tab-pane h1')).toHaveText('Overview');
-  await expect(page.locator('#overview-tab-pane .page-description')).toHaveCount(0);
+  await expect(page.locator('#overview-tab-pane .page-description')).toHaveText('Income, spending and dataset health at a glance.');
   await page.setViewportSize({ width: 390, height: 844 });
   await tab(page, 'Transactions');
   await expect(page.locator('.mobile-visible .fw-bold.text-truncate')).toHaveCSS('font-size', '16px');
@@ -370,7 +370,7 @@ test('working text is comfortably sized and the overview balance separates sign 
 test('section and metric labels stay readable on desktop', async ({ page }) => {
   await launch(page); await openRows(page, [row()]);
   await tab(page, 'Overview');
-  for (const selector of ['.net-hero .eyebrow', '.month-spotlight .eyebrow', '.flow-panel .eyebrow', '.health-spotlight .eyebrow', '.net-details > div > span']) {
+  for (const selector of ['.net-hero .eyebrow', '.month-spotlight .eyebrow', '.flow-panel .eyebrow', '.net-details > div > span']) {
     await expect(page.locator(selector).first()).toHaveCSS('font-size', '14px');
   }
   await tab(page, 'Analytics');
@@ -425,12 +425,33 @@ test('a narrow desktop can unlock, edit and relock without header overlaps', asy
   await expect(page.locator('#unsavedWarning')).toBeVisible();
 });
 
-test('workspace headings use section names without decorative introductory text', async ({ page }) => {
+test('workspace headings pair section names with one helpful subtitle', async ({ page }) => {
   await launch(page); await openRows(page, [row()]);
   for (const [name, id] of [['Overview','overview'], ['Transactions','list'], ['Analytics','analytics'], ['Dataset Health','cleanup']]) {
     await tab(page, name);
     await expect(page.locator(`#${id}-tab-pane h1`)).toHaveText(name);
     await expect(page.locator(`#${id}-tab-pane .page-heading .eyebrow`)).toHaveCount(0);
-    await expect(page.locator(`#${id}-tab-pane .page-heading .page-description`)).toHaveCount(0);
+    const subtitle = page.locator(`#${id}-tab-pane .page-heading .page-description`);
+    await expect(subtitle).toHaveCount(1);
+    await expect(subtitle).toBeVisible();
+    expect((await subtitle.textContent()).length).toBeLessThan(85);
   }
+});
+
+test('desktop Dataset Health card uses a prominent contained percentage graphic', async ({ page }) => {
+  await launch(page); await openRows(page, [row('Clean'), row('Review', -1, '', '')]);
+  await tab(page, 'Overview');
+  for (const width of [1024, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 1080 });
+    const panel = await page.locator('.health-spotlight').boundingBox();
+    const ring = await page.locator('.health-ring').boundingBox();
+    expect(ring.width).toBeGreaterThanOrEqual(160);
+    expect(ring.width).toBeLessThanOrEqual(224);
+    expect(ring.height / panel.height).toBeGreaterThan(.25);
+    expect(ring.x).toBeGreaterThanOrEqual(panel.x);
+    expect(ring.x + ring.width).toBeLessThanOrEqual(panel.x + panel.width);
+    const caption = await page.locator('.health-ring-caption').boundingBox();
+    expect(caption.y).toBeGreaterThanOrEqual(ring.y + ring.height);
+  }
+  await expect(page.locator('.health-spotlight h2')).toHaveText('Dataset health');
 });
