@@ -4,9 +4,7 @@ import AnalyticsChart from './AnalyticsChart.jsx';
 import { analyticsModel } from '../../assets/js/analyticsModel.js';
 import { isValidTransactionDate } from '../../assets/js/datasetHealth.js';
 import AnalyticsFilters from './AnalyticsFilters.jsx';
-import { formatMoney } from '../../assets/js/presentation.js';
-
-const euro = formatMoney;
+import Money from './Money.jsx';
 
 function ChartCard({ type, model, active, theme, reducedMotion }) {
   const title = `${type === 'pie' ? 'Expenses by Category' : 'Monthly Cash Flow Trend'} (${model.periodLabel})`;
@@ -144,8 +142,7 @@ function Breakdown({ kind, groups, periodLabel, onDrilldown }) {
                               className={`category-amount-badge ${tag && group.total < 0 ? 'text-danger' : 'text-success'}`}
                               style={{ fontSize: '1.1rem', fontWeight: 700 }}
                             >
-                              {income || (tag && group.total > 0) ? '+' : ''}
-                              {euro(group.total)}
+                              <Money value={group.total} signed={income || (tag && group.total > 0)} />
                             </span>
                             <div className="text-muted small">
                               {percent.toFixed(1)}%{tag ? ' of tagged vol' : ''}
@@ -171,13 +168,13 @@ function Breakdown({ kind, groups, periodLabel, onDrilldown }) {
                           <div className="subcategory-item d-flex justify-content-between align-items-center">
                             <span className="text-muted">Income</span>
                             <span className="fw-semibold text-success">
-                              +{euro(group.income)}
+                              <Money value={group.income} signed />
                             </span>
                           </div>
                           <div className="subcategory-item d-flex justify-content-between align-items-center">
                             <span className="text-muted">Expenses</span>
                             <span className="fw-semibold text-danger">
-                              -{euro(group.expenses)}
+                              <Money value={-group.expenses} />
                             </span>
                           </div>
                         </>
@@ -190,8 +187,7 @@ function Breakdown({ kind, groups, periodLabel, onDrilldown }) {
                             <span className="text-muted">{sub}</span>
                             <div className="d-flex align-items-center gap-2">
                               <span className="fw-semibold">
-                                {income ? '+' : ''}
-                                {euro(amount)}
+                                <Money value={amount} signed={income} />
                               </span>
                               <ViewTransactions
                                 name={sub}
@@ -357,21 +353,20 @@ export default function Analytics({
             id="metricDelta"
             className={model.net >= 0 ? 'positive' : 'negative'}
           >
-            {model.net >= 0 ? '+' : '-'}
-            {euro(Math.abs(model.net))}
+            <Money value={model.net} signed />
           </h2>
         </div>
         <div className="analytics-in-out">
           <div>
             <span className="eyebrow">↙ MONEY IN</span>
             <h2 id="metricIncome" className="positive">
-              {euro(model.income)}
+              <Money value={model.income} />
             </h2>
           </div>
           <div>
             <span className="eyebrow">↗ MONEY OUT</span>
             <h2 id="metricExpenses" className="negative">
-              {euro(model.expenses)}
+              <Money value={model.expenses} />
             </h2>
           </div>
         </div>
@@ -380,7 +375,7 @@ export default function Analytics({
           <div>
             <span>Current month</span>
             <strong id="metricCurrentMonth">
-              {euro(model.current)}{' '}
+              <Money value={model.current} />{' '}
               <span
                 id="metricComparisonPercent"
                 className={
@@ -394,7 +389,7 @@ export default function Analytics({
           </div>
           <div>
             <span>Previous month</span>
-            <strong id="metricPrevMonth">{euro(model.previous)}</strong>
+            <strong id="metricPrevMonth"><Money value={model.previous} /></strong>
           </div>
         </div>
       </div>

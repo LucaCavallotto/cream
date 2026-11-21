@@ -1,3 +1,4 @@
+import { spacedMoney } from '../../assets/js/money.js';
 import { existingClassification, isUnclassified } from '../../assets/js/classificationCatalog.js';
 import { createTransactionId } from '../../assets/js/transactionId.js';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -355,14 +356,14 @@ export default function ExpenseModal({
                       Amount <span className="text-danger">*</span>
                     </label>
                     <input
-                      type="number"
+                      type={viewOnly ? 'text' : 'number'}
                       step="0.01"
                       id="inputAmount"
                       className="form-control"
                       placeholder="e.g. 50.00 or -50"
                       required={required}
                       disabled={viewOnly}
-                      value={draft.amount}
+                      value={viewOnly && Number.isFinite(transaction?.Amount) ? spacedMoney(transaction.Amount) : draft.amount}
                       onChange={(e) => update('amount', e.target.value)}
                     />
                     <div className="form-text">

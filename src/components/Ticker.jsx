@@ -1,3 +1,4 @@
+import Money from './Money.jsx';
 import Star from './Star.jsx';
 import { useRef, useState } from 'react';
 import { datasetTicker } from '../../assets/js/presentation.js';
@@ -55,7 +56,7 @@ export default function Ticker({ model, loaded }) {
                         {item.tone === 'positive' ? '↗' : '↘'}{' '}
                       </span>
                     )}
-                    {item.value}
+                    <Money formatted={item.value} />
                   </span>
                   <span className="ticker-separator" aria-hidden="true">
                     <Star />

@@ -349,7 +349,7 @@ test('working text is comfortably sized and the overview balance separates sign 
   await expect(page.locator('#transactionsTbody')).toContainText('02-11-2026 14:28');
   await expect(page.locator('#transactionsTbody')).not.toContainText('14:28:36');
   await tab(page, 'Overview');
-  const parts = page.locator('#overviewNet > span');
+  const parts = page.locator('#overviewNet .money-amount > span');
   await expect(parts).toHaveText(['−', '€', '10.00']);
   const sign = await parts.nth(0).boundingBox(), currency = await parts.nth(1).boundingBox(), value = await parts.nth(2).boundingBox();
   expect(currency.x - (sign.x + sign.width)).toBeGreaterThan(3);

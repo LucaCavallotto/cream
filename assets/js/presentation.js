@@ -1,13 +1,7 @@
 import { analyticsModel } from './analyticsModel.js';
 
-const currency = new Intl.NumberFormat('en-IE', {
-  style: 'currency',
-  currency: 'EUR',
-  maximumFractionDigits: 2,
-});
-export function formatMoney(value, signed = false) {
-  return `${signed && value > 0 ? '+' : value < 0 ? '−' : ''}${currency.format(Math.abs(value))}`;
-}
+import { formatMoney } from './money.js';
+export { formatMoney } from './money.js';
 
 // The ticker uses the same validated, excluded scope as analytics, not market prices.
 export function datasetTicker(model) {

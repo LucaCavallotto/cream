@@ -4,7 +4,7 @@ import AnalyticsChart from './AnalyticsChart.jsx';
 import Star from './Star.jsx';
 import { compareTransactions } from '../../assets/js/transactions.js';
 import { formatDate } from '../../assets/js/dateTime.js';
-import { formatMoney } from '../../assets/js/presentation.js';
+import Money from './Money.jsx';
 import { getCategoryMeta } from '../../assets/js/categoryMeta.js';
 
 function CardCallout({ children, onClick }) {
@@ -81,9 +81,7 @@ export default function Overview({
             </span>
           </div>
           <p className="net-amount" id="overviewNet">
-            {model.net !== 0 && <span>{model.net > 0 ? '+' : '−'}</span>}
-            <span>€</span>
-            <span>{formatMoney(Math.abs(model.net)).replace('€', '')}</span>
+            <Money value={model.net} signed />
           </p>
           <span className="net-caption">
             The difference between your income and expenses.
@@ -94,7 +92,7 @@ export default function Overview({
                 <i className="bi bi-arrow-down-left" aria-hidden="true" /> MONEY
                 IN
               </span>
-              <strong id="overviewIncome">{formatMoney(model.income)}</strong>
+              <strong id="overviewIncome"><Money value={model.income} /></strong>
             </div>
             <div>
               <span>
@@ -102,7 +100,7 @@ export default function Overview({
                 OUT
               </span>
               <strong id="overviewExpenses">
-                {formatMoney(model.expenses)}
+                <Money value={model.expenses} />
               </strong>
             </div>
 
@@ -115,7 +113,7 @@ export default function Overview({
             <i className="bi bi-calendar3" aria-hidden="true" />
           </div>
           <h2><button type="button" className="month-heading-link" onClick={() => onAnalytics('current_month')}>This month.</button></h2>
-          <p className="spotlight-amount">{formatMoney(model.current)}</p>
+          <p className="spotlight-amount"><Money value={model.current} /></p>
           <p className="muted">
             spent in {new Date().toLocaleString('en-GB', { month: 'long' })}
           </p>
@@ -135,7 +133,7 @@ export default function Overview({
           </div>
           <div className="month-baseline">
             <span>Last month</span>
-            <strong>{formatMoney(model.previous)}</strong>
+            <strong><Money value={model.previous} /></strong>
           </div>
           <CardCallout onClick={() => onAnalytics('current_month')}>Explore this month</CardCallout>
         </section>
@@ -223,7 +221,7 @@ export default function Overview({
                   className={`recent-amount ${Number.isFinite(transaction.Amount) ? (transaction.Amount >= 0 ? 'positive' : 'negative') : 'muted'}`}
                 >
                   {Number.isFinite(transaction.Amount)
-                    ? formatMoney(transaction.Amount, true)
+                    ? <Money value={transaction.Amount} signed />
                     : 'Needs review'}
                 </strong>
                 <i

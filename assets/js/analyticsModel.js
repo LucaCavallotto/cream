@@ -1,3 +1,4 @@
+import { spacedMoney } from './money.js';
 import {
   buildMonthlyCashFlow,
   filterAnalyticsPeriod,
@@ -211,8 +212,8 @@ export function chartConfig(
           callbacks: {
             label: (context) =>
               type === 'pie'
-                ? ` ${context.label}: €${Number(context.raw).toFixed(2)} (${((context.raw / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%)`
-                : ` ${context.dataset.label}: €${Number(context.raw).toFixed(2)}`,
+                ? ` ${context.label}: ${spacedMoney(Number(context.raw))} (${((context.raw / context.dataset.data.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%)`
+                : ` ${context.dataset.label}: ${spacedMoney(Number(context.raw))}`,
           },
         },
       },

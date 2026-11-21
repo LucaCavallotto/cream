@@ -1,3 +1,4 @@
+import Money from './Money.jsx';
 import { formatDate } from '../../assets/js/dateTime.js';
 import { useEffect, useState } from 'react';
 import {
@@ -288,7 +289,7 @@ export default function AnalyticsFilters({
                             {formatDate(t.DateTime)} ·{' '}
                             {t.Description || '(Missing description)'} ·{' '}
                             {Number.isFinite(t.Amount)
-                              ? `€${t.Amount.toFixed(2)}`
+                              ? <Money value={t.Amount} />
                               : '(Invalid amount)'}{' '}
                             · {t.Category || '(No category)'}
                             {t.Subcategory ? ` / ${t.Subcategory}` : ''}

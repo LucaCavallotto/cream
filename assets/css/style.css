@@ -3467,4 +3467,15 @@ body {
 .shared-chart { min-width: 0; max-width: 100%; overflow: hidden; }
 .shared-chart canvas { max-width: 100%; }
 
+/* One currency treatment for cards, ledger, ticker, health and breakdowns. */
+.money-amount {
+  display: inline-flex;
+  align-items: baseline;
+  column-gap: .16em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  vertical-align: baseline;
+}
+.money-amount > span { min-width: 0; }
+.ticker-value .money-amount { display: inline-flex; }
 #cleanupReadOnly { margin: -10px 0 24px; }

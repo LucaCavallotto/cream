@@ -32,7 +32,7 @@ The magnifying glasses in analytics show the exact category/subcategory or tag, 
 
 The ticker and Overview totals use all-time data with the same exclusions as Analytics. Recent activity and Dataset Health include every record. Invalid dates and amounts remain outside calculations until corrected. Exclusions do not delete or alter CSV rows. Filters, navigation, exclusions and unsaved edits last only for the open browser session and reset when a different file is opened or the page reloads.
 
-Appearance follows the system light/dark setting automatically. Pause the ticker using its button; reduced-motion preferences make it static and horizontally scrollable. Transaction dates use the device timezone: **DD-MM-YYYY HH:MM** in the transaction list, with seconds available in the detail view. CSV timestamps retain their original offsets and precision when the date/time is not edited.
+Currency amounts use consistent spacing between the sign, euro symbol and value across the workspace and chart tooltips. Appearance follows the system light/dark setting automatically. Pause the ticker using its button; reduced-motion preferences make it static and horizontally scrollable. Transaction dates use the device timezone: **DD-MM-YYYY HH:MM** in the transaction list, with seconds available in the detail view. CSV timestamps retain their original offsets and precision when the date/time is not edited.
 
 ## Add, edit and save
 

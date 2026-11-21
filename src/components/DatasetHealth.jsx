@@ -1,3 +1,4 @@
+import Money from './Money.jsx';
 import { formatDate } from '../../assets/js/dateTime.js';
 import { useMemo, useState } from 'react';
 import {
@@ -118,14 +119,7 @@ export default function DatasetHealth({
                     {t.Description.trim() || '(Missing description)'}
                   </h6>
                   <p className="small text-muted text-break mb-2">
-                    {[
-                      formatDate(t.DateTime),
-                      Number.isFinite(t.Amount)
-                        ? `€${t.Amount.toFixed(2)}`
-                        : t.Amount || '(Missing amount)',
-                      t.Category || '(Missing category)',
-                      t.Subcategory || '(Missing subcategory)',
-                    ].join(' · ')}
+                    {formatDate(t.DateTime)} · {Number.isFinite(t.Amount) ? <Money value={t.Amount} /> : t.Amount || '(Missing amount)'} · {t.Category || '(Missing category)'} · {t.Subcategory || '(Missing subcategory)'}
                   </p>
                   <ul className="small mb-0 ps-3">
                     {issues.map((issue) => (

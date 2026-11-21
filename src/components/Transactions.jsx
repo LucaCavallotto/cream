@@ -5,7 +5,7 @@ import { matchesTransactionFilters } from '../../assets/js/transactionFilters.js
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { compareTransactions } from '../../assets/js/transactions.js';
 import { formatDate } from '../../assets/js/dateTime.js';
-import { formatMoney } from '../../assets/js/presentation.js';
+import Money from './Money.jsx';
 import { getCategoryMeta } from '../../assets/js/categoryMeta.js';
 import TagInput from './TagInput.jsx';
 
@@ -389,7 +389,7 @@ export default function Transactions({
               const valid = Number.isFinite(t.Amount),
                 income = t.Amount >= 0;
               const amount = valid
-                ? formatMoney(t.Amount, true)
+                ? <Money value={t.Amount} signed />
                 : 'Invalid / missing amount';
               const color = !valid
                 ? 'text-warning fw-bold'
