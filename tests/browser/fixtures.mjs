@@ -55,10 +55,13 @@ export async function launch(page) {
   await expect(page.getByRole('button', { name: 'Browse Files', exact: true })).toBeEnabled();
 }
 
-export async function openRawCSV(page, text, name = 'test.csv') {
+export async function openRawCSV(page, text, name = 'test.csv', { editable = true, valid = true } = {}) {
   const chooserPromise = page.waitForEvent('filechooser');
   await page.getByRole('button', { name: 'Browse Files', exact: true }).click();
   await (await chooserPromise).setFiles({ name, mimeType: 'text/csv', buffer: Buffer.from(text) });
+  if (!valid) return;
+  await expect(page.locator('#currentFileName')).toHaveText(name);
+  if (editable) await unlockFile(page);
 }
 
 export async function openRows(page, rows) {
@@ -92,4 +95,9 @@ export async function downloadRows(page) {
   expect(result.errors).toEqual([]);
   expect(result.meta.fields).toEqual(headers);
   return { text, rows: result.data };
+}
+
+export async function unlockFile(page) {
+  const toggle = page.locator('#btnToggleViewOnly');
+  if (await toggle.isVisible() && await toggle.getAttribute('aria-pressed') === 'true') await toggle.click();
 }

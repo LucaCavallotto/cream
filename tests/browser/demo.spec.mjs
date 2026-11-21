@@ -1,8 +1,9 @@
-import { test, expect, launch, openRawCSV, tab, saveModal } from './fixtures.mjs';
+import { test, expect, launch, openRawCSV, tab, saveModal, unlockFile } from './fixtures.mjs';
 test('built-in demo edits are temporary and a personal demo.csv remains saveable', async ({ page }) => {
   await launch(page);
   await page.getByRole('button', { name: /Take a look around/ }).click();
   await expect(page.locator('#demoNotice')).toBeVisible();
+  await unlockFile(page);
   await expect(page.locator('#btnSaveChanges')).toBeHidden();
   await page.locator('.recent-transaction').first().click();
   await page.locator('#inputDescription').fill('Temporary test');

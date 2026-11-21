@@ -21,7 +21,7 @@ Choose **Browse Files**, drop a compatible CSV anywhere in the window, or use **
 
 ## Your file and workspace
 
-Opening a file starts in **Overview**. Switch sections using the sidebar or the bottom navigation on phones:
+Opening a file starts in **Overview**, in read-only mode. On a computer, use the lock button in the header to enable editing; each newly opened file starts locked again. New files created on a computer start editable. Switch sections using the sidebar or the bottom navigation on phones:
 
 - **Overview:** all-time included income, expenses and net flow, monthly spending, recent transactions and dataset health. Net flow is not a bank-account balance. Use the explicit navigation buttons to explore each view; recent transaction rows open their details.
 - **Transactions:** search descriptions, amounts, classifications, tags and notes. Combine search with the expandable category, subcategory, amount-type and inclusive date filters. **Clear** resets the ledger filters and search. Sort from the column headings or the mobile sort selector. On a computer, **Select** enables bulk classification, tagging and deletion; Select all affects only visible matches.
@@ -87,7 +87,7 @@ Three-field rows use the form's classification. Supplying a category without a s
 
 ## Smartphones and Home Screen
 
-Smartphones, including Android, and iPad open files in protected **read-only** mode. On phones, the header keeps cream, the filename, **Read only** and the close button in one row; long filenames are abbreviated to keep the controls accessible. Explore transactions, filters, analytics and Dataset Health; tap **Read only** for an explanation. Use a computer to create files, add, edit or save transactions. A narrow desktop window remains editable, and desktop users can enable a manual read-only lock.
+Smartphones, including Android, and iPad open files in protected **read-only** mode. On phones, the header keeps cream, the filename, **Read only** and the close button in one row; long filenames are abbreviated to keep the controls accessible. Explore transactions, filters, analytics and Dataset Health; tap **Read only** for an explanation. Use a computer to create files, add, edit or save transactions. Desktop users can unlock files for editing or lock them again. Smartphone and iPad protection cannot be unlocked.
 
 To add the app to an iPhone Home Screen, open it in Safari and use **Share → Add to Home Screen**. The site provides Apple and manifest icons. Remove and re-add an old shortcut if its icon is cached. This shortcut does not add offline data storage; continue keeping your CSV files separately.
 

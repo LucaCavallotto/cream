@@ -40,7 +40,7 @@ const tabs = [
 
 export default function App() {
   const [state, dispatch] = useReducer(appReducer, undefined, () =>
-    createAppState(isReadOnlyDevice(navigator, document), isReadOnlyDevice(navigator, document)),
+    createAppState(true, isReadOnlyDevice(navigator, document)),
   );
   const [modal, setModal] = useState(null),
     [notice, setNotice] = useState(''),
@@ -188,7 +188,7 @@ export default function App() {
       const session = await createCSVSession();
       if (session) {
         pendingScroll.current = 0;
-        dispatch({ type: 'open', session });
+        dispatch({ type: 'open', session, editable: true });
         setNotice('');
       }
     } catch (error) {
@@ -341,7 +341,7 @@ export default function App() {
             <button
               id="btnToggleViewOnly"
               className={`icon-button view-mode-toggle ${state.deviceReadOnly ? 'd-none' : ''}`}
-              title="Toggle View Only Mode"
+              title={state.viewOnlyMode ? 'Unlock editing' : 'Lock file'}
               aria-label="Toggle View Only Mode"
               aria-pressed={state.viewOnlyMode}
               onClick={() => dispatch({ type: 'viewOnly' })}
@@ -593,9 +593,9 @@ export default function App() {
         className="read-only-dialog"
         aria-labelledby="readOnlyTitle"
       >
-        <h2 id="readOnlyTitle">Your money, on the go.</h2>
+        <h2 id="readOnlyTitle">Read-only mode</h2>
         <p>
-          On smartphones and iPad, cream is read only. You can explore transactions,
+          Files open in read-only mode. On a computer, use the lock button to enable editing. Smartphones and iPad stay read only. You can explore transactions,
           analytics and dataset health. To add, edit or save transactions, open
           your CSV in cream on a computer.
         </p>

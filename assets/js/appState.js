@@ -56,6 +56,7 @@ export function appReducer(state, action) {
       return {
         ...createAppState(state.viewOnlyMode, state.deviceReadOnly),
         ...action.session,
+        viewOnlyMode: state.deviceReadOnly || action.editable !== true,
         suggestedCategories: state.suggestedCategories,
         categories: buildCatalog(state.suggestedCategories, action.session.transactions),
         ready: state.ready,

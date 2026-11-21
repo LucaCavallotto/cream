@@ -93,7 +93,7 @@ test('a late save from a previous file cannot replace the new file baseline', ()
 });
 
 test('opening and closing reset file-specific state and preserve catalog and read-only setting', () => {
-  let state = appReducer(open(), { type: 'viewOnly' });
+  let state = open();
   state = appReducer(state, { type: 'search', value: 'Something' });
   state.analyticsExclusions.categories.add('Bar');
   state = appReducer(state, { type: 'close' });
@@ -150,4 +150,14 @@ test('drilldown return restores text, normalized search and sort while retaining
   assert.deepEqual(state.sort, { column: 'Amount', direction: 'desc' });
   assert.equal(state.analyticsReturnContext, null);
   assert(state.analyticsExclusions.categories.has('Tools'));
+});
+
+test('opening an existing file always resets to read only and desktop can explicitly unlock', () => {
+  let state = open();
+  assert.equal(state.viewOnlyMode, true);
+  state = appReducer(state, { type: 'viewOnly' });
+  assert.equal(state.viewOnlyMode, false);
+  state = appReducer(state, { type: 'open', session: { fileName: 'next.csv', transactions: [] } });
+  assert.equal(state.viewOnlyMode, true);
+  assert.equal(state.hasUnsavedChanges, false);
 });

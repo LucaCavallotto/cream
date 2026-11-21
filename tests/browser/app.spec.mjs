@@ -1,4 +1,4 @@
-import { test, expect, row, launch, openRows, openRawCSV, tab, addModal, saveModal, downloadRows, headers } from './fixtures.mjs';
+import { test, expect, row, launch, openRows, openRawCSV, tab, addModal, saveModal, downloadRows, headers, unlockFile } from './fixtures.mjs';
 import Papa from 'papaparse';
 
 test('create a file, enter a transaction, save and reopen the downloaded CSV', async ({ page }) => {
@@ -204,7 +204,7 @@ test('View Transactions and Back preserve exclusions, period, expansions and ori
 test('malformed CSV is rejected and view-only mode prevents editing', async ({ page }) => {
   await launch(page);
   const dialogPromise = page.waitForEvent('dialog');
-  const upload = openRawCSV(page, 'wrong,header\n1,2');
+  const upload = openRawCSV(page, 'wrong,header\n1,2', 'invalid.csv', { valid: false });
   const dialog = await dialogPromise;
   expect(dialog.message()).toContain('Incompatible');
   await dialog.accept();
@@ -229,6 +229,8 @@ test('native file-save failure keeps the edit pending and baseline unchanged', a
   });
   await launch(page);
   await page.getByRole('button', { name: 'Browse Files', exact: true }).click();
+  await expect(page.locator('#currentFileName')).toHaveText('native.csv');
+  await unlockFile(page);
   await tab(page, 'Transactions');
   await expect(page.locator('.btn-edit')).toHaveCount(1);
   await page.locator('.btn-edit').click();
@@ -270,6 +272,7 @@ test('drag/drop imports a real File and refuses to discard pending changes when 
   }
   await drop('Dropped');
   await expect(page.locator('#transactionsTbody')).toContainText('Dropped');
+  await unlockFile(page);
   await addModal(page);
   await page.locator('#inlineInput').fill('2026-11-03, -1, Pending');
   await saveModal(page);

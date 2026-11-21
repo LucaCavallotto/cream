@@ -3420,3 +3420,5 @@ body {
     font-size: 17px;
   }
 }
+
+#cleanupReadOnly { margin: -10px 0 24px; }

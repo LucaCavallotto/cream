@@ -31,6 +31,14 @@ export default function DatasetHealth({
           </p>
         </div>
       </div>
+      <div
+        id="cleanupReadOnly"
+        className={`alert alert-info ${viewOnly ? '' : 'd-none'}`}
+        role="status"
+      >
+        View Only Mode is active. You can inspect transactions, but editing is
+        disabled.
+      </div>
       <div className="health-summary" aria-live="polite">
         {[
           ['cleanupTotal', 'Total transactions', report.total, ''],
@@ -70,14 +78,6 @@ export default function DatasetHealth({
           Changes restores your last saved data.
         </p>
       </details>
-      <div
-        id="cleanupReadOnly"
-        className={`alert alert-info ${viewOnly ? '' : 'd-none'}`}
-        role="status"
-      >
-        View Only Mode is active. You can inspect transactions, but editing is
-        disabled.
-      </div>
       <details className="health-explainer" id="customClassifications">
         <summary>Custom classifications ({report.custom.length})</summary>
         <p>These values come from your dataset and extend the suggested catalog. They are not errors simply because they are custom. To classify a sale, use Income → Sales.</p>
