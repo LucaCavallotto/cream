@@ -118,11 +118,10 @@ test('smartphone inspection hides write-only entry controls and shows local huma
   await launch(page);
   await expect(page.locator('#btnCreateNewFile')).toBeHidden();
   const welcome = await page.locator('.landing-welcome').boundingBox();
-  const fresh = await page.locator('.landing-new-file').boundingBox();
   const existing = await page.locator('#dropZone').boundingBox();
-  expect(fresh.y).toBeGreaterThanOrEqual(welcome.y + welcome.height);
-  expect(existing.y).toBeGreaterThanOrEqual(fresh.y + fresh.height);
-  await expect(page.locator('.landing-new-file')).toContainText('File creation is available on a computer.');
+  expect(existing.y).toBeGreaterThanOrEqual(welcome.y + welcome.height);
+  await expect(page.locator('.landing-new-file')).toHaveCount(0);
+  await expect(page.locator('.landing-read-only-note')).toContainText('Create and edit your file on a computer.');
   await openRows(page, [row('Timezone sample', -1, 'Bar', 'Coffee', '2026-11-02T23:30:36-05:00')]);
   await expect(page.locator('#btnToggleViewOnly')).toBeHidden();
   await expect(page.locator('#btnSelectMode')).toBeHidden();
@@ -296,4 +295,9 @@ test('touch pauses resume at the same ticker position and speed without sticky h
     await page.locator('.ticker-viewport').tap();
     await expectTickerResumesAt(page, paused);
   }
+});
+
+test('protected landing offers viewing without a creation section in either theme', async ({ page }, info) => {
+  const { checkProtectedLanding } = await import('./protected-landing.mjs');
+  await checkProtectedLanding(page, info);
 });

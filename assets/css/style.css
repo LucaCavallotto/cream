@@ -3885,3 +3885,12 @@ body {
 .exclusions-notice details[open] .exclusions-show { display: none; }
 .exclusions-notice details[open] .exclusions-hide { display: inline; }
 #analyticsExclusionsPanel, #analyticsTransactionExclusionsPanel { scroll-margin-top: calc(var(--chrome-height, 120px) + 16px); }
+
+/* Protected devices offer an existing-file path, without an empty creation slot. */
+.landing-read-only { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: 'welcome open'; max-width: 1040px; margin: auto; }
+.landing-read-only .landing-welcome { text-align: left; margin: 0; }
+.landing-read-only-note { margin: 20px 0 0; color: var(--muted); font-size: 16px; line-height: 1.65; }
+.landing-read-only-note i { margin-right: 6px; }
+@media (max-width: 767.98px) {
+  .landing-read-only { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'welcome' 'open'; }
+}

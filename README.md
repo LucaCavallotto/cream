@@ -166,7 +166,7 @@ There is no automatic session recovery after reloading or closing the page. Keep
 
 ## Smartphones and Home Screen
 
-Smartphones, including Android, and iPad use protected **read-only** mode. You can browse records, search, sort, filter, change analytics exclusions and inspect Dataset Health. Creation, editing and saving require a computer. Tap **Read only** in the header for an explanation.
+Smartphones, including Android, and iPad use protected **read-only** mode. You can browse records, search, sort, filter, change analytics exclusions and inspect Dataset Health. On the landing page, open an existing CSV or explore the demo. Create, edit and save your file on a computer; protected devices do not show the new-file section. Tap **Read only** in the header for an explanation.
 
 The smartphone header keeps cream, the filename, Read only and the close button on one row. Long filenames are abbreviated. Bottom navigation stays available while scrolling, and narrow desktop sidebars wrap long labels without hiding their counts.
 

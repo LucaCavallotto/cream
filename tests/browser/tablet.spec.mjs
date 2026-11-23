@@ -107,3 +107,8 @@ test('tablet editing follows device protection and keeps exported changes availa
     await expect(page.locator('#btnAddExpense')).toBeHidden();
   }
 });
+
+test('tablet landing follows device protection rather than viewport width', async ({ page }, info) => {
+  const { checkProtectedLanding } = await import('./protected-landing.mjs');
+  await checkProtectedLanding(page, info, protectedDevice(info));
+});

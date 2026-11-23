@@ -19,28 +19,29 @@ function FilePreview() {
 export default function Landing({ ready, readOnly, onCreate, onOpen, onDemo, demoLoading }) {
   return (
     <main id="landingView" className="landing-view" tabIndex={-1}>
-      <section className="landing-hero" aria-label="Choose how to get started">
+      <section className={`landing-hero ${readOnly ? 'landing-read-only' : ''}`} aria-label="Choose how to get started">
       <header className="landing-welcome">
         <h1>Welcome to cream.</h1>
-        <p className="landing-description">A clear view of your transactions, starting with a CSV. Create a new file or open one you already have.</p>
+        <p className="landing-description">{readOnly ? 'Open your CSV to explore transactions, analytics and dataset health.' : 'A clear view of your transactions, starting with a CSV. Create a new file or open one you already have.'}</p>
+        {readOnly && <p className="landing-read-only-note"><i className="bi bi-laptop" aria-hidden="true" /> Create and edit your file on a computer. This device supports viewing only.</p>}
       </header>
-        <section className="landing-new-file" aria-labelledby="newFileTitle">
+        {!readOnly && <section className="landing-new-file" aria-labelledby="newFileTitle">
           <div className="fresh-heading">
             <span className="fresh-mark" aria-hidden="true"><i className="bi bi-plus-lg" /></span>
             <span className="eyebrow">START FRESH</span>
           </div>
           <div>
             <h2 id="newFileTitle">Create a new file</h2>
-            <p>{readOnly ? 'Create your file on a computer, then open it here to explore your transactions.' : 'Start with an empty CSV, then add your transactions. We set up the file for you.'}</p>
+            <p>Start with an empty CSV, then add your transactions. We set up the file for you.</p>
           </div>
-          {!readOnly && <button
+          <button
             id="btnCreateNewFile"
             className="text-action landing-create"
             disabled={!ready}
             onClick={onCreate}
-          >Create New File <i className="bi bi-plus-lg" aria-hidden="true" /></button>}
-          <span className="fresh-note"><i className={`bi bi-${readOnly ? 'laptop' : 'file-earmark-plus'}`} aria-hidden="true" /> {readOnly ? 'File creation is available on a computer.' : 'No template or spreadsheet setup needed.'}</span>
-        </section>
+          >Create New File <i className="bi bi-plus-lg" aria-hidden="true" /></button>
+          <span className="fresh-note"><i className="bi bi-file-earmark-plus" aria-hidden="true" /> No template or spreadsheet setup needed.</span>
+        </section>}
         <section id="dropZone" className="drop-zone landing-choice landing-file-area" aria-labelledby="existingFileTitle">
           <div className="drop-zone-top"><span className="eyebrow">CONTINUE WITH YOUR DATA</span></div>
           <FilePreview />
