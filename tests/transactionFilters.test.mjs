@@ -65,3 +65,28 @@ test('drilldowns clear ledger filters temporarily, restore them on return and ne
   state = appReducer(state, { type: 'clearTransactionFilters' });
   assert.deepEqual(state.transactionFilters, createTransactionFilters());
 });
+
+test('Need/Want filtering distinguishes legacy blanks and composes with other filters', () => {
+  const filters = {...createTransactionFilters(), needWant:'unclassified'};
+  for (const NeedWant of [undefined, '', null]) assert(matchesTransactionFilters({...row,NeedWant},filters));
+  for (const NeedWant of ['need','want']) {
+    assert(!matchesTransactionFilters({...row,NeedWant},filters));
+    assert(matchesTransactionFilters({...row,NeedWant},{...filters,needWant:NeedWant,type:'expense',category:JSON.stringify('Travel'),from:'2026-11-01'}));
+    assert(!matchesTransactionFilters({...row,NeedWant},{...filters,needWant:NeedWant,type:'income'}));
+    assert(matchesTransactionFilters({...row,NeedWant},createTransactionFilters()));
+  }
+});
+
+test('Need/Want filters survive navigation and drilldown, clear and reset with the file session', () => {
+  let state=appReducer(createAppState(),{type:'transactionFilters',value:{...createTransactionFilters(),needWant:'unclassified'}});
+  state=appReducer(state,{type:'tab',tab:'Overview'});
+  assert.equal(state.transactionFilters.needWant,'unclassified');
+  state=appReducer(state,{type:'drilldown',filter:'Bar',scrollY:0});
+  assert.equal(state.transactionFilters.needWant,'');
+  state=appReducer(state,{type:'tab',tab:'Analytics'});
+  assert.equal(state.transactionFilters.needWant,'unclassified');
+  assert.equal(state.hasUnsavedChanges,false);
+  assert.equal(appReducer(state,{type:'clearTransactionFilters'}).transactionFilters.needWant,'');
+  assert.equal(appReducer(state,{type:'open',session:{fileName:'next.csv',transactions:[]}}).transactionFilters.needWant,'');
+  assert.equal(appReducer(state,{type:'close'}).transactionFilters.needWant,'');
+});

@@ -1,10 +1,14 @@
 import { isValidTransactionDate } from './datasetHealth.js';
 
 export function createTransactionFilters() {
-  return { category: '', subcategory: '', from: '', to: '', type: '' };
+  return { category: '', subcategory: '', from: '', to: '', type: '', needWant: '' };
 }
 
 export function matchesTransactionFilters(transaction, filters) {
+  if (filters.needWant) {
+    const value = transaction.NeedWant || 'unclassified';
+    if (value !== filters.needWant) return false;
+  }
   if (filters.category && transaction.Category !== JSON.parse(filters.category))
     return false;
   if (

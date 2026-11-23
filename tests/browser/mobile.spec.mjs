@@ -308,3 +308,20 @@ test('ticker scrolls away without hiding the phone header or bottom navigation',
   const { checkTickerScroll } = await import('./ticker-scroll.mjs');
   await checkTickerScroll(page);
 });
+
+test('Need/Want filters remain usable in protected phone mode in both themes', async ({page}) => {
+  await launch(page);
+  await openRows(page,[row('Legacy coffee'),{...row('Need coffee'),NeedWant:'need'},{...row('Want coffee'),NeedWant:'want'}]);
+  await page.getByText('Transaction filters',{exact:true}).click();
+  for (const colorScheme of ['light','dark']) {
+    await page.emulateMedia({colorScheme,reducedMotion:'reduce'});
+    for (const [value,label] of [['need','Need coffee'],['want','Want coffee'],['unclassified','Legacy coffee']]) {
+      await page.locator('#filterNeedWant').selectOption(value);
+      await expect(page.locator('#transactionResultCount')).toHaveText('1 transaction');
+      await expect(page.locator('#transactionsTbody')).toContainText(label);
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    }
+  }
+  await expect(page.locator('#btnSelectMode')).toBeHidden();
+  await expect(page.locator('#unsavedWarning')).toBeHidden();
+});

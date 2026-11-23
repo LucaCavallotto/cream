@@ -26,7 +26,7 @@ export default function TransactionFilters({ state, dispatch }) {
         {Object.values(filters).filter(Boolean).length ? ' · Active' : ''}
       </summary>
       <div className="row g-3 mt-1">
-        <div className="col-sm-6 col-lg-3">
+        <div className="col-sm-6 col-lg-4">
           <label className="form-label" htmlFor="filterCategory">
             Category
           </label>
@@ -44,7 +44,7 @@ export default function TransactionFilters({ state, dispatch }) {
             ))}
           </select>
         </div>
-        <div className="col-sm-6 col-lg-3">
+        <div className="col-sm-6 col-lg-4">
           <label className="form-label" htmlFor="filterSubcategory">
             Subcategory
           </label>
@@ -72,7 +72,7 @@ export default function TransactionFilters({ state, dispatch }) {
               ))}
           </select>
         </div>
-        <div className="col-sm-6 col-lg-2">
+        <div className="col-sm-6 col-lg-4">
           <label className="form-label" htmlFor="filterType">
             Type
           </label>
@@ -88,8 +88,17 @@ export default function TransactionFilters({ state, dispatch }) {
             <option value="zero">Zero amount</option>
           </select>
         </div>
+        <div className="col-sm-6 col-lg-4">
+          <label className="form-label" htmlFor="filterNeedWant">Need / Want</label>
+          <select className="form-select" id="filterNeedWant" value={filters.needWant || ''} onChange={event => update('needWant', event.target.value)}>
+            <option value="">All classifications</option>
+            <option value="need">Need</option>
+            <option value="want">Want</option>
+            <option value="unclassified">Not classified</option>
+          </select>
+        </div>
         {['from', 'to'].map((field) => (
-          <div className="col-sm-6 col-lg-2" key={field}>
+          <div className="col-sm-6 col-lg-4" key={field}>
             <label className="form-label" htmlFor={`filter-${field}`}>
               {field === 'from' ? 'From' : 'To'}
             </label>

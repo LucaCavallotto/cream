@@ -74,7 +74,7 @@ Overview cards use centered callouts at the bottom. **This month** opens Analyti
 
 ### Filters and analytics exclusions
 
-Transaction filters combine with search. **Clear** resets the ledger's search and selectors. **Select all** in desktop bulk-edit mode selects only visible matching records.
+Transaction filters combine with search. Use **Need / Want** to show **Need**, **Want** or **Not classified** records; **All classifications** removes this restriction. Old CSV records without NeedWant are included in Not classified. Filter the unclassified records, unlock editing on desktop and use bulk selection to assign a value. Updated records immediately leave the list when they no longer match the filter. **Clear** resets the ledger's search and selectors. **Select all** in desktop bulk-edit mode selects only visible matching records.
 
 In Analytics, select **Time Period** above the two exclusion panels. Each panel starts with **Include all** (green) and **Exclude all** (red). These controls affect only their own type of exclusion: category controls keep individual selections, and transaction controls keep category rules. Bulk transaction actions cover the entire dataset, even when the transaction search is active. Records covered by a category rule stay excluded until that rule is removed. You cannot add the same category exclusion twice. The monthly comparison always compares the current and previous calendar months using the same exclusions.
 
