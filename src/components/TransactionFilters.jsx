@@ -102,13 +102,16 @@ export default function TransactionFilters({ state, dispatch }) {
             <label className="form-label" htmlFor={`filter-${field}`}>
               {field === 'from' ? 'From' : 'To'}
             </label>
-            <input
-              className="form-control"
-              type="date"
-              id={`filter-${field}`}
-              value={filters[field]}
-              onChange={(event) => update(field, event.target.value)}
-            />
+            <div className={`filter-date ${filters[field] ? '' : 'is-empty'}`}>
+              <input
+                className="form-control"
+                type="date"
+                id={`filter-${field}`}
+                value={filters[field]}
+                onChange={(event) => update(field, event.target.value)}
+              />
+              {!filters[field] && <span className="filter-date-placeholder" aria-hidden="true">Any date</span>}
+            </div>
           </div>
         ))}
         {filters.from && filters.to && filters.from > filters.to && (

@@ -309,7 +309,7 @@ test('ticker scrolls away without hiding the phone header or bottom navigation',
   await checkTickerScroll(page);
 });
 
-test('Need/Want filters remain usable in protected phone mode in both themes', async ({page}) => {
+test('Need/Want filters remain usable in protected phone mode in both themes', async ({page}, info) => {
   await launch(page);
   await openRows(page,[row('Legacy coffee'),{...row('Need coffee'),NeedWant:'need'},{...row('Want coffee'),NeedWant:'want'}]);
   await page.getByText('Transaction filters',{exact:true}).click();
@@ -324,4 +324,18 @@ test('Need/Want filters remain usable in protected phone mode in both themes', a
   }
   await expect(page.locator('#btnSelectMode')).toBeHidden();
   await expect(page.locator('#unsavedWarning')).toBeHidden();
+  await expect(page.locator('#filter-from')).toHaveValue('');
+  await expect(page.locator('#filter-to')).toHaveValue('');
+  await expect(page.locator('.filter-date-placeholder')).toHaveText(['Any date', 'Any date']);
+  await page.locator('#filter-from').fill('2026-12-01');
+  await page.locator('#filterNeedWant').focus();
+  await expect(page.locator('#transactionResultCount')).toHaveText('0 transactions');
+  await expect(page.locator('.filter-date-placeholder')).toHaveCount(1);
+  await page.locator('.transaction-filters').getByRole('button', {name:'Clear',exact:true}).click();
+  await expect(page.locator('#filterNeedWant')).toHaveValue('');
+  await expect(page.locator('#filter-from')).toHaveValue('');
+  await expect(page.locator('.filter-date-placeholder')).toHaveCount(2);
+  await expect(page.locator('#transactionResultCount')).toHaveText('3 transactions');
+  await page.setViewportSize({width:320,height:750});
+  await page.screenshot({path:info.outputPath('need-want-empty-dates-dark.png'),fullPage:true,scale:'css'});
 });

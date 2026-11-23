@@ -3906,3 +3906,9 @@ body {
 .need-want-grid h3 { font-size: 17px; }
 .need-want-grid .money-amount { font-size: 22px; font-weight: 600; }
 @media (max-width: 767.98px) { .need-want-grid { grid-template-columns: 1fr; } }
+
+/* Safari paints today's date in empty date controls: make unbounded filters explicit. */
+.filter-date { position: relative; }
+.filter-date-placeholder { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.filter-date.is-empty:not(:focus-within) input { color: transparent; }
+.filter-date:focus-within .filter-date-placeholder { display: none; }
