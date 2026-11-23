@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import AnalyticsChart from './AnalyticsChart.jsx';
 import { analyticsModel } from '../../assets/js/analyticsModel.js';
 import { isValidTransactionDate } from '../../assets/js/datasetHealth.js';
@@ -228,6 +228,7 @@ function Breakdown({ kind, groups, periodLabel, onDrilldown }) {
 }
 
 export default function Analytics({
+  reviewRequest,
   state,
   dispatch,
   onDrilldown,
@@ -235,6 +236,18 @@ export default function Analytics({
   theme,
   reducedMotion,
 }) {
+  const reviewed = useRef(0);
+  useEffect(() => {
+    if (!active || !reviewRequest || reviewed.current === reviewRequest) return;
+    reviewed.current = reviewRequest;
+    const ids = [];
+    if (state.analyticsExclusions.categories.size || state.analyticsExclusions.subcategories.size) ids.push('analyticsExclusionsPanel');
+    if (state.analyticsExclusions.transactions.size) ids.push('analyticsTransactionExclusionsPanel');
+    for (const id of ids) document.getElementById(id).open = true;
+    const first = document.getElementById(ids[0]);
+    first?.querySelector('summary')?.focus({ preventScroll: true });
+    first?.scrollIntoView({ block: 'start', behavior: 'instant' });
+  }, [active, reviewRequest, state.analyticsExclusions]);
   const period = state.analyticsPeriod;
   const setPeriod = value => dispatch({ type: 'analyticsPeriod', value });
   const [month, setMonth] = useState('');

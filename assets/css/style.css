@@ -3873,3 +3873,14 @@ body {
   .file-actions > .icon-button { width: 44px; height: 44px; min-width: 44px; flex-shrink: 0; }
   .file-actions > .read-only-badge { min-height: 44px; }
 }
+
+.exclusions-notice { overflow-wrap: anywhere; }
+.exclusions-notice p { margin-bottom: 8px; }
+.exclusions-notice details { margin-bottom: 8px; }
+.exclusions-notice summary { cursor: pointer; font-weight: 600; }
+.exclusions-notice ul { margin: 8px 0; }
+.exclusions-notice .text-action { color: inherit; }
+.exclusions-notice .exclusions-hide,
+.exclusions-notice details[open] .exclusions-show { display: none; }
+.exclusions-notice details[open] .exclusions-hide { display: inline; }
+#analyticsExclusionsPanel, #analyticsTransactionExclusionsPanel { scroll-margin-top: calc(var(--chrome-height, 120px) + 16px); }

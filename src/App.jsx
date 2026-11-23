@@ -25,6 +25,7 @@ import ExpenseModal from './components/ExpenseModal.jsx';
 import Landing from './components/Landing.jsx';
 import Overview from './components/Overview.jsx';
 import Ticker from './components/Ticker.jsx';
+import ExclusionsNotice from './components/ExclusionsNotice.jsx';
 import useMediaQuery from './hooks/useMediaQuery.js';
 import { overviewModel } from '../assets/js/presentation.js';
 import { analyzeDataset } from '../assets/js/datasetHealth.js';
@@ -42,6 +43,11 @@ export default function App() {
   const [state, dispatch] = useReducer(appReducer, undefined, () =>
     createAppState(true, isReadOnlyDevice(navigator, document)),
   );
+  const [exclusionReview, setExclusionReview] = useState(null);
+  const reviewExclusions = () => {
+    changeTab('Analytics');
+    setExclusionReview(previous => ({ sessionId: state.sessionId, sequence: (previous?.sequence || 0) + 1 }));
+  };
   const viewOnly = state.viewOnlyMode || state.isDemo;
   const [modal, setModal] = useState(null),
     [notice, setNotice] = useState(''),
@@ -544,6 +550,7 @@ export default function App() {
                   aria-labelledby={`${id}-tab`}
                   tabIndex="0"
                 >
+                  {['Overview', 'Analytics'].includes(name) && <ExclusionsNotice exclusions={state.analyticsExclusions} onReview={reviewExclusions} />}
                   {name === 'Overview' ? (
                     <Overview
                       state={state}
@@ -574,6 +581,7 @@ export default function App() {
                       fallback={<p role="status">Loading analytics…</p>}
                     >
                       <Analytics
+                        reviewRequest={exclusionReview?.sessionId === state.sessionId ? exclusionReview.sequence : 0}
                         state={state}
                         dispatch={dispatch}
                         active={state.tab === name}

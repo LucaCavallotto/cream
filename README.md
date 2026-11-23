@@ -80,6 +80,8 @@ In Analytics, select **Time Period** above the two exclusion panels. Each panel 
 
 The magnifying glasses in breakdowns open the exact category/subcategory or tag, matching the source period, amount sign and exclusions. **Back to Analytics** restores the analysis and the previous ledger search, sorting and filters. Ledger filters can further narrow a drilldown; Clear removes that temporary scope too.
 
+A yellow notice in Overview and Analytics counts active category, subcategory and individual transaction exclusions. Expand **Show details** to inspect classification rules, or choose **Review exclusions** to open the relevant controls without resetting your selections.
+
 Exclusions do not delete or modify CSV rows. Overview and the ticker use all-time data with the current exclusions. Recent activity and Dataset Health cover every record. Invalid dates and amounts stay outside calculations until corrected. Filters and exclusions reset when a file is opened, closed or the page reloads.
 
 ### Appearance and dates

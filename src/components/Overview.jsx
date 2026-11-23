@@ -54,21 +54,6 @@ export default function Overview({
           </span>
         </span>
       </div>
-      {model.selection.excluded.length > 0 && (
-        <div className="scope-note">
-          <i className="bi bi-funnel" aria-hidden="true" />
-          <span>
-            {model.selection.excluded.length}{' '}
-            {model.selection.excluded.length === 1
-              ? 'transaction'
-              : 'transactions'}{' '}
-            excluded from overview and ticker totals.
-          </span>
-          <button className="text-action" onClick={() => onTab('Analytics')}>
-            Review filters <span aria-hidden="true">↗</span>
-          </button>
-        </div>
-      )}
       <div className="overview-hero-grid">
         <section className="net-hero" aria-label="All-time cash flow">
           <div className="net-hero-top">
