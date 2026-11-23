@@ -22,6 +22,7 @@ const row = {
   Category: 'Bar',
   Subcategory: 'Coffee',
   Tags: '',
+  NeedWant: '',
   Notes: 'Keep, "this"\nunchanged',
 };
 const text = serializeTransactionsCSV([row], Papa);

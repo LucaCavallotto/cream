@@ -1,32 +1,32 @@
-DateTime,Amount,Description,Category,Subcategory,Tags,Notes
-2025-11-15T12:00:00+01:00,-200,Winter coat,Shopping,Clothes & Accessories,#winter,Older transaction for period filters
-2026-04-28T18:30:00+02:00,-15,Dinner at Pizzeria,Food & Dining,Restaurant,#evening,Summer-time offset example
-2026-08-20T10:30:00+02:00,-450,Flight to Rome,Transportation,Airline,#vacation #summer,Round trip ticket
-2026-09-01T09:00:00+02:00,2500,Monthly salary,Income,Salary,#work,September pay
-2026-09-15T14:00:00+02:00,-22,Train ticket,Transportation,Train,#travel,Return journey
-2026-09-24T09:15:00+02:00,-65,Gym membership,Sports,Gym & Fitness,#monthly,Monthly club fee
-2026-10-01T09:00:00+02:00,2500,Monthly salary,Income,Salary,#work,October pay
-2026-10-02T08:00:00+02:00,-35,Phone bill,Bills,Phone & Internet,#monthly,Monthly plan
-2026-10-08T11:00:00+02:00,-50,Hiking equipment,Sports,Equipment,#mountain,New hiking poles
-2026-10-15T12:00:00+02:00,-42.5,Weekly groceries,Food & Dining,Groceries,#weekly #food,Stocked up for the week
-2026-10-20T08:00:00+02:00,-120,Car rental,Transportation,Rental,#travel,Weekend rental
-2026-10-25T11:20:00+01:00,-12.99,Streaming subscription,Entertainment,Subscriptions,#digital #monthly,Same subcategory name as Bills
-2026-10-28T14:15:00+01:00,-45,Gas station,Vehicles,Fuel,#car,Full tank
-2026-11-01T09:00:00+01:00,2500,Monthly salary,Income,Salary,#work,November pay
-2026-11-02T14:28:36+01:00,-1,Caffè,Bar,Coffee,#break,Matches the README quick input example
-2026-11-03T10:00:00+01:00,-25.5,Weekly groceries,Food & Dining,Groceries,#weekly #food,November groceries
-2026-11-04T16:00:00+01:00,-5,"Coffee, cake",Bar,Snack,#break,Quoted description containing a comma
-2026-11-05T09:00:00+01:00,150,Freelance project,Income,Freelance,#work #side-hustle,Matches the README batch example
-2026-11-06T11:20:00+01:00,-12.99,Streaming subscription,Entertainment,Subscriptions,#digital #monthly,November subscription
-2026-11-07T10:00:00+01:00,-2.99,Cloud subscription,Bills,Subscriptions,#digital #monthly,Duplicate subcategory name under another category
-2026-11-08T13:00:00+01:00,50,Birthday gift,Income,Gifts,#family,Cash from family
-2026-11-09T20:00:00+01:00,-60,Dinner with friends,Food & Dining,Restaurant,#social,Shared dinner
-2026-11-10T18:00:00+01:00,-35.2,Pharmacy,Health & Care,Medicines,#wellness,Prescription refill
-2026-11-11T09:00:00+01:00,-1000,ETF purchase,Investments,ETFs,#investment,Currently included in expense statistics
-2026-11-12T09:00:00+01:00,8.5,Dividend payment,Investments,Interests & Dividends,#investment,Positive investment transaction
-2026-11-13T12:00:00+01:00,-18.8,Bookstore,Entertainment,Books,#hobby,New novel
-2026-11-14T12:00:00+01:00,-10,Uncategorized purchase,Other,Uncategorized,,Valid catalog classification
-2026-11-15T10:00:00+01:00,-5,Awaiting classification,,,,Intentionally empty category and subcategory
-2026-11-16T10:00:00+01:00,-20,Shopping purchase,Shopping,,#home,Category without subcategory
-2026-11-17T10:00:00+01:00,-15,Other insurance charge,Insurance,Other,#annual,Other is shared by multiple categories
-2026-11-18T08:00:00+01:00,-3,Other shopping purchase,Shopping,Other,#home,Use grouped options to distinguish Other
+DateTime,Amount,Description,Category,Subcategory,Tags,Notes,NeedWant
+2025-11-15T12:00:00+01:00,-200,Winter coat,Shopping,Clothes & Accessories,#winter,Older transaction for period filters,need
+2026-04-28T18:30:00+02:00,-15,Dinner at Pizzeria,Food & Dining,Restaurant,#evening,Summer-time offset example,want
+2026-08-20T10:30:00+02:00,-450,Flight to Rome,Transportation,Airline,#vacation #summer,Round trip ticket,
+2026-09-01T09:00:00+02:00,2500,Monthly salary,Income,Salary,#work,September pay,
+2026-09-15T14:00:00+02:00,-22,Train ticket,Transportation,Train,#travel,Return journey,want
+2026-09-24T09:15:00+02:00,-65,Gym membership,Sports,Gym & Fitness,#monthly,Monthly club fee,
+2026-10-01T09:00:00+02:00,2500,Monthly salary,Income,Salary,#work,October pay,
+2026-10-02T08:00:00+02:00,-35,Phone bill,Bills,Phone & Internet,#monthly,Monthly plan,want
+2026-10-08T11:00:00+02:00,-50,Hiking equipment,Sports,Equipment,#mountain,New hiking poles,
+2026-10-15T12:00:00+02:00,-42.5,Weekly groceries,Food & Dining,Groceries,#weekly #food,Stocked up for the week,need
+2026-10-20T08:00:00+02:00,-120,Car rental,Transportation,Rental,#travel,Weekend rental,want
+2026-10-25T11:20:00+01:00,-12.99,Streaming subscription,Entertainment,Subscriptions,#digital #monthly,Same subcategory name as Bills,
+2026-10-28T14:15:00+01:00,-45,Gas station,Vehicles,Fuel,#car,Full tank,need
+2026-11-01T09:00:00+01:00,2500,Monthly salary,Income,Salary,#work,November pay,
+2026-11-02T14:28:36+01:00,-1,Caffè,Bar,Coffee,#break,Matches the README quick input example,
+2026-11-03T10:00:00+01:00,-25.5,Weekly groceries,Food & Dining,Groceries,#weekly #food,November groceries,need
+2026-11-04T16:00:00+01:00,-5,"Coffee, cake",Bar,Snack,#break,Quoted description containing a comma,want
+2026-11-05T09:00:00+01:00,150,Freelance project,Income,Freelance,#work #side-hustle,Matches the README batch example,
+2026-11-06T11:20:00+01:00,-12.99,Streaming subscription,Entertainment,Subscriptions,#digital #monthly,November subscription,need
+2026-11-07T10:00:00+01:00,-2.99,Cloud subscription,Bills,Subscriptions,#digital #monthly,Duplicate subcategory name under another category,want
+2026-11-08T13:00:00+01:00,50,Birthday gift,Income,Gifts,#family,Cash from family,
+2026-11-09T20:00:00+01:00,-60,Dinner with friends,Food & Dining,Restaurant,#social,Shared dinner,need
+2026-11-10T18:00:00+01:00,-35.2,Pharmacy,Health & Care,Medicines,#wellness,Prescription refill,want
+2026-11-11T09:00:00+01:00,-1000,ETF purchase,Investments,ETFs,#investment,Currently included in expense statistics,
+2026-11-12T09:00:00+01:00,8.5,Dividend payment,Investments,Interests & Dividends,#investment,Positive investment transaction,
+2026-11-13T12:00:00+01:00,-18.8,Bookstore,Entertainment,Books,#hobby,New novel,want
+2026-11-14T12:00:00+01:00,-10,Uncategorized purchase,Other,Uncategorized,,Valid catalog classification,
+2026-11-15T10:00:00+01:00,-5,Awaiting classification,,,,Intentionally empty category and subcategory,need
+2026-11-16T10:00:00+01:00,-20,Shopping purchase,Shopping,,#home,Category without subcategory,want
+2026-11-17T10:00:00+01:00,-15,Other insurance charge,Insurance,Other,#annual,Other is shared by multiple categories,
+2026-11-18T08:00:00+01:00,-3,Other shopping purchase,Shopping,Other,#home,Use grouped options to distinguish Other,need

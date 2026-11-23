@@ -123,6 +123,7 @@ export function appReducer(state, action) {
         state,
         state.transactions.map((t) => {
           if (!state.selectedIds.includes(t.id)) return t;
+          if (action.field === 'NeedWant') return { ...t, NeedWant: ['', 'need', 'want'].includes(action.value) ? action.value : (t.NeedWant || '') };
           if (action.field === 'Category')
             return {
               ...t,

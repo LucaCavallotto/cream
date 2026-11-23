@@ -130,6 +130,8 @@ test('smartphone inspection hides write-only entry controls and shows local huma
   await page.locator('#transactionsTbody .mobile-row-click').click();
   await expect(page.locator('#inlineInput')).toBeHidden();
   await expect(page.locator('.transaction-display-date')).toContainText('03-11-2026 05:30:36');
+  await expect(page.locator('#inputNeedWant')).toBeDisabled();
+  await expect(page.locator('#inputNeedWant')).toHaveValue('');
 });
 
 

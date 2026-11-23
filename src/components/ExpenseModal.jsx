@@ -37,6 +37,7 @@ export default function ExpenseModal({
     subcategory: transaction?.Subcategory || '',
     tags: transaction?.Tags || '',
     notes: transaction?.Notes || '',
+    needWant: transaction?.NeedWant || '',
   }));
   const [inline, setInline] = useState(''),
     [errors, setErrors] = useState([]);
@@ -160,6 +161,7 @@ export default function ExpenseModal({
       Subcategory: draft.subcategory,
       Tags: normalizeTags(draft.tags),
       Notes: draft.notes,
+      NeedWant: draft.needWant,
     };
     let rows;
     if (!transaction && parsed?.rows.length > 1) {
@@ -479,6 +481,10 @@ export default function ExpenseModal({
                   />
                 </div>
                 <div className="mb-3">
+                  <label htmlFor="inputNeedWant" className="form-label">Need / Want (optional)</label>
+                  <select id="inputNeedWant" className="form-select mb-3" disabled={viewOnly} value={draft.needWant} onChange={e => setDraft(previous => ({ ...previous, needWant: e.target.value }))}>
+                    <option value="">Not classified</option><option value="need">Need</option><option value="want">Want</option>
+                  </select>
                   <label htmlFor="inputNotes" className="form-label">
                     Notes
                   </label>

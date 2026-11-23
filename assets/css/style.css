@@ -3899,3 +3899,10 @@ body {
 .tag-spending-empty { margin: 0; padding: 12px 16px; font-size: 15px; color: var(--muted); }
 .tag-spending-categories .money-amount { flex-shrink: 0; }
 .tag-spending-categories .fw-semibold { flex-shrink: 0; }
+
+.need-want-summary { margin-bottom: 24px; padding: 24px; }
+.need-want-summary h2 { font-size: 24px; }
+.need-want-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.need-want-grid h3 { font-size: 17px; }
+.need-want-grid .money-amount { font-size: 22px; font-weight: 600; }
+@media (max-width: 767.98px) { .need-want-grid { grid-template-columns: 1fr; } }

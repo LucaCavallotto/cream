@@ -5,7 +5,7 @@ import Papa from 'papaparse';
 import { CSV_HEADERS, parseTransactionsCSV, serializeTransactionsCSV } from '../../assets/js/csv.js';
 
 export const sample = { DateTime: '2026-11-02T14:28:36.123+01:00', Amount: -1.25,
-  Description: 'Caffè, "offerto" ☕', Category: 'Bar', Subcategory: 'Coffee', Tags: '#friend #work', Notes: 'First line\nSecond line, "quoted"' };
+  Description: 'Caffè, "offerto" ☕', Category: 'Bar', Subcategory: 'Coffee', Tags: '#friend #work', NeedWant: '', Notes: 'First line\nSecond line, "quoted"' };
 const csv = rows => serializeTransactionsCSV(rows, Papa);
 
 test('real PapaParse roundtrip preserves every field including quotes, Unicode, multiline notes and timezone', () => {
@@ -54,7 +54,7 @@ test('missing, extra and duplicate headers are rejected instead of dropping data
 });
 
 test('unterminated quotes and inconsistent field counts reject the entire import', () => {
-  for (const suffix of ['\n2026-11-02,-1,"unfinished', '\n2026-11-02,-1,short', '\n1,2,3,4,5,6,7,8']) {
+  for (const suffix of ['\n2026-11-02,-1,"unfinished', '\n2026-11-02,-1,short', '\n1,2,3,4,5,6,7,8,9']) {
     const result = parseTransactionsCSV(csv([sample]) + suffix, Papa);
     assert(result.errors.length > 0);
     assert.deepEqual(result.transactions, []);

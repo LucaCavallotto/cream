@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import Papa from 'papaparse';
 
 export { expect };
-export const headers = ['DateTime', 'Amount', 'Description', 'Category', 'Subcategory', 'Tags', 'Notes'];
+export const headers = ['DateTime', 'Amount', 'Description', 'Category', 'Subcategory', 'Tags', 'Notes', 'NeedWant'];
 export const row = (Description = 'Coffee', Amount = -1, Category = 'Bar', Subcategory = 'Coffee', DateTime = '2026-11-02T14:28:36+01:00') =>
   ({ DateTime, Amount, Description, Category, Subcategory, Tags: '', Notes: '' });
 export const test = base.extend({

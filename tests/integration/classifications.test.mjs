@@ -6,7 +6,7 @@ import { buildCatalog } from '../../assets/js/classificationCatalog.js';
 import { analyzeDataset } from '../../assets/js/datasetHealth.js';
 import { parseInlineCSV } from '../../assets/js/inlineInput.js';
 test('CSV roundtrip retains custom classifications and makes them available to quick entry', () => {
-  const original = [{ DateTime: '2026-11-02T14:28:36.123+01:00', Amount: -10, Description: 'Custom work', Category: 'Projects', Subcategory: 'Hardware', Tags: '#work', Notes: '' }];
+  const original = [{ DateTime: '2026-11-02T14:28:36.123+01:00', Amount: -10, Description: 'Custom work', Category: 'Projects', Subcategory: 'Hardware', Tags: '#work', Notes: '', NeedWant: '' }];
   const reopened = parseTransactionsCSV(serializeTransactionsCSV(original, Papa), Papa);
   assert.deepEqual(reopened.errors, []);
   assert.deepEqual(reopened.transactions, original);

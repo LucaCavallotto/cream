@@ -1,3 +1,4 @@
+import NeedWantSummary from './NeedWantSummary.jsx';
 import { useMemo } from 'react';
 import { analyticsModel } from '../../assets/js/analyticsModel.js';
 import AnalyticsChart from './AnalyticsChart.jsx';
@@ -155,6 +156,7 @@ export default function Overview({
           <CardCallout onClick={() => onTab('Dataset Health')}>Review dataset</CardCallout>
         </section>
       </div>
+      <NeedWantSummary rows={model.selection.included} />
       <section className="cream-panel recent-panel">
         <div className="panel-heading">
           <div>

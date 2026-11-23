@@ -19,12 +19,14 @@ export default function Transactions({
 }) {
   const [bulkCategory, setBulkCategory] = useState(''),
     [bulkSubcategory, setBulkSubcategory] = useState(''),
-    [bulkTags, setBulkTags] = useState('');
+    [bulkTags, setBulkTags] = useState(''),
+    [bulkNeedWant, setBulkNeedWant] = useState('');
   useEffect(() => {
     if (!state.isSelectionMode) {
       setBulkCategory('');
       setBulkSubcategory('');
       setBulkTags('');
+      setBulkNeedWant('');
     }
   }, [state.isSelectionMode]);
   const rows = useMemo(
@@ -65,7 +67,7 @@ export default function Transactions({
         : [...state.selectedIds, id],
     });
   const bulk = (field, value) => {
-    if (!value || !state.selectedIds.length) return;
+    if ((!value && field !== 'NeedWant') || !state.selectedIds.length) return;
     if (
       confirm(
         `Apply ${field.toLowerCase()} to ${state.selectedIds.length} transactions?`,
@@ -266,6 +268,13 @@ export default function Transactions({
               >
                 Apply
               </button>
+            </div>
+            <div className="input-group flex-grow-1" style={{ minWidth: 180, maxWidth: 400 }}>
+              <label className="input-group-text" htmlFor="bulkNeedWant">Need / Want</label>
+              <select id="bulkNeedWant" className="form-select" value={bulkNeedWant} onChange={e => setBulkNeedWant(e.target.value)}>
+                <option value="">Not classified</option><option value="need">Need</option><option value="want">Want</option>
+              </select>
+              <button id="btnBulkApplyNeedWant" className="btn btn-primary" disabled={!state.selectedIds.length} onClick={() => bulk('NeedWant', bulkNeedWant)}>Apply</button>
             </div>
             <button
               id="btnBulkDelete"

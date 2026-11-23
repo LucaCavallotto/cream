@@ -86,6 +86,14 @@ A yellow notice in Overview and Analytics counts active category, subcategory an
 
 Exclusions do not delete or modify CSV rows. Overview and the ticker use all-time data with the current exclusions. Recent activity and Dataset Health cover every record. Invalid dates and amounts stay outside calculations until corrected. Filters and exclusions reset when a file is opened, closed or the page reloads.
 
+### Optional Need / Want classification
+
+Use **Need / Want** in the transaction editor to mark an expense as **Need** or **Want**, or leave it **Not classified**. Existing records start unclassified. Desktop bulk selection also supports assigning or clearing the value with **Apply**. Quick Input keeps its current formats; the editor selection applies to the inserted rows, like tags and notes.
+
+Overview shows all-time included spending across the three groups; Analytics uses the selected period and exclusions. Income and zero amounts do not contribute. Missing Need/Want is not a Dataset Health issue.
+
+Old seven-column CSVs remain supported. Saving exports an eighth column, `NeedWant`, containing blank, `need` or `want`. Import accepts these values without case sensitivity; other values produce an import error without replacing the open file.
+
 ### Appearance and dates
 
 Appearance follows the system's light/dark setting. The ticker appears at the top of the page and scrolls away with the content; the header and navigation remain available. It fills the strip continuously, starts at a random position on each page reload and scrolls at the same speed as its contents change. It resumes from the same position at the same speed. Click or tap it to pause or resume it, or use Enter/Space when it has keyboard focus. Hovering with a mouse pauses it temporarily; reduced-motion preferences make it static and horizontally scrollable.
@@ -176,11 +184,11 @@ On iPhone, open the site in Safari and use **Share → Add to Home Screen**. The
 
 ## CSV compatibility and privacy
 
-A file must contain exactly these seven unique headers. Import accepts a different order and surrounding header whitespace; export uses this order:
+The original seven headers are required; `NeedWant` is optional when importing older files. Headers must be unique. Import accepts reordered headers and surrounding whitespace; export always uses these eight columns:
 
 ```csv
-DateTime,Amount,Description,Category,Subcategory,Tags,Notes
-2026-11-02T14:28:36+01:00,-1,Coffee,Bar,Coffee,#friends,
+DateTime,Amount,Description,Category,Subcategory,Tags,Notes,NeedWant
+2026-11-02T14:28:36+01:00,-1,Coffee,Bar,Coffee,#friends,,want
 ```
 
 Use ISO dates and numeric amounts without currency symbols in CSV files. Tags are space-separated `#labels`. Quoted commas and newlines are supported. Invalid dates or amounts are retained for review, not replaced with invented values. Missing, duplicate or unsupported columns are rejected before replacing the open dataset. Internal record IDs are not exported.
@@ -194,7 +202,7 @@ Financial data is processed locally in the browser. There is no account, automat
 | Editing buttons are missing | Existing files start locked. Unlock with the header lock on desktop. Smartphones and iPad cannot be unlocked. |
 | Save Changes is missing in the demo | The demo always stays read only. Open or create your own file to add and save transactions. |
 | Saving downloads a file | This is the fallback when direct writes are unavailable. Use the downloaded CSV as the updated version. |
-| A CSV is rejected | Check the seven unique column headers above and quote commas/newlines correctly. Rejection leaves the current file open. |
+| A CSV is rejected | Check the required headers and optional NeedWant column above and quote commas/newlines correctly. Rejection leaves the current file open. |
 | Totals differ from the ledger | Check analytics period and exclusions. Invalid dates/amounts are omitted from calculations; the ledger and health checks retain all records. |
 | A category is omitted from Quick Input | Use a name in the current catalog, or create it in the editor first. Check the warning for the affected row. |
 | A file was lost after refresh | Unsaved data is session-only. Reopen your last saved CSV. |

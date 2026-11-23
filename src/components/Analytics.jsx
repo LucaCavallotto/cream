@@ -1,3 +1,4 @@
+import NeedWantSummary from './NeedWantSummary.jsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import AnalyticsChart from './AnalyticsChart.jsx';
 import { analyticsModel } from '../../assets/js/analyticsModel.js';
@@ -410,6 +411,7 @@ export default function Analytics({
           </div>
         </div>
       </div>
+      <NeedWantSummary rows={model.rows} />
       <div className="analytics-charts">
         <ChartCard
           type="line"
