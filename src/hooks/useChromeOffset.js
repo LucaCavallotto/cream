@@ -9,7 +9,11 @@ export default function useChromeOffset(chrome, sessionId) {
     const root = document.documentElement;
     let frame;
     const measure = () => {
-      const height = Math.max(header.getBoundingClientRect().height, ticker.getBoundingClientRect().bottom);
+      const headerHeight = header.getBoundingClientRect().height;
+      const tickerBounds = ticker.getBoundingClientRect();
+      // Safari can report geometry beyond the document bounds during elastic scrolling.
+      const visibleTicker = Math.min(tickerBounds.height, Math.max(0, tickerBounds.bottom - headerHeight));
+      const height = headerHeight + visibleTicker;
       root.style.setProperty('--chrome-height', `${height}px`);
     };
     const schedule = () => {

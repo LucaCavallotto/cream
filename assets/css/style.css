@@ -68,6 +68,8 @@
   box-sizing: border-box;
 }
 html {
+  /* Keep viewport rubber-banding from separating content and fixed navigation. */
+  overscroll-behavior-y: none;
   min-width: 320px;
   scroll-padding-top: calc(var(--chrome-height) + 24px);
 }
