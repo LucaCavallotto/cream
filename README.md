@@ -88,7 +88,7 @@ Exclusions do not delete or modify CSV rows. Overview and the ticker use all-tim
 
 ### Appearance and dates
 
-Appearance follows the system's light/dark setting. The ticker fills the strip continuously, starts at a random position on each page reload and scrolls at the same speed as its contents change. It resumes from the same position at the same speed. Click or tap it to pause or resume it, or use Enter/Space when it has keyboard focus. Hovering with a mouse pauses it temporarily; reduced-motion preferences make it static and horizontally scrollable.
+Appearance follows the system's light/dark setting. The ticker appears at the top of the page and scrolls away with the content; the header and navigation remain available. It fills the strip continuously, starts at a random position on each page reload and scrolls at the same speed as its contents change. It resumes from the same position at the same speed. Click or tap it to pause or resume it, or use Enter/Space when it has keyboard focus. Hovering with a mouse pauses it temporarily; reduced-motion preferences make it static and horizontally scrollable.
 
 Currency amounts use consistent spacing between the sign, euro symbol and value, including chart tooltips. Large headline totals adapt to the available width. On smaller screens, figures may move onto a separate line to remain readable.
 

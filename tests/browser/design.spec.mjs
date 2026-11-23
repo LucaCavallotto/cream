@@ -477,11 +477,12 @@ test('desktop navigation stays anchored and file status stays beside the filenam
     await page.setViewportSize({ width, height: 800 });
     await page.evaluate(() => window.scrollTo(0, 0));
     const sidebar = page.locator('.workspace-sidebar');
-    const before = await sidebar.boundingBox();
+    await expect.poll(async () => (await sidebar.boundingBox()).y).toBeCloseTo((await page.locator('.app-chrome').boundingBox()).height + 38, 0);
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
-    await expect.poll(async () => (await sidebar.boundingBox()).y).toBe(before.y);
-    expect(before.y + before.height).toBe(800);
+    await expect.poll(async () => (await sidebar.boundingBox()).y).toBeCloseTo((await page.locator('.app-chrome').boundingBox()).height, 0);
+    const after = await sidebar.boundingBox();
+    expect(after.y + after.height).toBe(800);
     await expect(page.locator('.cream-footer')).toHaveCount(0);
     const name = await page.locator('#currentFileName').boundingBox();
     const status = await page.locator('.file-status').boundingBox();

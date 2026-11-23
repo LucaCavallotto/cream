@@ -72,8 +72,8 @@ test('mobile bottom navigation, dataset ticker and ledger sorting remain usable 
   ).toContainText('Mobile transaction 23');
   await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
   const ticker = await page.locator('.money-ticker').boundingBox();
-  expect(ticker.y).toBeGreaterThanOrEqual(0);
-  expect(ticker.y + ticker.height).toBeLessThanOrEqual(150);
+  expect(ticker.y + ticker.height).toBeLessThanOrEqual(0);
+  await expect(page.locator('.cream-header')).toBeInViewport();
   const navigation = await page.locator('#appTabs').boundingBox();
   const viewportHeight = await page.evaluate(() => innerHeight);
   expect(navigation.y).toBeGreaterThan(viewportHeight - 100);
@@ -300,4 +300,9 @@ test('touch pauses resume at the same ticker position and speed without sticky h
 test('protected landing offers viewing without a creation section in either theme', async ({ page }, info) => {
   const { checkProtectedLanding } = await import('./protected-landing.mjs');
   await checkProtectedLanding(page, info);
+});
+
+test('ticker scrolls away without hiding the phone header or bottom navigation', async ({ page }) => {
+  const { checkTickerScroll } = await import('./ticker-scroll.mjs');
+  await checkTickerScroll(page);
 });

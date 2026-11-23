@@ -27,6 +27,7 @@ import Overview from './components/Overview.jsx';
 import Ticker from './components/Ticker.jsx';
 import ExclusionsNotice from './components/ExclusionsNotice.jsx';
 import useMediaQuery from './hooks/useMediaQuery.js';
+import useChromeOffset from './hooks/useChromeOffset.js';
 import { overviewModel } from '../assets/js/presentation.js';
 import { analyzeDataset } from '../assets/js/datasetHealth.js';
 
@@ -48,6 +49,8 @@ export default function App() {
     changeTab('Analytics');
     setExclusionReview(previous => ({ sessionId: state.sessionId, sequence: (previous?.sequence || 0) + 1 }));
   };
+  const chrome = useRef(null);
+  useChromeOffset(chrome, state.sessionId);
   const viewOnly = state.viewOnlyMode || state.isDemo;
   const [modal, setModal] = useState(null),
     [notice, setNotice] = useState(''),
@@ -327,7 +330,7 @@ export default function App() {
           <p>Drop CSV file to open</p>
         </div>
       </div>
-      <div className="app-chrome">
+      <div className="app-chrome" ref={chrome}>
         <header
           className={`cream-header ${loaded ? 'has-file' : ''} ${viewOnly ? 'is-read-only' : ''} ${state.deviceReadOnly || state.isDemo ? '' : 'supports-editing'}`}
         >
@@ -442,8 +445,8 @@ export default function App() {
             </button>
           </div>
         </header>
-        <Ticker key={state.sessionId} model={model} loaded={loaded} />
       </div>
+      <Ticker key={state.sessionId} model={model} loaded={loaded} />
       {!loaded && (
         <Landing
           ready={state.ready}

@@ -112,3 +112,8 @@ test('tablet landing follows device protection rather than viewport width', asyn
   const { checkProtectedLanding } = await import('./protected-landing.mjs');
   await checkProtectedLanding(page, info, protectedDevice(info));
 });
+
+test('ticker scrolls away while tablet navigation follows the sticky header', async ({ page }) => {
+  const { checkTickerScroll } = await import('./ticker-scroll.mjs');
+  await checkTickerScroll(page);
+});
