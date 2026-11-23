@@ -3,6 +3,8 @@ import Star from './Star.jsx';
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { datasetTicker } from '../../assets/js/presentation.js';
 
+const PIXELS_PER_SECOND = 40;
+
 const welcome = [
   { key: 'local', label: 'LOCAL CSV', value: 'No uploads', tone: 'neutral' },
   { key: 'desktop', label: 'EDIT & SAVE', value: 'On a computer', tone: 'neutral' },
@@ -24,15 +26,19 @@ export default function Ticker({ model, loaded }) {
       if (!baseWidth) return;
       const repeats = Math.max(1, Math.ceil(viewport.current.clientWidth / baseWidth));
       // Each half fills the viewport. Translate one half at a constant 40px/s.
-      const duration = baseWidth * repeats / 40;
+      const duration = baseWidth * repeats / PIXELS_PER_SECOND;
       setLayout(previous => previous.repeats === repeats && Math.abs(previous.duration - duration) < .001
         ? previous : { repeats, duration });
     };
     measure();
-    const observer = new ResizeObserver(measure);
+    let frame;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    });
     observer.observe(viewport.current);
     observer.observe(group.current);
-    return () => observer.disconnect();
+    return () => { observer.disconnect(); cancelAnimationFrame(frame); };
   }, [items]);
   return (
     <section
@@ -79,7 +85,7 @@ export default function Ticker({ model, loaded }) {
           setPaused((value) => !value);
         }}
       >
-        <div className="ticker-track" aria-live="off" style={{ '--ticker-duration': `${layout.duration}s`, '--ticker-delay': `${-initialPhase * layout.duration}s` }}>
+        <div className="ticker-track" aria-live="off" style={{ '--ticker-distance': `${layout.duration * PIXELS_PER_SECOND}px`, '--ticker-duration': `${layout.duration}s`, '--ticker-delay': `${-initialPhase * layout.duration}s` }}>
           {[0, 1].map((copy) => (
             <ul
               ref={copy === 0 ? group : undefined}

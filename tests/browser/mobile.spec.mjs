@@ -285,3 +285,15 @@ test('the demo exposes only read-only status on smartphones', async ({ page }) =
     await expect(page.locator('#btnSaveChanges')).toBeHidden();
   }
 });
+
+test('touch pauses resume at the same ticker position and speed without sticky hover', async ({ page }) => {
+  const { expectTickerSpeed, expectTickerPaused, expectTickerResumesAt } = await import('./ticker-motion.mjs');
+  await launch(page);
+  await expectTickerSpeed(page);
+  for (let cycle = 0; cycle < 3; cycle++) {
+    await page.locator('.ticker-viewport').tap();
+    const paused = await expectTickerPaused(page);
+    await page.locator('.ticker-viewport').tap();
+    await expectTickerResumesAt(page, paused);
+  }
+});

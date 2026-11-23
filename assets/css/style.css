@@ -555,7 +555,8 @@ button:disabled {
 }
 @keyframes ticker-scroll {
   to {
-    transform: translateX(-50%);
+    /* Distance and duration come from the same measurement: 40px per second. */
+    transform: translateX(calc(-1 * var(--ticker-distance, 50%)));
   }
 }
 .landing-view {
