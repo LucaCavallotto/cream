@@ -14,7 +14,7 @@ test('hybrid catalog preserves imported spelling, extends known parents and hand
 });
 test('custom catalog is rebuilt on file replacement and unused additions never enter transactions', () => {
   let state = appReducer(createAppState(), { type: 'categories', categories: { Bar: ['Coffee'] } });
-  state = appReducer(state, { type: 'open', session: { fileName: 'first.csv', transactions: [{ Category: 'Legacy', Subcategory: 'Old' }] } });
+  state = appReducer(state, { type: 'open', editable: true, session: { fileName: 'first.csv', transactions: [{ Category: 'Legacy', Subcategory: 'Old' }] } });
   assert.deepEqual(state.categories.Legacy, ['Old']);
   state = appReducer(state, { type: 'addClassification', category: 'Hobbies', subcategory: 'Crafts' });
   assert.equal(state.transactions.length, 1);

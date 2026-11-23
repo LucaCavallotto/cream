@@ -12,8 +12,8 @@ const original = {
   Tags: '',
   Notes: '',
 };
-const open = () =>
-  appReducer(
+const open = (locked = false) => {
+  const state = appReducer(
     appReducer(createAppState(), {
       type: 'categories',
       categories: { Bar: ['Coffee'], Tools: ['Software'] },
@@ -27,6 +27,8 @@ const open = () =>
       },
     },
   );
+  return locked ? state : appReducer(state, { type: 'viewOnly' });
+};
 const edit = (state) =>
   appReducer(state, {
     type: 'upsert',
@@ -93,7 +95,7 @@ test('a late save from a previous file cannot replace the new file baseline', ()
 });
 
 test('opening and closing reset file-specific state and preserve catalog and read-only setting', () => {
-  let state = open();
+  let state = open(true);
   state = appReducer(state, { type: 'search', value: 'Something' });
   state.analyticsExclusions.categories.add('Bar');
   state = appReducer(state, { type: 'close' });
@@ -153,7 +155,7 @@ test('drilldown return restores text, normalized search and sort while retaining
 });
 
 test('opening an existing file always resets to read only and desktop can explicitly unlock', () => {
-  let state = open();
+  let state = open(true);
   assert.equal(state.viewOnlyMode, true);
   state = appReducer(state, { type: 'viewOnly' });
   assert.equal(state.viewOnlyMode, false);
@@ -193,4 +195,27 @@ test('the built-in demo stays read only and rejects unlock and write actions', (
   ]) assert.equal(appReducer(state, action), state);
   const personal = appReducer(state, { type: 'open', session: { fileName: 'demo.csv', isDemo: false, transactions: [original] } });
   assert.equal(appReducer(personal, { type: 'viewOnly' }).viewOnlyMode, false);
+});
+
+test('locked and device-protected sessions reject write actions at the reducer boundary', () => {
+  const actions = [
+    { type: 'upsert', id: 'one', rows: [{ ...original, NeedWant: 'want' }] },
+    { type: 'upsert', rows: [{ ...original, id: 'two' }] },
+    { type: 'delete', ids: ['one'] },
+    { type: 'bulk', field: 'NeedWant', value: 'need' },
+    { type: 'bulk', field: 'Tags', value: '#changed' },
+    { type: 'addClassification', category: 'New category' },
+    { type: 'undo' }, { type: 'selection' }, { type: 'select', ids: ['one'] },
+  ];
+  for (const protection of [{viewOnlyMode:true}, {deviceReadOnly:true}]) {
+    const state = {...open(), ...protection, selectedIds:['one'], hasUnsavedChanges:true};
+    const snapshot=structuredClone(state);
+    for (const action of actions) assert.equal(appReducer(state,action),state,action.type);
+    assert.deepEqual(state,snapshot);
+    assert.equal(appReducer(state,{type:'analyticsPeriod',value:'overall'}).analyticsPeriod,'overall');
+  }
+  let desktop = appReducer(open(true),{type:'viewOnly'});
+  desktop=appReducer(desktop,{type:'select',ids:['one']});
+  desktop=appReducer(desktop,{type:'bulk',field:'NeedWant',value:'need'});
+  assert.equal(desktop.transactions[0].NeedWant,'need');
 });

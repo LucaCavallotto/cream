@@ -32,6 +32,7 @@ const native = { showSaveFilePicker() {} };
 async function loaded() {
   return appReducer(createAppState(), {
     type: 'open',
+    editable: true,
     session: await readCSVSession(source()),
   });
 }

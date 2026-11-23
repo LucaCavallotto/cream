@@ -46,10 +46,10 @@ const changed = (state, transactions) => ({
   selectedIds: [],
 });
 
-const demoWriteActions = new Set(['addClassification', 'upsert', 'delete', 'bulk', 'undo', 'selection', 'select']);
+const writeActions = new Set(['addClassification', 'upsert', 'delete', 'bulk', 'undo', 'selection', 'select']);
 
 export function appReducer(state, action) {
-  if (state.isDemo && demoWriteActions.has(action.type)) return state;
+  if ((state.isDemo || state.deviceReadOnly || state.viewOnlyMode) && writeActions.has(action.type)) return state;
   switch (action.type) {
     case 'categories':
       return { ...state, suggestedCategories: action.categories, categories: buildCatalog(action.categories, state.transactions, state.catalogAdditions), ready: true };

@@ -31,5 +31,5 @@ test('bulk need/want modifies selected records only and can clear the field', ()
   state=appReducer(state,{type:'bulk',field:'NeedWant',value:''});
   assert.equal(state.transactions[0].NeedWant,'');
   assert.equal(state.transactions[1].NeedWant,'want');
-  assert(appReducer({...state,viewOnlyMode:true},{type:'bulk',field:'NeedWant',value:'need'}).transactions[0].NeedWant==='');
+  assert(appReducer({...state,viewOnlyMode:true,selectedIds:['a']},{type:'bulk',field:'NeedWant',value:'need'}).transactions[0].NeedWant==='');
 });
