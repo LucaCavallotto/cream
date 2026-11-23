@@ -159,3 +159,31 @@ test('analytics model consistently excludes investments from every metric, chart
   assert.equal(chartConfig('line', empty).data.labels.length, 0);
   assert.equal(JSON.stringify(transactions), snapshot);
 });
+
+test('tag expense categories use gross spending, selected period and all exclusion types', () => {
+  const rows = [
+    make('coffee', -10, 'Bar', 'Coffee'), make('lunch', -20, 'Food & Dining', 'Restaurant'),
+    make('refund', 5, 'Bar', 'Coffee'), make('missing', -3, '', ''),
+    make('older', -40, 'Travel', 'Transport', '2026-10-01'),
+    make('zero', 0, 'Zero', ''), make('invalid', NaN, 'Broken', ''),
+    { ...make('multi', -2, 'Bar', 'Coffee'), Tags: '#example #shared' },
+    { ...make('income-only', 100, 'Income', 'Salary'), Tags: '#income' },
+    { ...make('untagged', -50, 'Other', ''), Tags: '' },
+  ];
+  const snapshot = JSON.stringify(rows);
+  const exclusions = createAnalyticsExclusions();
+  const model = () => analyticsModel(rows, exclusions, 'current_month', '', now);
+  const find = name => model().tags.find(tag => tag.name === name);
+  assert.deepEqual(find('#example').spending, [['Food & Dining', 20], ['Bar', 12], ['Uncategorized', 3]]);
+  assert.equal(find('#example').expenses, 35);
+  assert.equal(find('#example').total, -30);
+  assert.deepEqual(find('#shared').spending, [['Bar', 2]]);
+  assert.deepEqual(find('#income').spending, []);
+  exclusions.categories.add('Food & Dining');
+  exclusions.transactions.add('missing');
+  assert.deepEqual(find('#example').spending, [['Bar', 12]]);
+  exclusions.subcategories.add(JSON.stringify(['Bar', 'Coffee']));
+  assert.equal(find('#example').expenses, 0);
+  assert.deepEqual(find('#example').spending, []);
+  assert.equal(JSON.stringify(rows), snapshot);
+});

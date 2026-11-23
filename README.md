@@ -78,6 +78,8 @@ Transaction filters combine with search. **Clear** resets the ledger's search an
 
 In Analytics, select **Time Period** above the two exclusion panels. Each panel starts with **Include all** (green) and **Exclude all** (red). These controls affect only their own type of exclusion: category controls keep individual selections, and transaction controls keep category rules. Bulk transaction actions cover the entire dataset, even when the transaction search is active. Records covered by a category rule stay excluded until that rule is removed. You cannot add the same category exclusion twice. The monthly comparison always compares the current and previous calendar months using the same exclusions.
 
+Expand a tag in **Detailed Tags Breakdown** to see its income and expense totals and the categories of its expenses, ordered by amount. These categories follow the selected period and exclusions; income does not reduce category spending. A transaction with multiple tags contributes its full amount to each tag.
+
 The magnifying glasses in breakdowns open the exact category/subcategory or tag, matching the source period, amount sign and exclusions. **Back to Analytics** restores the analysis and the previous ledger search, sorting and filters. Ledger filters can further narrow a drilldown; Clear removes that temporary scope too.
 
 A yellow notice in Overview and Analytics counts active category, subcategory and individual transaction exclusions. Expand **Show details** to inspect classification rules, or choose **Review exclusions** to open the relevant controls without resetting your selections.

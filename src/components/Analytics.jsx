@@ -176,6 +176,15 @@ function Breakdown({ kind, groups, periodLabel, onDrilldown }) {
                               <Money value={-group.expenses} />
                             </span>
                           </div>
+                          <div className="tag-spending-categories" role="group" aria-label={`Spending categories for ${group.name}`}>
+                            <p className="tag-spending-title">Spending by category</p>
+                            {group.spending.length ? group.spending.map(([category, amount]) => (
+                              <div key={category} className="subcategory-item d-flex justify-content-between align-items-center gap-3">
+                                <span className="text-muted">{category}</span>
+                                <span className="fw-semibold text-danger"><Money value={-amount} /></span>
+                              </div>
+                            )) : <p className="tag-spending-empty">No expenses for this tag in the selected period.</p>}
+                          </div>
                         </>
                       ) : (
                         group.subcategories.map(([sub, amount]) => (

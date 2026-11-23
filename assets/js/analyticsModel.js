@@ -57,12 +57,16 @@ export function analyticsModel(
       .filter(Boolean)
       .forEach((name) => {
         if (!tags.has(name))
-          tags.set(name, { name, total: 0, income: 0, expenses: 0, volume: 0 });
+          tags.set(name, { name, total: 0, income: 0, expenses: 0, volume: 0, spending: new Map() });
         const tag = tags.get(name);
         tag.total += t.Amount;
         tag.volume += Math.abs(t.Amount);
         if (t.Amount > 0) tag.income += t.Amount;
-        else tag.expenses += Math.abs(t.Amount);
+        else if (t.Amount < 0) {
+          tag.expenses += -t.Amount;
+          const category = t.Category || 'Uncategorized';
+          tag.spending.set(category, (tag.spending.get(category) || 0) - t.Amount);
+        }
       }),
   );
   const current = filterAnalyticsPeriod(
@@ -111,7 +115,9 @@ export function analyticsModel(
     spending: grouped('expenses'),
     incomeGroups: grouped('income'),
     pie: [...pie].sort((a, b) => b[1] - a[1]).slice(0, 5),
-    tags: [...tags.values()].sort((a, b) => b.volume - a.volume),
+    tags: [...tags.values()].sort((a, b) => b.volume - a.volume).map(tag => ({
+      ...tag, spending: [...tag.spending].sort((a, b) => b[1] - a[1]),
+    })),
     monthly: buildMonthlyCashFlow(rows),
     current,
     previous,
