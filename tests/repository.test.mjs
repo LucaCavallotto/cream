@@ -46,3 +46,25 @@ test('CSV ignore rules exempt only the supplied public demo', t => {
     assert.equal(result.status, 0, `${path}: ${result.stderr}`);
   }
 });
+
+test('Pages deployment consumes the checked artifact only after its producing job succeeds', () => {
+  const workflow=read('.github/workflows/tests.yml').toString();
+  const [,producer,consumer]=workflow.match(/^  test:\n([\s\S]*?)^  deploy:\n([\s\S]*)$/m) || [];
+  assert(producer && consumer, 'Checks and deployment must use separate jobs');
+  const upload=producer.indexOf('uses: actions/upload-pages-artifact@');
+  assert(upload>0);
+  for (const script of ['npm run test:unit','npm run test:integration','npm run test:build','Repeat logic and integration checks in UTC']) {
+    const check=producer.indexOf(script);
+    assert(check>=0 && check<upload,`${script} must complete before uploading Pages`);
+  }
+  assert.match(producer,/name: Upload Pages artifact\n\s+if: github.event_name != 'pull_request' && github.ref == 'refs\/heads\/main'/);
+  assert.match(producer,/uses: actions\/upload-pages-artifact@v5\n\s+with:\n\s+name: github-pages\n\s+path: dist/);
+  assert.match(consumer,/needs: test/);
+  assert.match(consumer,/if: github.event_name != 'pull_request' && github.ref == 'refs\/heads\/main'/);
+  assert.match(consumer,/pages: write/);
+  assert.match(consumer,/id-token: write/);
+  assert.match(consumer,/name: github-pages/);
+  assert.match(consumer,/uses: actions\/configure-pages@v6/);
+  assert.match(consumer,/uses: actions\/deploy-pages@v5\n\s+with:\n\s+artifact_name: github-pages/);
+  assert(!/npm (?:ci|run build)|upload-pages-artifact/.test(consumer),'Deployment must consume the existing artifact instead of rebuilding or uploading it');
+});
