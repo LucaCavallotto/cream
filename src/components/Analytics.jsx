@@ -378,22 +378,22 @@ export default function Analytics({
           <div>
             <span className="eyebrow">↙ MONEY IN</span>
             <h2 id="metricIncome" className="positive">
-              <Money value={model.income} />
+              <Money value={model.income} fit />
             </h2>
           </div>
           <div>
             <span className="eyebrow">↗ MONEY OUT</span>
             <h2 id="metricExpenses" className="negative">
-              <Money value={model.expenses} />
+              <Money value={model.expenses} fit />
             </h2>
           </div>
         </div>
         <div className="analytics-comparison">
           <p className="eyebrow">MONTHLY SPEND COMPARISON</p>
           <div>
-            <span>Current month</span>
+            <span className="analytics-kpi-label">Current month</span>
             <div className="comparison-value">
-            <strong id="metricCurrentMonth"><Money value={model.current} /></strong>
+              <strong id="metricCurrentMonth"><Money value={model.current} fit /></strong>
               <span
                 id="metricComparisonPercent"
                 className={
@@ -406,8 +406,8 @@ export default function Analytics({
             </div>
           </div>
           <div>
-            <span>Previous month</span>
-            <div className="comparison-value"><strong id="metricPrevMonth"><Money value={model.previous} /></strong></div>
+            <span className="analytics-kpi-label">Previous month</span>
+            <div className="comparison-value"><strong id="metricPrevMonth"><Money value={model.previous} fit /></strong></div>
           </div>
         </div>
       </div>

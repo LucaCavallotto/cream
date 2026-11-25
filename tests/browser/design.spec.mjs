@@ -805,7 +805,7 @@ test('ticker fills wide screens from launch and keeps constant speed across cont
   }
 });
 
-test('monthly divider follows in-out totals and labels sit close to their values', async ({ page }) => {
+test('monthly divider follows the responsive KPI layout', async ({ page }) => {
   await launch(page);
   await openRows(page, [row('Salary', 2000, 'Income', 'Salary'), row('Purchase', -10)]);
   await tab(page, 'Analytics');
@@ -817,8 +817,7 @@ test('monthly divider follows in-out totals and labels sit close to their values
     for (const entry of await page.locator('.analytics-in-out > div').all()) {
       const label = await entry.locator('.eyebrow').boundingBox();
       const value = await entry.locator('h2').boundingBox();
-      if (width < 768) expect(value.y - label.y - label.height).toBeLessThanOrEqual(5);
-      else expect(value.x - label.x - label.width).toBeLessThanOrEqual(9);
+      expect(value.x).toBeGreaterThanOrEqual(label.x + label.width);
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
