@@ -519,6 +519,7 @@ test('landing uses a wide row, an intermediate welcome row with two choices, and
     const open = await page.locator('#dropZone').boundingBox();
     if (width >= 1280) {
       expect(welcome.x + welcome.width).toBeLessThanOrEqual(fresh.x);
+      expect(welcome.y).toBe(open.y);
       expect(fresh.x + fresh.width).toBeLessThanOrEqual(open.x);
       expect(fresh.y).toBe(open.y);
     } else if (width >= 768) {
@@ -529,11 +530,16 @@ test('landing uses a wide row, an intermediate welcome row with two choices, and
       expect(welcome.y + welcome.height).toBeLessThanOrEqual(fresh.y);
       expect(fresh.y + fresh.height).toBeLessThanOrEqual(open.y);
     }
+    if (width >= 768) {
+      const createLabel = await page.locator('.fresh-heading .eyebrow').boundingBox();
+      const openLabel = await page.locator('.drop-zone-top .eyebrow').boundingBox();
+      expect(Math.abs(createLabel.y + createLabel.height / 2 - openLabel.y - openLabel.height / 2)).toBeLessThan(1);
+    }
     await expect(page.locator('.landing-new-file #btnCreateNewFile')).toBeVisible();
     await expect(page.locator('.landing-demo-area .landing-demo')).toBeVisible();
     const demo = await page.locator('.landing-demo-area').boundingBox();
     expect(demo.y).toBeGreaterThanOrEqual(Math.max(open.y + open.height, fresh.y + fresh.height));
-    if ([390, 1440].includes(width)) {
+    if ([390, 1024, 1440].includes(width)) {
       await expect(page.locator('body')).toHaveCSS('background-color', width === 390 ? 'rgb(11, 12, 11)' : 'rgb(255, 255, 255)');
       await page.screenshot({ path: testInfo.outputPath(`landing-distinct-${width}.png`), fullPage: true });
     }
