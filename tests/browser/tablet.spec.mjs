@@ -117,3 +117,33 @@ test('ticker scrolls away while tablet navigation follows the sticky header', as
   const { checkTickerScroll } = await import('./ticker-scroll.mjs');
   await checkTickerScroll(page);
 });
+
+test('transaction sort indicators use monochrome SVGs for all three states', async ({ page }) => {
+  await launch(page);
+  await openRawCSV(page, csv(), filename, { editable: false });
+  await tab(page, 'Transactions');
+  await page.setViewportSize({ width: 1100, height: 810 });
+  const date = page.locator('#transactionsTable th[data-sort="Date"]');
+  const icons = page.locator('#transactionsTable .sort-indicator');
+  await expect(icons).toHaveCount(3);
+
+  for (const colorScheme of ['light', 'dark']) {
+    await page.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+    await expect(page.locator('html')).toHaveAttribute('data-bs-theme', colorScheme);
+    await expect(date).toHaveAttribute('aria-sort', 'descending');
+    for (const icon of await icons.all()) {
+      await expect(icon).toBeVisible();
+      await expect(icon).toHaveAttribute('stroke', 'currentColor');
+      await expect(icon).toHaveAttribute('aria-hidden', 'true');
+      expect(await icon.evaluate(el => getComputedStyle(el).stroke === getComputedStyle(el).color)).toBe(true);
+    }
+    const descending = await date.locator('svg path').getAttribute('d');
+    const unsorted = await page.locator('#transactionsTable th[data-sort="Amount"] svg path').getAttribute('d');
+    await date.getByRole('button', { name: 'Sort by date' }).tap();
+    await expect(date).toHaveAttribute('aria-sort', 'ascending');
+    const ascending = await date.locator('svg path').getAttribute('d');
+    expect(new Set([ascending, descending, unsorted]).size).toBe(3);
+    await expect(date.getByRole('button')).toHaveText('Date');
+    await date.getByRole('button', { name: 'Sort by date' }).tap();
+  }
+});

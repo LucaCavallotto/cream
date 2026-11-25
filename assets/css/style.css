@@ -1520,6 +1520,14 @@ button:disabled {
   gap: 5px;
   align-items: center;
 }
+.sort-indicator {
+  width: 1em;
+  height: 1em;
+  flex: none;
+}
+.transaction-table th:not([aria-sort]) .sort-indicator {
+  color: var(--muted);
+}
 .transaction-table .description-cell {
   font-size: 13px;
   font-weight: 550;

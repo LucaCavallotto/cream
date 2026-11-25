@@ -9,6 +9,29 @@ import Money from './Money.jsx';
 import { getCategoryMeta } from '../../assets/js/categoryMeta.js';
 import TagInput from './TagInput.jsx';
 
+function SortIndicator({ direction }) {
+  const paths = {
+    asc: 'M8 13V3m-4 4 4-4 4 4',
+    desc: 'M8 3v10m-4-4 4 4 4-4',
+    none: 'M5 13V3M2.5 5.5 5 3l2.5 2.5M11 3v10m-2.5-2.5L11 13l2.5-2.5',
+  };
+  return (
+    <svg
+      className="sort-indicator"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d={paths[direction]} />
+    </svg>
+  );
+}
+
 export default function Transactions({
   state,
   dispatch,
@@ -330,6 +353,7 @@ export default function Transactions({
                 'Amount',
               ].map((field) => {
                 const sortable = ['Date', 'Category', 'Amount'].includes(field);
+                const direction = state.sort.column === field ? state.sort.direction : 'none';
                 const responsive = ['Description', 'Date', 'Amount'].includes(
                   field,
                 )
@@ -343,8 +367,8 @@ export default function Transactions({
                     scope="col"
                     data-sort={sortable ? field : undefined}
                     aria-sort={
-                      sortable && state.sort.column === field
-                        ? state.sort.direction === 'asc'
+                      sortable && direction !== 'none'
+                        ? direction === 'asc'
                           ? 'ascending'
                           : 'descending'
                         : undefined
@@ -362,13 +386,7 @@ export default function Transactions({
                         aria-label={`Sort by ${field.toLowerCase()}`}
                       >
                         {field}
-                        <span aria-hidden="true">
-                          {state.sort.column === field
-                            ? state.sort.direction === 'asc'
-                              ? '↑'
-                              : '↓'
-                            : '↕'}
-                        </span>
+                        <SortIndicator direction={direction} />
                       </button>
                     ) : field === 'Description' ? (
                       'Transaction'
